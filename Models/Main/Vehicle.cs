@@ -1,10 +1,13 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Models
 {
     public class VehiclePart : BaseEntity
     {
+        [MaxLength(50)]
         public string Model { get; set; }
+        [MaxLength(20)]
         public string Number { get; set; }
 
 

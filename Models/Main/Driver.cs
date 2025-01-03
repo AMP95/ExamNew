@@ -1,5 +1,4 @@
-﻿using Models.Sub;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Models
@@ -7,15 +6,20 @@ namespace Models
     public class Driver : BaseEntity
     {
 
-        public string Name { get; set; }                                                                                                                 
+        [MaxLength(50)]
+        public string Name { get; set; }
+        [MaxLength(50)]
         public string FamilyName { get; set; }
+        [MaxLength(50)]
         public string FatherName { get; set; }
 
         public DateTime DateOfBirth { get; set; }
 
 
+        [MaxLength(50)]
         public string PassportSerial { get; set; }
         public DateTime PassportDateOfIssue { get; set; }
+        [MaxLength(200)]
         public string PassportIssuer { get; set; }
 
 
@@ -35,7 +39,7 @@ namespace Models
         public Guid? CarrierId { get; set; }
         public virtual Carrier Carrier { get; set; }
 
-
+        [MaxLength(200)]
         public string Phones { get; set; }
     }
 }
