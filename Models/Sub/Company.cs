@@ -3,10 +3,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Models
 {
-    public class Company
+    public class Company : BaseEntity
     {
-        [Key]
-        public Guid Id { get; set; }
         public string Name { get; set; }
         public string InnKpp { get; set; }
         public string Address { get; set; }

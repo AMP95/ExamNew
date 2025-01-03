@@ -4,10 +4,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Models
 {
-    public class Driver
+    public class Driver : BaseEntity
     {
-        [Key]
-        public Guid Id { get; set; }
 
         public string Name { get; set; }                                                                                                                 
         public string FamilyName { get; set; }
@@ -16,20 +14,19 @@ namespace Models
         public DateTime DateOfBirth { get; set; }
 
 
-        [ForeignKey(nameof(Passport))]
-        public Guid PaddportId { get; set; }
-        public virtual Passport Passport { get; set; }
-
+        public string PassportSerial { get; set; }
+        public DateTime PassportDateOfIssue { get; set; }
+        public string PassportIssuer { get; set; }
 
 
         [ForeignKey(nameof(Truck))]
-        public Guid TruckId { get; set; }
+        public Guid? TruckId { get; set; }
         public Truck Truck { get; set; }
 
 
 
         [ForeignKey(nameof(Trailer))]
-        public Guid TrailerId { get; set; }
+        public Guid? TrailerId { get; set; }
         public Trailer Trailer { get; set; }
 
 

@@ -9,7 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Models", "Models\Models.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAL", "DAL\DAL.csproj", "{2D9FB60C-154A-48C7-B762-A89B748DF449}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MediatRepos", "MediatRepos\MediatRepos.csproj", "{0BEFF534-931E-4DE1-8C4B-2A74CAEC265D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MediatorServices", "MediatRepos\MediatorServices.csproj", "{0BEFF534-931E-4DE1-8C4B-2A74CAEC265D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DTOs", "DTOs\DTOs.csproj", "{E8A69EBA-FF74-4773-B3D5-C0C586BB1FDB}"
 EndProject

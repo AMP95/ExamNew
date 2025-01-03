@@ -91,8 +91,6 @@
         public float Prepayment { get; set; }
         public PaymentPriority PayPriority { get; set; }
         public RecievingType PaymentCondition { get; set; }
-        public BookingDataDto BookingData { get; set; }
-
-        
+        public List<DocumentDto> Documents { get; set; }
     }
 }

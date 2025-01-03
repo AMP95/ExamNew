@@ -16,6 +16,18 @@ namespace DTOs
         TTN
     }
 
+    public enum DocumentDirection 
+    {
+        [Description("Входящий документ")]
+        IncomeDocument,
+        [Description("Исходящий документ")]
+        OutcomeDocument,
+        [Description("Входящая оплата")]
+        IncomePayment,
+        [Description("Исходящая оплата")]
+        OutcomePayment
+    }
+
     public enum PaymentPriority
     {
         [Description("5-7 б/д")]
@@ -36,9 +48,13 @@ namespace DTOs
 
     public enum ContractStatus
     {
+        [Description("Создана")]
         Created,
+        [Description("Документы получены")]
         DocumentsRecieved,
+        [Description("Документы отправленны")]
         DocumentSended,
+        [Description("Закрыта")]
         Closed
     }
 

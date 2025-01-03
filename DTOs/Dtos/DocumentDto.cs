@@ -20,9 +20,13 @@
                 {
                     _validationError = "Необходимо указать номер документа";
                 }
-                else if (Summ <= 0) 
+                else if (Summ <= 0)
                 {
                     _validationError = "Необходимо указать сумму документа";
+                }
+                else if (ContractId == Guid.Empty) 
+                {
+                    _validationError = "Необхождимо указать номер заявки";
                 }
                 return string.IsNullOrWhiteSpace(this._validationError);
             }
@@ -31,9 +35,11 @@
         public string ValidationError => _validationError;
 
         public Guid Id { get; set; }
-        public DocumentType DocumentType { get; }
+        public Guid ContractId { get; set; }
+        public DocumentType Type { get; set; }
+        public DocumentDirection Direction { get; set; }
         public DateTime CreationDate { get; set; }
-        public RecievingType RecieveType { get; }
+        public RecievingType RecieveType { get; set; }
         public DateTime RecievingDate { get; set; }
         public string Number { get; set; }
         public float Summ { get; set; }

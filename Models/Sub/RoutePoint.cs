@@ -1,10 +1,8 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-
-namespace Models.Sub
+﻿namespace Models.Sub
 {
-    public class RoutePoint
+    public class RoutePoint : BaseEntity
     {
-        public Guid Id { get; set; }
+        public string Route { get; set; }
         public string Address { get; set; }
         public short Side { get; set; }
         public short Type { get; set; }

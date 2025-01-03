@@ -23,6 +23,7 @@
         public string ValidationError => _validationError;
 
         public Guid Id { get; set; }
+        public string Route { get; set; }
         public string Address { get; set; }
         public LoadingSide Side { get; set; }
         public LoadPointType Type { get; set; }

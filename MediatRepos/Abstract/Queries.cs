@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using System.Linq.Expressions;
 
 namespace MediatRepos
 {
@@ -24,36 +25,31 @@ namespace MediatRepos
 
     public class Delete<T> : IRequest<bool>
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
-        public Delete(int id)
+        public Delete(Guid id)
         {
             Id = id;
         }
-    }
-
-    public class GetAll<TModel> : IRequest<object>
-    {
-
     }
 
     public class GetId<TModel> : IRequest<object>
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
-        public GetId(int id)
+        public GetId(Guid id)
         {
             Id = id;
         }
     }
 
-    public class GetCondition<TModel> : IRequest<object>
+    public class GetFiltered<TModel> : IRequest<object>
     {
-        public Func<TModel, bool> Condition { get; set; }
+        public Expression<Func<TModel, bool>> Filter { get; set; }
 
-        public GetCondition(Func<TModel,bool> condition)
+        public GetFiltered(Expression<Func<TModel, bool>> filter = null)
         {
-            Condition = condition;
+            Filter = filter;
         }
     }
 }

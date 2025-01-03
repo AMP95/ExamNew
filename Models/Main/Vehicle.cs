@@ -1,12 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Models
 {
-    public class VehiclePart
+    public class VehiclePart : BaseEntity
     {
-        [Key]
-        public Guid Id { get; set; }
         public string Model { get; set; }
         public string Number { get; set; }
 

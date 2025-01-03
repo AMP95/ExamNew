@@ -1,15 +1,10 @@
 ﻿using Models.Sub;
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Models
 {
-
-
-    public class Contract
+    public class Contract : BaseEntity
     {
-        [Key]
-        public Guid Id { get; set; }
         public short Number { get; set; }
         public DateTime CreationDate { get; set; }
         public short Status { get; set; }
@@ -55,8 +50,6 @@ namespace Models
         public short PaymentCondition { get; set; }
 
 
-        [ForeignKey(nameof(BookingData))]
-        public Guid? BookingDataId { get; set; }
-        public virtual BookingData BookingData { get; set; }
+        public virtual ICollection<Document> Documents { get; set; }
     }
 }
