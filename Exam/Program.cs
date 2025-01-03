@@ -7,11 +7,20 @@ namespace Exam
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
+            builder.Services.AddControllers().AddNewtonsoftJson();
 
-            builder.Services.AddControllers();
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
+            builder.Logging.AddProvider(new Log4NetProvider("log4net.config"));
+
+
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("default", policy =>
+                {
+                    policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+                });
+            });
 
             var app = builder.Build();
 
@@ -25,6 +34,7 @@ namespace Exam
 
             app.UseAuthorization();
 
+            app.UseCors("default");
 
             app.MapControllers();
 
