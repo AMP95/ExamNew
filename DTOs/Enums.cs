@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace Models
+namespace DTOs
 {
     public enum DocumentType
     {
@@ -42,7 +42,7 @@ namespace Models
         Closed
     }
 
-    public enum LoadingType
+    public enum LoadingSide
     {
         [Description("Зад")]
         Back,
@@ -50,6 +50,14 @@ namespace Models
         Side,
         [Description("Верх")]
         Top
+    }
+
+    public enum LoadPointType 
+    {
+        [Description("Загрузка")]
+        Upload,
+        [Description("Выгрузка")]
+        Download
     }
 
     public enum VAT

@@ -6,7 +6,8 @@ namespace Models.Sub
     {
         public Guid Id { get; set; }
         public string Address { get; set; }
-        public LoadingType Loading { get; set; }
+        public short Side { get; set; }
+        public short Type { get; set; }
         public string Phones { get; set; }
     }
 }

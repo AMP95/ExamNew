@@ -12,7 +12,7 @@ namespace Models
         public Guid Id { get; set; }
         public short Number { get; set; }
         public DateTime CreationDate { get; set; }
-        public ContractStatus Status { get; set; }
+        public short Status { get; set; }
 
 
         [ForeignKey(nameof(LoadingPoint))]
@@ -51,8 +51,8 @@ namespace Models
 
         public float Payment { get; set; }
         public float Prepayment { get; set; }
-        public PaymentPriority PayPriority { get; set; }
-        public RecievingType PaymentCondition { get; set; }
+        public short PayPriority { get; set; }
+        public short PaymentCondition { get; set; }
 
 
         [ForeignKey(nameof(BookingData))]

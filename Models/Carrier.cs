@@ -6,7 +6,7 @@ namespace Models
     [Table(nameof(Carrier))]
     public class Carrier : Company
     {
-        public VAT Vat { get; set; }
+        public short Vat { get; set; }
 
         public virtual ICollection<Driver> Drivers { get; set; }
         public virtual ICollection<Truck> Trucks { get; set; }

@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Models;
-using System.Data;
+using Models.Sub;
 
 namespace DAL
 {
@@ -12,6 +12,7 @@ namespace DAL
         public DbSet<Truck> Trucks { get; set; }
         public DbSet<Trailer> Trailers { get; set; }
         public DbSet<Contract> Contracts { get; set; }
+        public DbSet<RoutePoint> RoutePoints { get; set; }
 
         public Context(DbContextOptions options) : base(options)
         {

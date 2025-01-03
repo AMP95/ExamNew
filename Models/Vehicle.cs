@@ -10,6 +10,7 @@ namespace Models
         public string Model { get; set; }
         public string Number { get; set; }
 
+
         [ForeignKey(nameof(Carrier))]
         public Guid? CarrierId { get; set; }
         public virtual Carrier Carrier { get; set; }

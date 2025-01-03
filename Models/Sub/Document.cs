@@ -6,9 +6,9 @@ namespace Models
     {
         [Key]
         public Guid Id { get; set; }
-        public DocumentType DocumentType { get; }
+        public short DocumentType { get; }
         public DateTime CreationDate { get; set; }
-        public RecievingType RecieveType { get; }
+        public short RecieveType { get; }
         public DateTime RecievingDate { get; set; }
         public string Number { get; set; }
         public float Summ { get; set; }
