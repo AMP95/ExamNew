@@ -12,7 +12,7 @@ namespace Models
         
 
         [ForeignKey(nameof(OutcomeDocument))]
-        public Guid OutcomeDocumentId { get; set; }
+        public Guid? OutcomeDocumentId { get; set; }
         public virtual Document OutcomeDocument { get; set; }
 
 
@@ -20,7 +20,7 @@ namespace Models
 
 
         [ForeignKey(nameof(IncomePayment))]
-        public Guid IncomePaymentId { get; set; }
+        public Guid? IncomePaymentId { get; set; }
         public virtual Document IncomePayment { get; set; }
 
     }

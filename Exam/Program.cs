@@ -1,4 +1,7 @@
 
+using DAL;
+using Microsoft.EntityFrameworkCore;
+
 namespace Exam
 {
     public class Program
@@ -9,10 +12,9 @@ namespace Exam
 
             builder.Services.AddControllers().AddNewtonsoftJson();
 
-            // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
             builder.Logging.AddProvider(new Log4NetProvider("log4net.config"));
-
+            builder.Services.AddDbContext<Context>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
             builder.Services.AddCors(options =>
             {
@@ -24,7 +26,6 @@ namespace Exam
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
                 app.MapOpenApi();

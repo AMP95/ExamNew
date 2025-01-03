@@ -31,6 +31,7 @@ namespace Models
         public Carrier Carrier { get; set; }
 
 
+
         [ForeignKey(nameof(Driver))]
         public Guid DriverId { get; set; }
         public Driver Driver { get; set; }
@@ -55,7 +56,7 @@ namespace Models
 
 
         [ForeignKey(nameof(BookingData))]
-        public Guid BookingDataId { get; set; }
+        public Guid? BookingDataId { get; set; }
         public virtual BookingData BookingData { get; set; }
     }
 }

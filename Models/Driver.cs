@@ -20,16 +20,24 @@ namespace Models
         public Guid PaddportId { get; set; }
         public virtual Passport Passport { get; set; }
 
-       
 
-        [ForeignKey(nameof(Vehicle))]
-        public Guid VehicleId { get; set; }
-        public virtual Vehicle Vehicle { get; set; }
+
+        [ForeignKey(nameof(Truck))]
+        public Guid TruckId { get; set; }
+        public Truck Truck { get; set; }
+
+
+
+        [ForeignKey(nameof(Trailer))]
+        public Guid TrailerId { get; set; }
+        public Trailer Trailer { get; set; }
+
 
 
         [ForeignKey(nameof(Carrier))]
-        public Guid CarrierId { get; set; }
+        public Guid? CarrierId { get; set; }
         public virtual Carrier Carrier { get; set; }
+
 
         public string Phones { get; set; }
     }
