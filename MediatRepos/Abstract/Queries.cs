@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using System.Linq.Expressions;
+using System.Reflection;
 
 namespace MediatRepos
 {
@@ -47,9 +48,16 @@ namespace MediatRepos
     {
         public Expression<Func<TModel, bool>> Filter { get; set; }
 
-        public GetFiltered(Expression<Func<TModel, bool>> filter = null)
+        public GetFiltered(string property, object value)
         {
-            Filter = filter;
+            Type type = typeof(TModel);
+
+            PropertyInfo info = type.GetProperty(property);
+
+            if (info != null) 
+            { 
+                Filter = m => info.GetValue(m) == value;
+            }
         }
     }
 }

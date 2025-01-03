@@ -55,7 +55,9 @@ namespace DTOs
         [Description("Документы отправленны")]
         DocumentSended,
         [Description("Закрыта")]
-        Closed
+        Closed,
+        [Description("Сорвана")]
+        Failed
     }
 
     public enum LoadingSide
