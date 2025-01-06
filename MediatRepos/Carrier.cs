@@ -2,7 +2,6 @@
 using MediatRepos;
 using Microsoft.Extensions.Logging;
 using Models;
-using System.Linq.Expressions;
 
 namespace MediatorServices
 {
@@ -14,13 +13,11 @@ namespace MediatorServices
 
         protected override async Task<object> Get(Guid id)
         {
-            IEnumerable<Carrier> companies = await _repository.Get<Carrier>(c => c.Id == id, null, "Drivers,Trucks,Trailers");
+            Carrier company = await _repository.GetById<Carrier>(id);
             CarrierDto dto = null;
 
-            if (companies.Any())
+            if (company != null)
             {
-                Carrier company = companies.First();
-
                 dto = new CarrierDto()
                 {
                     Id = company.Id,
@@ -36,28 +33,57 @@ namespace MediatorServices
         }
     }
 
-    public class GetFilteredCarrierService : GetFilteredModelService<Carrier>
+    public class SearchCarrierService : SearchModelService<Carrier>
     {
-        public GetFilteredCarrierService(IRepository repository, ILogger<GetIdModelService<Carrier>> logger) : base(repository, logger)
+        public SearchCarrierService(IRepository repository, ILogger<SearchModelService<Carrier>> logger) : base(repository, logger)
         {
         }
 
-        protected override async Task<object> Get(Expression<Func<Carrier, bool>> filter)
+        protected override async Task<object> Get(string name)
         {
-            IEnumerable<Carrier> companys = await _repository.Get(filter);
+            IEnumerable<Carrier> carriers = await _repository.Get<Carrier>(c => c.Name.ToLower().Contains(name.ToLower()) ,null, null);
             List<CarrierDto> dtos = new List<CarrierDto>();
 
-            foreach (var company in companys)
+            foreach (var carrier in carriers)
             {
                 dtos.Add(new CarrierDto()
                 {
-                    Id = company.Id,
-                    Vat = (VAT)company.Vat,
-                    Name = company.Name,
-                    Address = company.Address,
-                    Emails = company.Emails.Split(';').ToList(),
-                    Phones = company.Phones.Split(';').ToList(),
-                    InnKpp = company.InnKpp
+                    Id = carrier.Id,
+                    Vat = (VAT)carrier.Vat,
+                    Name = carrier.Name,
+                    Address = carrier.Address,
+                    Emails = carrier.Emails.Split(';').ToList(),
+                    Phones = carrier.Phones.Split(';').ToList(),
+                    InnKpp = carrier.InnKpp
+                });
+            }
+
+            return dtos;
+        }
+    }
+
+    public class GetRangeCarrierService : GetRangeModelService<Carrier>
+    {
+        public GetRangeCarrierService(IRepository repository, ILogger<GetRangeModelService<Carrier>> logger) : base(repository, logger)
+        {
+        }
+
+        protected override async Task<object> Get(int start, int end)
+        {
+            IEnumerable<Carrier> carriers = await _repository.GetRange<Carrier>(start, end, null);
+            List<CarrierDto> dtos = new List<CarrierDto>();
+
+            foreach (var carrier in carriers) 
+            {
+                dtos.Add(new CarrierDto() 
+                {
+                    Id = carrier.Id,
+                    Vat = (VAT)carrier.Vat,
+                    Name = carrier.Name,
+                    Address = carrier.Address,
+                    Emails = carrier.Emails.Split(';').ToList(),
+                    Phones = carrier.Phones.Split(';').ToList(),
+                    InnKpp = carrier.InnKpp
                 });
             }
 
@@ -105,14 +131,18 @@ namespace MediatorServices
         {
             Carrier company = await _repository.GetById<Carrier>(dto.Id);
 
-            company.Name = dto.Name;
-            company.Vat = company.Vat;
-            company.Address = dto.Address;
-            company.InnKpp = dto.InnKpp;
-            company.Phones = string.Join(";", dto.Phones);
-            company.Emails = string.Join(";", dto.Emails);
+            if (company != null)
+            {
+                company.Name = dto.Name;
+                company.Vat = company.Vat;
+                company.Address = dto.Address;
+                company.InnKpp = dto.InnKpp;
+                company.Phones = string.Join(";", dto.Phones);
+                company.Emails = string.Join(";", dto.Emails);
 
-            return await _repository.Update(company);
+                return await _repository.Update(company);
+            }
+            return false;
         }
     }
 }

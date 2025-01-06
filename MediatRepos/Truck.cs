@@ -38,31 +38,104 @@ namespace MediatRepos
         }
     }
 
-    public class GetFilteredTruckService : GetFilteredModelService<Truck>
+    public class GetMainIdTrailerService : GetMainIdModelService<Truck>
     {
-        public GetFilteredTruckService(IRepository repository, ILogger<GetIdModelService<Truck>> logger) : base(repository, logger)
+        public GetMainIdTrailerService(IRepository repository, ILogger<GetMainIdModelService<Truck>> logger) : base(repository, logger)
         {
         }
 
-        protected override async Task<object> Get(Expression<Func<Truck, bool>> filter)
+        protected override async Task<object> Get(Guid id)
         {
-            IEnumerable<Truck> trucks = await _repository.Get(filter,null, "Carrier");
+            IEnumerable<Truck> trailers = await _repository.Get<Truck>(t => t.CarrierId == id);
             List<TruckDto> dtos = new List<TruckDto>();
 
-            foreach (var truck in trucks)
+            foreach (var trailer in trailers)
             {
                 TruckDto dto = new TruckDto()
                 {
-                    Id = truck.Id,
-                    Model = truck.Model,
-                    Number = truck.Number,
+                    Id = trailer.Id,
+                    Model = trailer.Model,
+                    Number = trailer.Number
                 };
-                if (truck.Carrier != null)
+
+                if (trailer.Carrier != null)
                 {
                     dto.Carrier = new CarrierDto()
                     {
-                        Id = truck.Carrier.Id,
-                        Name = truck.Carrier.Name,
+                        Id = trailer.Carrier.Id,
+                        Name = trailer.Carrier.Name
+                    };
+                }
+
+                dtos.Add(dto);
+            }
+
+            return dtos;
+        }
+    }
+
+    public class GetRangeTrailerService : GetRangeModelService<Truck>
+    {
+        public GetRangeTrailerService(IRepository repository, ILogger<GetRangeModelService<Truck>> logger) : base(repository, logger)
+        {
+        }
+
+        protected override async Task<object> Get(int start, int end)
+        {
+            IEnumerable<Truck> trailers = await _repository.GetRange<Truck>(start, end);
+            List<TruckDto> dtos = new List<TruckDto>();
+
+            foreach (var trailer in trailers)
+            {
+                TruckDto dto = new TruckDto()
+                {
+                    Id = trailer.Id,
+                    Model = trailer.Model,
+                    Number = trailer.Number
+                };
+
+                if (trailer.Carrier != null)
+                {
+                    dto.Carrier = new CarrierDto()
+                    {
+                        Id = trailer.Carrier.Id,
+                        Name = trailer.Carrier.Name
+                    };
+                }
+
+                dtos.Add(dto);
+            }
+
+            return dtos;
+        }
+    }
+
+    public class SearchTrailerService : SearchModelService<Truck>
+    {
+        public SearchTrailerService(IRepository repository, ILogger<SearchModelService<Truck>> logger) : base(repository, logger)
+        {
+        }
+
+        protected override async Task<object> Get(string name)
+        {
+            IEnumerable<Truck> trailers = await _repository.Get<Truck>(t => $"{t.Model}{t.Number.Replace(" ", "")}".ToLower().Contains(name.Replace(" ", "").ToLower()), null, "Carrier");
+            List<TruckDto> dtos = new List<TruckDto>();
+
+            foreach (var trailer in trailers)
+            {
+                TruckDto dto = new TruckDto()
+                {
+                    Id = trailer.Id,
+                    Model = trailer.Model,
+                    Number = trailer.Number
+                };
+
+                if (trailer.Carrier != null)
+                {
+                    dto.Carrier = new CarrierDto()
+                    {
+                        Id = trailer.Carrier.Id,
+                        Name = trailer.Carrier.Name
                     };
                 }
 

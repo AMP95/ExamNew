@@ -1,6 +1,4 @@
 ﻿using MediatR;
-using System.Linq.Expressions;
-using System.Reflection;
 
 namespace MediatRepos
 {
@@ -44,20 +42,35 @@ namespace MediatRepos
         }
     }
 
-    public class GetFiltered<TModel> : IRequest<object>
+    public class GetMainId<TModel> : IRequest<object>
     {
-        public Expression<Func<TModel, bool>> Filter { get; set; }
+        public Guid Id { get; set; }
 
-        public GetFiltered(string property, object value)
+        public GetMainId(Guid id)
         {
-            Type type = typeof(TModel);
+            Id = id;
+        }
+    }
 
-            PropertyInfo info = type.GetProperty(property);
+    public class Search<TModel> : IRequest<object>
+    {
+        public string Name { get; set; }
 
-            if (info != null) 
-            { 
-                Filter = m => info.GetValue(m) == value;
-            }
+        public Search(string name)
+        {
+            Name = name;
+        }
+    }
+
+    public class GetRange<TModel> : IRequest<object>
+    {
+        public int Start { get; set; }
+        public int End { get; set; }
+
+        public GetRange(int start, int end)
+        {
+            Start = start;
+            End = end;
         }
     }
 }

@@ -1,67 +1,66 @@
-﻿namespace DTOs
-{
-    public class DriverDto : IDto
-    {
-        private string _validationError;
+﻿using System.ComponentModel;
 
-        public bool HasValidationError 
+namespace DTOs
+{
+    public class DriverDto : IDataErrorInfo
+    {
+        public string this[string columnName] 
         {
             get 
             { 
-                _validationError = string.Empty;
-                string nameError = ModelsValidator.IsNameValid(Name);
-                if (string.IsNullOrWhiteSpace(nameError))
+                string error = string.Empty;
+
+                switch (columnName) 
                 {
-                    _validationError = nameError;
-                }
-                else if (BirthDate == DateTime.MinValue)
-                {
-                    _validationError = "Необходимо указать дату рождения";
-                }
-                else if (string.IsNullOrWhiteSpace(PassportSerial))
-                {
-                    _validationError = "Необходимо указать серию и номер паспорта";
-                }
-                else if (string.IsNullOrWhiteSpace(PassportIssuer))
-                {
-                    _validationError = "Необходимо указать орган выдачи паспорта";
-                }
-                else if (PassportDateOfIssue == DateTime.MinValue)
-                {
-                    _validationError = "Необходимо указать дату выдачи паспорта";
-                }
-                else if (Truck.HasValidationError)
-                {
-                    _validationError = Truck.ValidationError;
-                }
-                else if (Trailer.HasValidationError)
-                {
-                    _validationError = Trailer.ValidationError;
-                }
-                else
-                {
-                    if (!Phones.Any())
-                    {
-                        _validationError = "Необходимо указать телефон для связи";
-                    }
-                    else
-                    {
-                        foreach (var phone in Phones)
+                    case nameof(Name):
+                        error = ModelsValidator.IsNameValid(Name);
+                        break;
+                    case nameof(BirthDate):
+                        if (BirthDate == DateTime.MinValue)
                         {
-                            string phoneError = ModelsValidator.IsPhoneValid(phone);
-                            if (string.IsNullOrWhiteSpace(phoneError))
-                            {
-                                _validationError = phoneError;
-                                break;
-                            }
+                            error = "Необходимо указать дату рождения";
                         }
-                    }
+                        break;
+                    case nameof(PassportSerial):
+                        if (string.IsNullOrWhiteSpace(PassportSerial))
+                        {
+                            error = "Необходимо указать серию и номер паспорта";
+                        }
+                        break;
+                    case nameof(PassportDateOfIssue):
+                        if (PassportDateOfIssue == DateTime.MinValue)
+                        {
+                            error = "Необходимо указать дату выдачи паспорта";
+                        }
+                        break;
+                    case nameof(PassportIssuer):
+                        if (string.IsNullOrWhiteSpace(PassportIssuer))
+                        {
+                            error = "Необходимо указать орган выдачи паспорта";
+                        }
+                        break;
+                    case nameof(Phones):
+                        if (Phones.Any())
+                        {
+                            error = ModelsValidator.IsPhonesValid(Phones);
+                        }
+                        else 
+                        {
+                            error = "Необходимо указать телефон для связи";
+                        }
+                        break;
                 }
-                return string.IsNullOrWhiteSpace(_validationError);
+
+                return error;
             }
         }
 
-        public string ValidationError => _validationError;
+        public string Error => this[nameof(Name)] + 
+                               this[nameof(BirthDate)] + 
+                               this[nameof(PassportSerial)] + 
+                               this[nameof(PassportDateOfIssue)] + 
+                               this[nameof(PassportIssuer)] + 
+                               this[nameof(Phones)];
 
         public Guid Id { get; set; }
         
@@ -79,6 +78,6 @@
         public TruckDto Truck { get; set; }
         public TrailerDto Trailer { get; set; }
 
-       
+        
     }
 }

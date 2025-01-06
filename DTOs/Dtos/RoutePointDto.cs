@@ -1,26 +1,34 @@
-﻿namespace DTOs
+﻿using System.ComponentModel;
+
+namespace DTOs
 {
-    public class RoutePointDto : IDto
+    public class RoutePointDto : IDataErrorInfo
     {
-        private string _validationError;
-        public bool HasValidationError 
+        public string this[string columnName] 
         {
             get 
-            { 
-                _validationError = string.Empty;
-                if (string.IsNullOrWhiteSpace(Address))
+            {
+                switch (columnName) 
                 {
-                    _validationError = "Необходимо указать адрес";
+                    case nameof(Route):
+                        if (string.IsNullOrWhiteSpace(Route)) 
+                        {
+                            return "Необходимо указать маршрут\n";
+                        }
+                        break;
+                    case nameof(Address):
+                        if (string.IsNullOrWhiteSpace(Address))
+                        {
+                            return "Необходимо указать адрес\n";
+                        }
+                        break;
+                    case nameof(Phones):
+                        return ModelsValidator.IsPhonesValid(Phones);
+                        
                 }
-                else 
-                {
-                    _validationError = ModelsValidator.IsPhonesValid(Phones);
-                }
-                return string.IsNullOrWhiteSpace(_validationError);
+                return string.Empty;
             }
         }
-
-        public string ValidationError => _validationError;
 
         public Guid Id { get; set; }
         public string Route { get; set; }
@@ -28,5 +36,7 @@
         public LoadingSide Side { get; set; }
         public LoadPointType Type { get; set; }
         public List<string> Phones { get; set; }
+
+        public string Error => this[nameof(Route)] + this[nameof(Address)] + this[nameof(Phones)];
     }
 }

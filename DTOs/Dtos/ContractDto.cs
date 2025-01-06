@@ -1,75 +1,112 @@
-﻿namespace DTOs
+﻿using System.ComponentModel;
+
+namespace DTOs
 {
-    public class ContractDto : IDto
+    public class ContractDto : IDataErrorInfo
     {
-        private string _validationError;
-        public bool HasValidationError 
+        public string this[string columnName]
         {
             get 
-            {
-                _validationError = string.Empty;
+            { 
+                string error = string.Empty;
 
-                if (Number <= 0)
+                switch (columnName) 
                 {
-                    _validationError = "Необходимо указать номер заявки";
-                }
-                else if (CreationDate == DateTime.MinValue)
-                {
-                    _validationError = "Необходимо указать дату создания заявки";
-                }
-                else if (LoadPoint == null)
-                {
-                    _validationError = "Необходимо указать точку погрузки";
-                }
-                else if (UnloadPoints == null && !UnloadPoints.Any())
-                {
-                    _validationError = "Необходимо указать точки выгрузки";
-                }
-                else if (Weight <= 0)
-                {
-                    _validationError = "Необходимо указать вес груза";
-                }
-                else if (Volume <= 0)
-                {
-                    _validationError = "Необходимо указать объем груза";
-                }
-                else if (Payment <= 0)
-                {
-                    _validationError = "Необходимо указать сумму оплаты";
-                }
-                else if (Carrier == null)
-                {
-                    _validationError = "Необходимо указать перевозчика";
-                }
-                else if (Driver == null)
-                {
-                    _validationError = "Необходимо указать водителя";
-                }
-                else if (Truck == null)
-                {
-                    _validationError = "Необходимо указать тягач";
-                }
-                else if (Trailer == null)
-                {
-                    _validationError = "Необходимо указать прицеп";
-                }
-                else
-                {
-                    foreach (RoutePointDto route in UnloadPoints) 
-                    {
-                        if (route.HasValidationError) 
-                        { 
-                            _validationError = route.ValidationError;
-                            break;
+                    case nameof(Number):
+                        if (Number <= 0)
+                        {
+                            error = "Необходимо указать номер заявки";
                         }
-                    }
+                        break;
+                    case nameof(CreationDate):
+                        if (CreationDate == DateTime.MinValue)
+                        {
+                            error = "Необходимо указать дату создания заявки";
+                        }
+                        break;
+                    case nameof(LoadPoint):
+                        if (LoadPoint == null)
+                        {
+                            error = "Необходимо указать точку погрузки";
+                        }
+                        else 
+                        { 
+                            error = LoadPoint.Error;
+                        }
+                        break;
+                    case nameof(UnloadPoints):
+                        if (UnloadPoints.Any())
+                        {
+                            RoutePointDto point = UnloadPoints.FirstOrDefault(p => !string.IsNullOrWhiteSpace(p.Error));
+                            if (point != null) 
+                            { 
+                                error = point.Error;
+                            }
+                        }
+                        else 
+                        {
+                            error = "Необходимо указать точку выгрузки";
+                        }
+                        break;
+                    case nameof(Weight):
+                        if (Weight <= 0)
+                        {
+                            error = "Необходимо указать вес груза";
+                        }
+                        break;
+                    case nameof(Volume):
+                        if (Volume <= 0)
+                        {
+                            error = "Необходимо указать объем груза";
+                        }
+                        break;
+                    case nameof(Carrier):
+                        if (Carrier == null)
+                        {
+                            error = "Необходимо указать перевозчика";
+                        }
+                        break;
+                    case nameof(Driver):
+                        if (Driver == null)
+                        {
+                            error = "Необходимо указать водителя";
+                        }
+                        break;
+                    case nameof(Truck):
+                        if (Truck == null)
+                        {
+                            error = "Необходимо указать тягач";
+                        }
+                        break;
+                    case nameof(Trailer):
+                        if (Trailer == null)
+                        {
+                            error = "Необходимо указать прицеп";
+                        }
+                        break;
+                    case nameof(Payment):
+                        if (Payment <= 0)
+                        {
+                            error = "Необходимо указать сумму оплаты";
+                        }
+                        break;
                 }
 
-                return string.IsNullOrWhiteSpace(_validationError);
+                return error;
             }
         }
 
-        public string ValidationError => _validationError;
+        public string Error => this[nameof(Number)] +
+                               this[nameof(CreationDate)] + 
+                               this[nameof(LoadPoint)] + 
+                               this[nameof(UnloadPoints)] + 
+                               this[nameof(Weight)] + 
+                               this[nameof(Volume)] + 
+                               this[nameof(Carrier)] + 
+                               this[nameof(Driver)] + 
+                               this[nameof(Truck)] + 
+                               this[nameof(Trailer)] + 
+                               this[nameof(Payment)];
 
         public Guid Id { get; set; }
         public short Number { get; set; }
@@ -92,5 +129,7 @@
         public PaymentPriority PayPriority { get; set; }
         public RecievingType PaymentCondition { get; set; }
         public List<DocumentDto> Documents { get; set; }
+
+        
     }
 }

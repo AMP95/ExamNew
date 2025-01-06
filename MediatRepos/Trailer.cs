@@ -14,7 +14,7 @@ namespace MediatorServices
 
         protected override async Task<object> Get(Guid id)
         {
-            IEnumerable<Trailer> trailers = await _repository.Get<Trailer>(t => t.Id == id,null, "Carrier");
+            IEnumerable<Trailer> trailers = await _repository.Get<Trailer>(t => t.Id == id, null, "Carrier");
             TruckDto dto = null;
             if (trailers.Any())
             {
@@ -35,27 +35,99 @@ namespace MediatorServices
         }
     }
 
-    public class GetFilteredTrailerService : GetFilteredModelService<Trailer>
+    public class GetMainIdTrailerService : GetMainIdModelService<Trailer>
     {
-        public GetFilteredTrailerService(IRepository repository, ILogger<GetIdModelService<Trailer>> logger) : base(repository, logger)
+        public GetMainIdTrailerService(IRepository repository, ILogger<GetMainIdModelService<Trailer>> logger) : base(repository, logger)
         {
         }
 
-        protected override async Task<object> Get(Expression<Func<Trailer, bool>> filter)
+        protected override async Task<object> Get(Guid id)
         {
-            IEnumerable<Trailer> trailers = await _repository.Get(filter);
+            IEnumerable<Trailer> trailers = await _repository.Get<Trailer>(t => t.CarrierId == id);
             List<TrailerDto> dtos = new List<TrailerDto>();
 
             foreach (var trailer in trailers)
             {
-                TrailerDto dto =new TrailerDto()
+                TrailerDto dto = new TrailerDto()
                 {
                     Id = trailer.Id,
                     Model = trailer.Model,
                     Number = trailer.Number
                 };
 
-                if (trailer.Carrier != null) 
+                if (trailer.Carrier != null)
+                {
+                    dto.Carrier = new CarrierDto()
+                    {
+                        Id = trailer.Carrier.Id,
+                        Name = trailer.Carrier.Name
+                    };
+                }
+
+                dtos.Add(dto);
+            }
+
+            return dtos;
+        }
+    }
+
+    public class GetRangeTrailerService : GetRangeModelService<Trailer>
+    {
+        public GetRangeTrailerService(IRepository repository, ILogger<GetRangeModelService<Trailer>> logger) : base(repository, logger)
+        {
+        }
+
+        protected override async Task<object> Get(int start, int end)
+        {
+            IEnumerable<Trailer> trailers = await _repository.GetRange<Trailer>(start, end);
+            List<TrailerDto> dtos = new List<TrailerDto>();
+
+            foreach (var trailer in trailers)
+            {
+                TrailerDto dto = new TrailerDto()
+                {
+                    Id = trailer.Id,
+                    Model = trailer.Model,
+                    Number = trailer.Number
+                };
+
+                if (trailer.Carrier != null)
+                {
+                    dto.Carrier = new CarrierDto()
+                    {
+                        Id = trailer.Carrier.Id,
+                        Name = trailer.Carrier.Name
+                    };
+                }
+
+                dtos.Add(dto);
+            }
+
+            return dtos;
+        }
+    }
+
+    public class SearchTrailerService : SearchModelService<Trailer>
+    {
+        public SearchTrailerService(IRepository repository, ILogger<SearchModelService<Trailer>> logger) : base(repository, logger)
+        {
+        }
+
+        protected override async Task<object> Get(string name)
+        {
+            IEnumerable<Trailer> trailers = await _repository.Get<Trailer>(t => $"{t.Model}{t.Number.Replace(" ", "")}".ToLower().Contains(name.Replace(" ","").ToLower()), null, "Carrier");
+            List<TrailerDto> dtos = new List<TrailerDto>();
+
+            foreach (var trailer in trailers)
+            {
+                TrailerDto dto = new TrailerDto()
+                {
+                    Id = trailer.Id,
+                    Model = trailer.Model,
+                    Number = trailer.Number
+                };
+
+                if (trailer.Carrier != null)
                 {
                     dto.Carrier = new CarrierDto()
                     {

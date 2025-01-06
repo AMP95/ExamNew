@@ -3,7 +3,6 @@ using MediatRepos;
 using Microsoft.Extensions.Logging;
 using Models;
 using Models.Sub;
-using System.Linq.Expressions;
 
 namespace MediatorServices
 {
@@ -15,7 +14,7 @@ namespace MediatorServices
 
         protected override async Task<object> Get(Guid id)
         {
-            IEnumerable<Contract> contracts = await _repository.Get<Contract>(t => t.Id == id, null, "Carrier,Driver,Truck,Trailer");
+            IEnumerable<Contract> contracts = await _repository.Get<Contract>(t => t.Id == id, null, "Carrier,Driver,Truck,Trailer,Documents");
             ContractDto dto = null;
             if (contracts.Any())
             {
@@ -105,15 +104,79 @@ namespace MediatorServices
         }
     }
 
-    public class GetFilteredContractService : GetFilteredModelService<Contract>
+    public class SearchContractService : SearchModelService<Contract>
     {
-        public GetFilteredContractService(IRepository repository, ILogger<GetIdModelService<Contract>> logger) : base(repository, logger)
+        public SearchContractService(IRepository repository, ILogger<SearchModelService<Contract>> logger) : base(repository, logger)
         {
         }
 
-        protected override async Task<object> Get(Expression<Func<Contract, bool>> filter)
+        protected override async Task<object> Get(string name)
         {
-            IEnumerable<Contract> contracts = await _repository.Get(filter, null, "Carrier,Driver,Truck,Trailer");
+            IEnumerable<Contract> contracts = await _repository.Get<Contract>(c => c.Number.ToString().Contains(name), null, "Carrier,Driver,Truck,Trailer");
+            List<ContractDto> dtos = new List<ContractDto>();
+
+            foreach (var contract in contracts)
+            {
+                ContractDto dto = new ContractDto()
+                {
+                    Id = contract.Id,
+                    Number = contract.Number,
+                    CreationDate = contract.CreationDate,
+                    LoadPoint = new RoutePointDto()
+                    {
+                        Id = contract.LoadingPoint.Id,
+                        Route = contract.LoadingPoint.Route,
+                    },
+                    Status = (ContractStatus)contract.Status,
+                    Payment = contract.Payment,
+                    Prepayment = contract.Prepayment,
+                    Carrier = new CarrierDto()
+                    {
+                        Id = contract.Carrier.Id,
+                        Name = contract.Carrier.Name,
+                        Vat = (VAT)contract.Carrier.Vat,
+                    },
+                    Driver = new DriverDto()
+                    {
+                        Id = contract.Driver.Id,
+                        Name = $"{contract.Driver.FamilyName} {contract.Driver.Name} {contract.Driver.FatherName}",
+                        Phones = contract.Driver.Phones.Split(';').ToList(),
+                    },
+                    Truck = new TruckDto()
+                    {
+                        Id = contract.Truck.Id,
+                        Model = contract.Truck.Model,
+                        Number = contract.Truck.Number,
+                    },
+                    Trailer = new TrailerDto()
+                    {
+                        Id = contract.Trailer.Id,
+                        Model = contract.Trailer.Model,
+                        Number = contract.Trailer.Number,
+                    },
+                    UnloadPoints = contract.UnloadingPoints.Select(s => new RoutePointDto() { Id = s.Id, Route = s.Route}).ToList(),
+                    Documents = new List<DocumentDto>()
+                };
+
+                dtos.Add(dto);
+            }
+
+            return dtos;
+        }
+    }
+
+    public class GetRangeContractService : GetRangeModelService<Contract>
+    {
+        public GetRangeContractService(IRepository repository, ILogger<GetRangeModelService<Contract>> logger) : base(repository, logger)
+        {
+        }
+
+        protected override async Task<object> Get(int start, int end)
+        {
+            DateTime startDate = DateTime.FromOADate(start);
+            DateTime endDate = DateTime.FromOADate(end);
+
+            IEnumerable<Contract> contracts = await _repository.Get<Contract>(c => c.CreationDate >= startDate && c.CreationDate <= endDate , q => q.OrderBy(c => c.CreationDate) , "Carrier,Driver,Truck,Trailer");
             List<ContractDto> dtos = new List<ContractDto>();
 
             foreach (var contract in contracts)

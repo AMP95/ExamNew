@@ -1,45 +1,64 @@
-﻿namespace DTOs
-{
-    public class CompanyDto : IDto
-    {
-        private string _validationError;
-        public bool HasValidationError 
-        { 
-            get
-            { 
-                _validationError = string.Empty;
-                if (string.IsNullOrWhiteSpace(Name))
-                {
-                    _validationError = "Необходимо указать название контрагента";
-                }
-                else if (string.IsNullOrWhiteSpace(Address))
-                {
-                    _validationError = "Необходимо указать адрес контрагента";
-                }
-                else 
-                {
-                    string innKppError = ModelsValidator.IsInnKppValid(InnKpp);
-                    string phoneError = ModelsValidator.IsPhonesValid(Phones);
-                    string mailError = ModelsValidator.IsMailsValid(Emails);
+﻿using System.ComponentModel;
 
-                    if (string.IsNullOrWhiteSpace(innKppError))
-                    {
-                        _validationError = innKppError;
-                    }
-                    else if (string.IsNullOrWhiteSpace(phoneError))
-                    {
-                        _validationError = phoneError;
-                    }
-                    else if (string.IsNullOrWhiteSpace(mailError)) 
-                    {
-                        _validationError = mailError;
-                    }
+namespace DTOs
+{
+    public class CompanyDto : IDataErrorInfo
+    {
+        public string this[string columnName] 
+        {
+            get 
+            { 
+                string error = string.Empty;
+
+                switch (columnName) 
+                {
+                    case nameof(Name):
+                        if (string.IsNullOrWhiteSpace(Name))
+                        {
+                            error = "Необходимо указать название контрагента";
+                        }
+                        break;
+                    case nameof(InnKpp):
+                        error = ModelsValidator.IsInnKppValid(InnKpp);
+                        break;
+                    case nameof(Address):
+                        if (string.IsNullOrWhiteSpace(Address))
+                        {
+                            error = "Необходимо указать адрес контрагента";
+                        }
+                        break;
+                    case nameof(Phones):
+                        if (Phones.Any())
+                        {
+                            error = ModelsValidator.IsPhonesValid(Phones);
+                        }
+                        else 
+                        {
+                            error = "Необходимо указать телефон для связи";
+                        }
+                        break;
+                    case nameof(Emails):
+                        if (Emails.Any())
+                        {
+                            error = ModelsValidator.IsMailsValid(Emails);
+                        }
+                        else 
+                        {
+                            error = "Необходимо указать email";
+                        }
+                        break;
+
                 }
-                return string.IsNullOrWhiteSpace(_validationError);
+
+                return error;
             }
         }
 
-        public string ValidationError => _validationError;
+        public string Error => this[nameof(Name)] + 
+                               this[nameof(InnKpp)] + 
+                               this[nameof(Address)] + 
+                               this[nameof(Phones)] + 
+                               this[nameof(Emails)];
 
         public Guid Id { get; set; }
         public string Name { get; set; }
@@ -47,5 +66,7 @@
         public string Address { get; set; }
         public List<string> Phones { get; set; }
         public List<string> Emails { get; set; }
+
+       
     }
 }

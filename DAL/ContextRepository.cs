@@ -18,8 +18,8 @@ namespace DAL
         }
 
         public async Task<IEnumerable<T>> Get<T>(Expression<Func<T, bool>> filter = null, Func<IQueryable<T>,
-                                    IOrderedQueryable<T>> orderBy = null,
-                                    string includeProperties = "") where T : BaseEntity
+                                                 IOrderedQueryable<T>> orderBy = null,
+                                                 string includeProperties = "") where T : BaseEntity
         {
             if (_context != null)
             {
@@ -50,6 +50,32 @@ namespace DAL
             return Enumerable.Empty<T>();
         }
 
+        public async Task<IEnumerable<T>> GetRange<T>(int start, int end, string includeProperties = "") where T : BaseEntity
+        {
+            if (_context != null)
+            {
+                IQueryable<T> query = _context.Set<T>();
+                if (query.Any())
+                {
+                    foreach (string includeProperty in includeProperties.Split
+                        (new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+                    {
+                        query = query.Include(includeProperty);
+                    }
+
+                    if (end > start)
+                    {
+                        return query.Take(new Range(start, end));
+                    }
+                    else
+                    {
+                        return query;
+                    }
+                }
+            }
+            return Enumerable.Empty<T>();
+        }
+
         public async Task<T> GetById<T>(Guid id) where T : BaseEntity
         {
             if (_context != null)
@@ -58,6 +84,8 @@ namespace DAL
             }
             return null;
         }
+
+        
 
         public async Task<bool> Remove<T>(Guid id) where T : BaseEntity
         {

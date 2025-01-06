@@ -1,38 +1,58 @@
-﻿namespace DTOs
+﻿using System.ComponentModel;
+
+namespace DTOs
 {
-    public class DocumentDto : IDto
+    public class DocumentDto : IDataErrorInfo
     {
-        private string _validationError;
-        public bool HasValidationError 
+        public string this[string columnName] 
         {
             get 
             { 
-                _validationError = string.Empty;
-                if (CreationDate == DateTime.MinValue)
+                string error = string.Empty;
+
+                switch (columnName) 
                 {
-                    _validationError = "Необходимо указать дату создания документа";
+                    case nameof(ContractId):
+                        if (ContractId == Guid.Empty) 
+                        {
+                            error = "Необходумо указать номер заявки\n";
+                        }
+                        break;
+                    case nameof(CreationDate):
+                        if (CreationDate == DateTime.MinValue)
+                        {
+                            error = "Необходимо указать дату создания документа\n";
+                        }
+                        break;
+                    case nameof(Number):
+                        if(string.IsNullOrWhiteSpace(Number))
+                        {
+                            error = "Необходимо указать номер документа\n";
+                        }
+                        break;
+                    case nameof(RecievingDate):
+                        if (RecievingDate == DateTime.MinValue)
+                        {
+                            error = "Необходимо указать дату прихода документа\n";
+                        }
+                        break;
+                    case nameof(Summ):
+                        if (Summ <= 0)
+                        {
+                            error = "Необходимо указать сумму документа\n";
+                        }
+                        break;
                 }
-                else if (RecievingDate == DateTime.MinValue)
-                {
-                    _validationError = "Необходимо указать дату прихода документа";
-                }
-                else if (string.IsNullOrWhiteSpace(Number))
-                {
-                    _validationError = "Необходимо указать номер документа";
-                }
-                else if (Summ <= 0)
-                {
-                    _validationError = "Необходимо указать сумму документа";
-                }
-                else if (ContractId == Guid.Empty) 
-                {
-                    _validationError = "Необхождимо указать номер заявки";
-                }
-                return string.IsNullOrWhiteSpace(this._validationError);
+
+                return error;
             }
         }
 
-        public string ValidationError => _validationError;
+        public string Error => this[nameof(ContractId)] +
+                               this[nameof(CreationDate)] + 
+                               this[nameof(RecievingDate)] + 
+                               this[nameof(Number)] + 
+                               this[nameof(Summ)];
 
         public Guid Id { get; set; }
         public Guid ContractId { get; set; }
@@ -43,5 +63,7 @@
         public DateTime RecievingDate { get; set; }
         public string Number { get; set; }
         public float Summ { get; set; }
+
+        
     }
 }

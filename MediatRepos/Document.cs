@@ -2,7 +2,6 @@
 using MediatRepos;
 using Microsoft.Extensions.Logging;
 using Models;
-using System.Linq.Expressions;
 
 namespace MediatorServices
 {
@@ -36,15 +35,15 @@ namespace MediatorServices
         }
     }
 
-    public class GetFilteredDocumentService : GetFilteredModelService<Document>
+    public class GetMainIdDocumentService : GetMainIdModelService<Document>
     {
-        public GetFilteredDocumentService(IRepository repository, ILogger<GetIdModelService<Document>> logger) : base(repository, logger)
+        public GetMainIdDocumentService(IRepository repository, ILogger<GetMainIdModelService<Document>> logger) : base(repository, logger)
         {
         }
 
-        protected override async Task<object> Get(Expression<Func<Document, bool>> filter)
+        protected async override Task<object> Get(Guid id)
         {
-            IEnumerable<Document> documents = await _repository.Get(filter);
+            IEnumerable<Document> documents = await _repository.Get<Document>(d => d.ContractId == id);
             List<DocumentDto> dtos = new List<DocumentDto>();
 
             foreach (var document in documents)

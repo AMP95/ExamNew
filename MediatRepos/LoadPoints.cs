@@ -2,19 +2,18 @@
 using Microsoft.Extensions.Logging;
 using Models;
 using Models.Sub;
-using System.Linq.Expressions;
 
 namespace MediatorServices
 {
-    public class GetFilteredRouteService : GetFilteredModelService<RoutePoint>
+    public class GetRangeRoutePoint : GetRangeModelService<RoutePoint>
     {
-        public GetFilteredRouteService(IRepository repository, ILogger<GetIdModelService<RoutePoint>> logger) : base(repository, logger)
+        public GetRangeRoutePoint(IRepository repository, ILogger<GetRangeModelService<RoutePoint>> logger) : base(repository, logger)
         {
         }
 
-        protected override async Task<object> Get(Expression<Func<RoutePoint, bool>> filter)
+        protected override async Task<object> Get(int start, int end)
         {
-            IEnumerable<RoutePoint> points = await _repository.Get(filter);
+            IEnumerable<RoutePoint> points = await _repository.Get<RoutePoint>(r => r.Type == (int)LoadPointType.Upload);
             List<RoutePointDto> dtos = new List<RoutePointDto>();
 
             foreach (var point in points)
