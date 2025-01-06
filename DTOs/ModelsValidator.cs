@@ -2,7 +2,7 @@
 
 namespace DTOs
 {
-    internal static class ModelsValidator
+    public static class ModelsValidator
     {
         private static Regex _phone;
         private static Regex _mail;
@@ -114,7 +114,7 @@ namespace DTOs
             }
             else
             {
-                return "Номер инн/кпп соответствовать шаблону: ИНН(/КПП)\n";
+                return "Неверный формат ИНН/КПП\n";
             }
         }
     }

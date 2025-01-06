@@ -14,7 +14,7 @@ namespace MediatorServices
 
         protected override async Task<object> Get(Guid id)
         {
-            IEnumerable<Contract> contracts = await _repository.Get<Contract>(t => t.Id == id, null, "Carrier,Driver,Truck,Trailer,Documents");
+            IEnumerable<Contract> contracts = await _repository.Get<Contract>(t => t.Id == id, null, "Carrier,Driver,Vehicle,Documents");
             ContractDto dto = null;
             if (contracts.Any())
             {
@@ -55,17 +55,13 @@ namespace MediatorServices
                         PassportDateOfIssue = constract.Driver.PassportDateOfIssue,
                         BirthDate = constract.Driver.DateOfBirth
                     },
-                    Trailer = new TrailerDto() 
+                    Vehicle = new VehicleDto() 
                     { 
-                        Id = constract.Trailer.Id,
-                        Model = constract.Trailer.Model,
-                        Number = constract.Trailer.Number,
-                    },
-                    Truck = new TruckDto() 
-                    { 
-                        Id = constract.Truck.Id,
-                        Model= constract.Truck.Model,
-                        Number= constract.Truck.Number,
+                        Id = constract.Vehicle.Id,
+                        TruckModel = constract.Vehicle.TruckModel,
+                        TruckNumber = constract.Vehicle.TruckNumber,
+                        TrailerNumber = constract.Vehicle.TrailerNumber,
+                        TrailerModel = constract.Vehicle.TrailerModel,
                     },
                     UnloadPoints = new List<RoutePointDto>(),
                     Documents = new List<DocumentDto>()
@@ -142,17 +138,13 @@ namespace MediatorServices
                         Name = $"{contract.Driver.FamilyName} {contract.Driver.Name} {contract.Driver.FatherName}",
                         Phones = contract.Driver.Phones.Split(';').ToList(),
                     },
-                    Truck = new TruckDto()
+                    Vehicle = new VehicleDto()
                     {
-                        Id = contract.Truck.Id,
-                        Model = contract.Truck.Model,
-                        Number = contract.Truck.Number,
-                    },
-                    Trailer = new TrailerDto()
-                    {
-                        Id = contract.Trailer.Id,
-                        Model = contract.Trailer.Model,
-                        Number = contract.Trailer.Number,
+                        Id = contract.Vehicle.Id,
+                        TruckModel = contract.Vehicle.TruckModel,
+                        TruckNumber = contract.Vehicle.TruckNumber,
+                        TrailerModel = contract.Vehicle.TrailerModel,
+                        TrailerNumber = contract.Vehicle.TrailerNumber,
                     },
                     UnloadPoints = contract.UnloadingPoints.Select(s => new RoutePointDto() { Id = s.Id, Route = s.Route}).ToList(),
                     Documents = new List<DocumentDto>()
@@ -206,17 +198,13 @@ namespace MediatorServices
                         Name = $"{contract.Driver.FamilyName} {contract.Driver.Name} {contract.Driver.FatherName}",
                         Phones = contract.Driver.Phones.Split(';').ToList(),
                     },
-                    Truck = new TruckDto()
+                    Vehicle = new VehicleDto()
                     {
-                        Id = contract.Truck.Id,
-                        Model = contract.Truck.Model,
-                        Number = contract.Truck.Number,
-                    },
-                    Trailer = new TrailerDto()
-                    {
-                        Id = contract.Trailer.Id,
-                        Model = contract.Trailer.Model,
-                        Number = contract.Trailer.Number,
+                        Id = contract.Vehicle.Id,
+                        TruckModel = contract.Vehicle.TruckModel,
+                        TruckNumber = contract.Vehicle.TruckNumber,
+                        TrailerModel = contract.Vehicle.TrailerModel,
+                        TrailerNumber = contract.Vehicle.TrailerNumber, 
                     },
                     UnloadPoints = new List<RoutePointDto>()
                 };
@@ -254,7 +242,6 @@ namespace MediatorServices
         {
             Contract contract = new Contract()
             {
-                Id = Guid.NewGuid(),
                 Number = dto.Number,
                 CreationDate = dto.CreationDate,
                 Payment = dto.Payment,
@@ -273,11 +260,8 @@ namespace MediatorServices
             Driver driver = await _repository.GetById<Driver>(dto.Driver.Id);
             contract.Driver = driver;
 
-            Truck truck = await _repository.GetById<Truck>(dto.Truck.Id);
-            contract.Truck = truck;
-
-            Trailer trailer = await _repository.GetById<Trailer>(dto.Trailer.Id);
-            contract.Trailer = trailer;
+            Vehicle truck = await _repository.GetById<Vehicle>(dto.Vehicle.Id);
+            contract.Vehicle = truck;
 
             IEnumerable<RoutePoint> loads = await _repository.Get<RoutePoint>(p => p.Address == dto.LoadPoint.Address && p.Side == (short)dto.LoadPoint.Side);
 
@@ -289,7 +273,6 @@ namespace MediatorServices
             {
                 contract.LoadingPoint = new RoutePoint()
                 {
-                    Id = Guid.NewGuid(),
                     Address = dto.LoadPoint.Address,
                     Route = dto.LoadPoint.Route,
                     Phones = string.Join(";", dto.LoadPoint.Phones),
@@ -302,7 +285,6 @@ namespace MediatorServices
             {
                 contract.UnloadingPoints.Add(new RoutePoint() 
                 { 
-                    Id = Guid.NewGuid(),
                     Address = pointDto.Address,
                     Route = pointDto.Route,
                     Side = (short)pointDto.Side,
@@ -341,11 +323,8 @@ namespace MediatorServices
             Driver driver = await _repository.GetById<Driver>(dto.Driver.Id);
             contract.Driver = driver;
 
-            Truck truck = await _repository.GetById<Truck>(dto.Truck.Id);
-            contract.Truck = truck;
-
-            Trailer trailer = await _repository.GetById<Trailer>(dto.Trailer.Id);
-            contract.Trailer = trailer;
+            Vehicle vehicle = await _repository.GetById<Vehicle>(dto.Vehicle.Id);
+            contract.Vehicle = vehicle;
 
             IEnumerable<RoutePoint> loads = await _repository.Get<RoutePoint>(p => p.Address == dto.LoadPoint.Address && p.Side == (short)dto.LoadPoint.Side);
 

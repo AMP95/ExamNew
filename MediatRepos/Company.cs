@@ -32,7 +32,61 @@ namespace MediatorServices
         }
     }
 
+    public class SearchCompanyService : SearchModelService<Company>
+    {
+        public SearchCompanyService(IRepository repository, ILogger<SearchModelService<Company>> logger) : base(repository, logger)
+        {
+        }
 
+        protected override async Task<object> Get(string name)
+        {
+            IEnumerable<Company> carriers = await _repository.Get<Company>(c => c.Name.ToLower().Contains(name.ToLower()));
+            List<CompanyDto> dtos = new List<CompanyDto>();
+
+            foreach (var carrier in carriers)
+            {
+                dtos.Add(new CompanyDto()
+                {
+                    Id = carrier.Id,
+                    Name = carrier.Name,
+                    Address = carrier.Address,
+                    Emails = carrier.Emails.Split(';').ToList(),
+                    Phones = carrier.Phones.Split(';').ToList(),
+                    InnKpp = carrier.InnKpp
+                });
+            }
+
+            return dtos;
+        }
+    }
+
+    public class GetRangeCompanyService : GetRangeModelService<Company>
+    {
+        public GetRangeCompanyService(IRepository repository, ILogger<GetRangeModelService<Company>> logger) : base(repository, logger)
+        {
+        }
+
+        protected override async Task<object> Get(int start, int end)
+        {
+            IEnumerable<Company> carriers = await _repository.GetRange<Company>(start, end, q => q.OrderBy(c => c.Name));
+            List<CompanyDto> dtos = new List<CompanyDto>();
+
+            foreach (var carrier in carriers)
+            {
+                dtos.Add(new CompanyDto()
+                {
+                    Id = carrier.Id,
+                    Name = carrier.Name,
+                    Address = carrier.Address,
+                    Emails = carrier.Emails.Split(';').ToList(),
+                    Phones = carrier.Phones.Split(';').ToList(),
+                    InnKpp = carrier.InnKpp
+                });
+            }
+
+            return dtos;
+        }
+    }
 
     public class DeleteCompanyService : DeleteModelService<Company>
     {
@@ -51,7 +105,6 @@ namespace MediatorServices
         {
             Company company = new Company()
             {
-                Id = Guid.NewGuid(),
                 Name = dto.Name,
                 Address = dto.Address,
                 InnKpp = dto.InnKpp,

@@ -1,8 +1,9 @@
-﻿using System.ComponentModel;
+﻿using DTOs.Dtos;
+using System.ComponentModel;
 
 namespace DTOs
 {
-    public class ContractDto : IDataErrorInfo
+    public class ContractDto : IDto
     {
         public string this[string columnName]
         {
@@ -72,16 +73,10 @@ namespace DTOs
                             error = "Необходимо указать водителя";
                         }
                         break;
-                    case nameof(Truck):
-                        if (Truck == null)
+                    case nameof(Vehicle):
+                        if (Vehicle == null)
                         {
-                            error = "Необходимо указать тягач";
-                        }
-                        break;
-                    case nameof(Trailer):
-                        if (Trailer == null)
-                        {
-                            error = "Необходимо указать прицеп";
+                            error = "Необходимо указать ТС";
                         }
                         break;
                     case nameof(Payment):
@@ -104,8 +99,7 @@ namespace DTOs
                                this[nameof(Volume)] + 
                                this[nameof(Carrier)] + 
                                this[nameof(Driver)] + 
-                               this[nameof(Truck)] + 
-                               this[nameof(Trailer)] + 
+                               this[nameof(Vehicle)] + 
                                this[nameof(Payment)];
 
         public Guid Id { get; set; }
@@ -121,8 +115,7 @@ namespace DTOs
 
         public CarrierDto Carrier { get; set; }
         public DriverDto Driver { get; set; }
-        public TruckDto Truck { get; set; }
-        public TrailerDto Trailer { get; set; }
+        public VehicleDto Vehicle { get; set; }
 
         public float Payment { get; set; }
         public float Prepayment { get; set; }

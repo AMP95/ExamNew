@@ -1,8 +1,8 @@
-﻿using System.ComponentModel;
+﻿using DTOs.Dtos;
 
 namespace DTOs
 {
-    public class CompanyDto : IDataErrorInfo
+    public class CompanyDto : IDto
     {
         public string this[string columnName] 
         {

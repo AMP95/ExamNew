@@ -99,10 +99,7 @@ namespace DAL.Migrations
                     b.Property<short>("Status")
                         .HasColumnType("smallint");
 
-                    b.Property<Guid>("TrailerId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("TruckId")
+                    b.Property<Guid>("VehicleId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<float>("Volume")
@@ -119,9 +116,10 @@ namespace DAL.Migrations
 
                     b.HasIndex("LoadingPointId");
 
-                    b.HasIndex("TrailerId");
+                    b.HasIndex("VehicleId");
 
-                    b.HasIndex("TruckId");
+                    b.HasIndex("Number", "CreationDate")
+                        .IsUnique();
 
                     b.ToTable("Contracts");
                 });
@@ -209,19 +207,14 @@ namespace DAL.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
-                    b.Property<Guid?>("TrailerId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("TruckId")
+                    b.Property<Guid?>("VehicleId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
                     b.HasIndex("CarrierId");
 
-                    b.HasIndex("TrailerId");
-
-                    b.HasIndex("TruckId");
+                    b.HasIndex("VehicleId");
 
                     b.ToTable("Drivers");
                 });
@@ -263,7 +256,7 @@ namespace DAL.Migrations
                     b.ToTable("RoutePoints");
                 });
 
-            modelBuilder.Entity("Models.Trailer", b =>
+            modelBuilder.Entity("Models.Vehicle", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -272,12 +265,22 @@ namespace DAL.Migrations
                     b.Property<Guid?>("CarrierId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Model")
+                    b.Property<string>("TrailerModel")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<string>("Number")
+                    b.Property<string>("TrailerNumber")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("TruckModel")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("TruckNumber")
                         .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
@@ -286,39 +289,10 @@ namespace DAL.Migrations
 
                     b.HasIndex("CarrierId");
 
-                    b.HasIndex("Model", "Number")
+                    b.HasIndex("TruckModel", "TruckNumber", "TrailerModel", "TrailerNumber")
                         .IsUnique();
 
-                    b.ToTable("Trailer");
-                });
-
-            modelBuilder.Entity("Models.Truck", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("CarrierId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Model")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("Number")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CarrierId");
-
-                    b.HasIndex("Model", "Number")
-                        .IsUnique();
-
-                    b.ToTable("Truck");
+                    b.ToTable("Vehicles");
                 });
 
             modelBuilder.Entity("Models.Carrier", b =>
@@ -351,15 +325,9 @@ namespace DAL.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Models.Trailer", "Trailer")
+                    b.HasOne("Models.Vehicle", "Vehicle")
                         .WithMany()
-                        .HasForeignKey("TrailerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Models.Truck", "Truck")
-                        .WithMany()
-                        .HasForeignKey("TruckId")
+                        .HasForeignKey("VehicleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -369,9 +337,7 @@ namespace DAL.Migrations
 
                     b.Navigation("LoadingPoint");
 
-                    b.Navigation("Trailer");
-
-                    b.Navigation("Truck");
+                    b.Navigation("Vehicle");
                 });
 
             modelBuilder.Entity("Models.Document", b =>
@@ -391,19 +357,13 @@ namespace DAL.Migrations
                         .WithMany("Drivers")
                         .HasForeignKey("CarrierId");
 
-                    b.HasOne("Models.Trailer", "Trailer")
+                    b.HasOne("Models.Vehicle", "Vehicle")
                         .WithMany()
-                        .HasForeignKey("TrailerId");
-
-                    b.HasOne("Models.Truck", "Truck")
-                        .WithMany()
-                        .HasForeignKey("TruckId");
+                        .HasForeignKey("VehicleId");
 
                     b.Navigation("Carrier");
 
-                    b.Navigation("Trailer");
-
-                    b.Navigation("Truck");
+                    b.Navigation("Vehicle");
                 });
 
             modelBuilder.Entity("Models.Sub.RoutePoint", b =>
@@ -413,19 +373,10 @@ namespace DAL.Migrations
                         .HasForeignKey("ContractId");
                 });
 
-            modelBuilder.Entity("Models.Trailer", b =>
+            modelBuilder.Entity("Models.Vehicle", b =>
                 {
                     b.HasOne("Models.Carrier", "Carrier")
-                        .WithMany("Trailers")
-                        .HasForeignKey("CarrierId");
-
-                    b.Navigation("Carrier");
-                });
-
-            modelBuilder.Entity("Models.Truck", b =>
-                {
-                    b.HasOne("Models.Carrier", "Carrier")
-                        .WithMany("Trucks")
+                        .WithMany("Vehicles")
                         .HasForeignKey("CarrierId");
 
                     b.Navigation("Carrier");
@@ -453,9 +404,7 @@ namespace DAL.Migrations
 
                     b.Navigation("Drivers");
 
-                    b.Navigation("Trailers");
-
-                    b.Navigation("Trucks");
+                    b.Navigation("Vehicles");
                 });
 #pragma warning restore 612, 618
         }

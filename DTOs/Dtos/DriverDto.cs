@@ -1,8 +1,8 @@
-﻿using System.ComponentModel;
+﻿using DTOs.Dtos;
 
 namespace DTOs
 {
-    public class DriverDto : IDataErrorInfo
+    public class DriverDto : IDto
     {
         public string this[string columnName] 
         {
@@ -75,9 +75,6 @@ namespace DTOs
 
 
         public CarrierDto Carrier { get; set; }
-        public TruckDto Truck { get; set; }
-        public TrailerDto Trailer { get; set; }
-
-        
+        public VehicleDto Vehicle { get; set; }
     }
 }

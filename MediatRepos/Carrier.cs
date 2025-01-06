@@ -41,7 +41,7 @@ namespace MediatorServices
 
         protected override async Task<object> Get(string name)
         {
-            IEnumerable<Carrier> carriers = await _repository.Get<Carrier>(c => c.Name.ToLower().Contains(name.ToLower()) ,null, null);
+            IEnumerable<Carrier> carriers = await _repository.Get<Carrier>(c => c.Name.ToLower().Contains(name.ToLower()));
             List<CarrierDto> dtos = new List<CarrierDto>();
 
             foreach (var carrier in carriers)
@@ -70,7 +70,7 @@ namespace MediatorServices
 
         protected override async Task<object> Get(int start, int end)
         {
-            IEnumerable<Carrier> carriers = await _repository.GetRange<Carrier>(start, end, null);
+            IEnumerable<Carrier> carriers = await _repository.GetRange<Carrier>(start, end, q => q.OrderBy(c => c.Name));
             List<CarrierDto> dtos = new List<CarrierDto>();
 
             foreach (var carrier in carriers) 
@@ -108,7 +108,6 @@ namespace MediatorServices
         {
             Carrier company = new Carrier()
             {
-                Id = Guid.NewGuid(),
                 Name = dto.Name,
                 Vat = (short)dto.Vat, 
                 Address = dto.Address,

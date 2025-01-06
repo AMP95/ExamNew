@@ -46,38 +46,21 @@ namespace DAL.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Trailer",
+                name: "Vehicles",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Model = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    Number = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    TruckModel = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    TruckNumber = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    TrailerModel = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    TrailerNumber = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
                     CarrierId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Trailer", x => x.Id);
+                    table.PrimaryKey("PK_Vehicles", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Trailer_Carrier_CarrierId",
-                        column: x => x.CarrierId,
-                        principalTable: "Carrier",
-                        principalColumn: "Id");
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Truck",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Model = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    Number = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
-                    CarrierId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Truck", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Truck_Carrier_CarrierId",
+                        name: "FK_Vehicles_Carrier_CarrierId",
                         column: x => x.CarrierId,
                         principalTable: "Carrier",
                         principalColumn: "Id");
@@ -95,8 +78,7 @@ namespace DAL.Migrations
                     PassportSerial = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     PassportDateOfIssue = table.Column<DateTime>(type: "datetime2", nullable: false),
                     PassportIssuer = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    TruckId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    TrailerId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    VehicleId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     CarrierId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     Phones = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false)
                 },
@@ -109,14 +91,9 @@ namespace DAL.Migrations
                         principalTable: "Carrier",
                         principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_Drivers_Trailer_TrailerId",
-                        column: x => x.TrailerId,
-                        principalTable: "Trailer",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_Drivers_Truck_TruckId",
-                        column: x => x.TruckId,
-                        principalTable: "Truck",
+                        name: "FK_Drivers_Vehicles_VehicleId",
+                        column: x => x.VehicleId,
+                        principalTable: "Vehicles",
                         principalColumn: "Id");
                 });
 
@@ -133,8 +110,7 @@ namespace DAL.Migrations
                     Volume = table.Column<float>(type: "real", nullable: false),
                     CarrierId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     DriverId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    TruckId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    TrailerId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    VehicleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Payment = table.Column<float>(type: "real", nullable: false),
                     Prepayment = table.Column<float>(type: "real", nullable: false),
                     PayPriority = table.Column<short>(type: "smallint", nullable: false),
@@ -156,15 +132,9 @@ namespace DAL.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Contracts_Trailer_TrailerId",
-                        column: x => x.TrailerId,
-                        principalTable: "Trailer",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Contracts_Truck_TruckId",
-                        column: x => x.TruckId,
-                        principalTable: "Truck",
+                        name: "FK_Contracts_Vehicles_VehicleId",
+                        column: x => x.VehicleId,
+                        principalTable: "Vehicles",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -238,14 +208,15 @@ namespace DAL.Migrations
                 column: "LoadingPointId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Contracts_TrailerId",
+                name: "IX_Contracts_Number_CreationDate",
                 table: "Contracts",
-                column: "TrailerId");
+                columns: new[] { "Number", "CreationDate" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Contracts_TruckId",
+                name: "IX_Contracts_VehicleId",
                 table: "Contracts",
-                column: "TruckId");
+                column: "VehicleId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Document_ContractId",
@@ -258,14 +229,9 @@ namespace DAL.Migrations
                 column: "CarrierId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Drivers_TrailerId",
+                name: "IX_Drivers_VehicleId",
                 table: "Drivers",
-                column: "TrailerId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Drivers_TruckId",
-                table: "Drivers",
-                column: "TruckId");
+                column: "VehicleId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_RoutePoints_ContractId",
@@ -273,25 +239,14 @@ namespace DAL.Migrations
                 column: "ContractId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Trailer_CarrierId",
-                table: "Trailer",
+                name: "IX_Vehicles_CarrierId",
+                table: "Vehicles",
                 column: "CarrierId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Trailer_Model_Number",
-                table: "Trailer",
-                columns: new[] { "Model", "Number" },
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Truck_CarrierId",
-                table: "Truck",
-                column: "CarrierId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Truck_Model_Number",
-                table: "Truck",
-                columns: new[] { "Model", "Number" },
+                name: "IX_Vehicles_TruckModel_TruckNumber_TrailerModel_TrailerNumber",
+                table: "Vehicles",
+                columns: new[] { "TruckModel", "TruckNumber", "TrailerModel", "TrailerNumber" },
                 unique: true);
 
             migrationBuilder.AddForeignKey(
@@ -319,12 +274,8 @@ namespace DAL.Migrations
                 table: "Drivers");
 
             migrationBuilder.DropForeignKey(
-                name: "FK_Trailer_Carrier_CarrierId",
-                table: "Trailer");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_Truck_Carrier_CarrierId",
-                table: "Truck");
+                name: "FK_Vehicles_Carrier_CarrierId",
+                table: "Vehicles");
 
             migrationBuilder.DropForeignKey(
                 name: "FK_Contracts_Drivers_DriverId",
@@ -353,10 +304,7 @@ namespace DAL.Migrations
                 name: "Contracts");
 
             migrationBuilder.DropTable(
-                name: "Trailer");
-
-            migrationBuilder.DropTable(
-                name: "Truck");
+                name: "Vehicles");
         }
     }
 }

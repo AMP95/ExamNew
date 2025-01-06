@@ -50,7 +50,7 @@ namespace DAL
             return Enumerable.Empty<T>();
         }
 
-        public async Task<IEnumerable<T>> GetRange<T>(int start, int end, string includeProperties = "") where T : BaseEntity
+        public async Task<IEnumerable<T>> GetRange<T>(int start, int end, Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null, string includeProperties = "") where T : BaseEntity
         {
             if (_context != null)
             {
@@ -63,9 +63,14 @@ namespace DAL
                         query = query.Include(includeProperty);
                     }
 
+                    if (orderBy != null)
+                    {
+                        query = orderBy(query);
+                    }
+
                     if (end > start)
                     {
-                        return query.Take(new Range(start, end));
+                        return query.Skip(start).Take(end);
                     }
                     else
                     {

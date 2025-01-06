@@ -17,17 +17,12 @@ namespace Exam.Controllers
             _logger = logger;
         }
 
-        [HttpDelete("truck/{id}")]
-        public virtual async Task<ActionResult> DeleteTruck(Guid id)
+        [HttpDelete("vehicle/{id}")]
+        public virtual async Task<ActionResult> DeleteVehicle(Guid id)
         {
-            return Ok(await _updateService.Add(new Delete<Truck>(id)));
+            return Ok(await _updateService.Add(new Delete<Vehicle>(id)));
         }
 
-        [HttpDelete("trailer/{id}")]
-        public virtual async Task<ActionResult> DeleteTrailer(Guid id)
-        {
-            return Ok(await _updateService.Add(new Delete<Trailer>(id)));
-        }
 
         [HttpDelete("document/{id}")]
         public virtual async Task<ActionResult> DeleteDocument(Guid id)

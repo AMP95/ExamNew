@@ -83,7 +83,6 @@ namespace MediatorServices
         {
             Document document = new Document()
             {
-                Id = Guid.NewGuid(),
                 CreationDate = dto.CreationDate,
                 DocumentType = (short)dto.Type,
                 Summ = dto.Summ,

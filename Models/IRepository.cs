@@ -8,7 +8,7 @@ namespace Models
                  Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null,
                  string includeProperties = "") where T : BaseEntity;
 
-        Task<IEnumerable<T>> GetRange<T>(int start, int count, string includeProperties = "") where T : BaseEntity;
+        Task<IEnumerable<T>> GetRange<T>(int start, int count, Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null, string includeProperties = "") where T : BaseEntity;
 
         Task<T> GetById<T>(Guid id) where T : BaseEntity;
 

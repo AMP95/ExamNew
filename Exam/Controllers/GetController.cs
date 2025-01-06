@@ -20,16 +20,10 @@ namespace Exam.Controllers
 
         #region ID
 
-        [HttpGet("truck/id/{id}")]
-        public virtual async Task<ActionResult> GetTruck(Guid id)
+        [HttpGet("vehicle/id/{id}")]
+        public virtual async Task<ActionResult> GetVehicle(Guid id)
         {
-            return Ok(await _getService.Add(new GetId<Truck>(id)));
-        }
-
-        [HttpGet("trailer/id/{id}")]
-        public virtual async Task<ActionResult> GetTrailer(Guid id)
-        {
-            return Ok(await _getService.Add(new GetId<Trailer>(id)));
+            return Ok(await _getService.Add(new GetId<Vehicle>(id)));
         }
 
         [HttpGet("driver/id/{id}")]
@@ -72,16 +66,10 @@ namespace Exam.Controllers
 
         #region MainId
 
-        [HttpGet("truck/main/{id}")]
-        public virtual async Task<ActionResult> GetTruckMain(Guid id)
+        [HttpGet("vehicle/main/{id}")]
+        public virtual async Task<ActionResult> GetVehicleMain(Guid id)
         {
-            return Ok(await _getService.Add(new GetMainId<Truck>(id)));
-        }
-
-        [HttpGet("trailer/main/{id}")]
-        public virtual async Task<ActionResult> GetTrailerMain(Guid id)
-        {
-            return Ok(await _getService.Add(new GetMainId<Trailer>(id)));
+            return Ok(await _getService.Add(new GetMainId<Vehicle>(id)));
         }
 
         [HttpGet("driver/main/{id}")]
@@ -99,16 +87,10 @@ namespace Exam.Controllers
 
         #region Search
 
-        [HttpGet("truck/search/{name}")]
-        public virtual async Task<ActionResult> GetTruckSearch(string name)
+        [HttpGet("vehicle/search/{name}")]
+        public virtual async Task<ActionResult> GetVehicleSearch(string name)
         {
-            return Ok(await _getService.Add(new Search<Truck>(name)));
-        }
-
-        [HttpGet("trailer/search/{name}")]
-        public virtual async Task<ActionResult> GetTrailerSearch(string name)
-        {
-            return Ok(await _getService.Add(new Search<Trailer>(name)));
+            return Ok(await _getService.Add(new Search<Vehicle>(name)));
         }
 
         [HttpGet("driver/search/{name}")]
@@ -129,21 +111,22 @@ namespace Exam.Controllers
             return Ok(await _getService.Add(new Search<Document>(name)));
         }
 
+        [HttpGet("company/search/{name}")]
+        public virtual async Task<ActionResult> GetCompanySearch(string name)
+        {
+            return Ok(await _getService.Add(new Search<Company>(name)));
+        }
+
         #endregion Search
 
         #region Range
 
-        [HttpGet("truck/range/{start}/{end}")]
-        public virtual async Task<ActionResult> GetTruckRange(int start, int end)
+        [HttpGet("vehicle/range/{start}/{end}")]
+        public virtual async Task<ActionResult> GetVehicleRange(int start, int end)
         {
-            return Ok(await _getService.Add(new GetRange<Truck>(start, end)));
+            return Ok(await _getService.Add(new GetRange<Vehicle>(start, end)));
         }
 
-        [HttpGet("trailer/range/{start}/{end}")]
-        public virtual async Task<ActionResult> GetTrailerRange(int start, int end)
-        {
-            return Ok(await _getService.Add(new GetRange<Trailer>(start, end)));
-        }
 
         [HttpGet("driver/range/{start}/{end}")]
         public virtual async Task<ActionResult> GetDriverRange(int start, int end)
@@ -161,6 +144,12 @@ namespace Exam.Controllers
         public virtual async Task<ActionResult> GetContractRange(int start, int end)
         {
             return Ok(await _getService.Add(new GetRange<Document>(start, end)));
+        }
+
+        [HttpGet("company/range/{start}/{end}")]
+        public virtual async Task<ActionResult> GetCompanyRange(int start, int end)
+        {
+            return Ok(await _getService.Add(new GetRange<Company>(start, end)));
         }
 
         #endregion Range

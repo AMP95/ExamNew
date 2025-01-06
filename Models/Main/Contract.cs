@@ -33,15 +33,9 @@ namespace Models
 
 
 
-        [ForeignKey(nameof(Truck))]
-        public Guid TruckId { get; set; }
-        public Truck Truck { get; set; }
-
-
-
-        [ForeignKey(nameof(Trailer))]
-        public Guid TrailerId { get; set; }
-        public Trailer Trailer { get; set; }
+        [ForeignKey(nameof(Vehicle))]
+        public Guid VehicleId { get; set; }
+        public Vehicle Vehicle { get; set; }
 
 
         public float Payment { get; set; }

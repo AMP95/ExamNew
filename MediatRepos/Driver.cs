@@ -13,7 +13,7 @@ namespace MediatorServices
 
         protected override async Task<object> Get(Guid id)
         {
-            IEnumerable<Driver> drivers = await _repository.Get<Driver>(d => d.Id == id, null, "Truck,Trailer");
+            IEnumerable<Driver> drivers = await _repository.Get<Driver>(d => d.Id == id, null, "Vehicle");
             DriverDto dto = null;
             if (drivers.Any())
             {
@@ -31,7 +31,7 @@ namespace MediatorServices
                 };
                 if (driver.CarrierId != null)
                 {
-                    IEnumerable<Carrier> carriers = await _repository.Get<Carrier>(c => c.Id == driver.Carrier.Id, null, "Truck,Trailer");
+                    IEnumerable<Carrier> carriers = await _repository.Get<Carrier>(c => c.Id == driver.Carrier.Id, null, "Vehicle");
                     Carrier carrier = carriers.First();
 
                     dto.Carrier = new CarrierDto()
@@ -43,27 +43,26 @@ namespace MediatorServices
                         InnKpp = carrier.InnKpp,
                         Emails = carrier.Emails.Split(";").ToList(),
                         Phones = carrier.Phones.Split(";").ToList(),
-                        Trucks = carrier.Trucks.Select(t => new TruckDto() { Id = t.Id, Number = t.Number, Model = t.Model}).ToList(),
-                        Trailers = carrier.Trailers.Select(t => new TrailerDto() { Id = t.Id, Number = t.Number, Model = t.Model }).ToList()
+                        Vehicles = carrier.Vehicles.Select(t => new VehicleDto() 
+                        { 
+                            Id = t.Id, 
+                            TruckNumber = t.TruckNumber, 
+                            TruckModel = t.TruckModel,
+                            TrailerModel = t.TrailerModel,
+                            TrailerNumber = t.TrailerNumber,
+                        }).ToList(),
                     };
                 }
 
-                if (driver.TruckId != null) 
+                if (driver.VehicleId != null) 
                 { 
-                    dto.Truck = new TruckDto() 
+                    dto.Vehicle = new VehicleDto() 
                     { 
-                        Id = driver.Truck.Id,
-                        Model = driver.Truck.Model,
-                        Number = driver.Truck.Number,
-                    };
-                }
-                if (driver.TrailerId != null) 
-                {
-                    dto.Trailer = new TrailerDto()
-                    {
-                        Id = driver.Trailer.Id,
-                        Number = driver.Trailer.Number,
-                        Model = driver.Trailer.Model
+                        Id = driver.Vehicle.Id,
+                        TruckModel = driver.Vehicle.TruckModel,
+                        TruckNumber = driver.Vehicle.TruckNumber,
+                        TrailerModel = driver.Vehicle.TrailerModel,
+                        TrailerNumber = driver.Vehicle.TrailerNumber,
                     };
                 }
             }
@@ -79,7 +78,7 @@ namespace MediatorServices
 
         protected override async Task<object> Get(Guid id)
         {
-            IEnumerable<Driver> drivers = await _repository.Get<Driver>(d => d.CarrierId == id, null, "Carrier,Truck,Trailer");
+            IEnumerable<Driver> drivers = await _repository.Get<Driver>(d => d.CarrierId == id, null, "Carrier,Vehicle");
             List<DriverDto> dtos = new List<DriverDto>();
 
             foreach (var driver in drivers)
@@ -99,22 +98,15 @@ namespace MediatorServices
                     };
                 }
 
-                if (driver.TruckId != null)
+                if (driver.VehicleId != null)
                 {
-                    dto.Truck = new TruckDto()
+                    dto.Vehicle = new VehicleDto()
                     {
-                        Id = driver.Truck.Id,
-                        Model = driver.Truck.Model,
-                        Number = driver.Truck.Number,
-                    };
-                }
-                if (driver.TrailerId != null)
-                {
-                    dto.Trailer = new TrailerDto()
-                    {
-                        Id = driver.Trailer.Id,
-                        Number = driver.Trailer.Number,
-                        Model = driver.Trailer.Model
+                        Id = driver.Vehicle.Id,
+                        TruckModel = driver.Vehicle.TruckModel,
+                        TruckNumber = driver.Vehicle.TruckNumber,
+                        TrailerNumber = driver.Vehicle.TrailerNumber,
+                        TrailerModel = driver.Vehicle.TrailerModel,
                     };
                 }
 
@@ -133,7 +125,7 @@ namespace MediatorServices
 
         protected override async Task<object> Get(string name)
         {
-            IEnumerable<Driver> drivers = await _repository.Get<Driver>(d => $"{d.FamilyName} {d.Name} {d.FatherName}".ToLower().Contains(name.ToLower()), null, "Carrier,Truck,Trailer");
+            IEnumerable<Driver> drivers = await _repository.Get<Driver>(d => $"{d.FamilyName} {d.Name} {d.FatherName}".ToLower().Contains(name.ToLower()), null, "Carrier,Vehicle");
             List<DriverDto> dtos = new List<DriverDto>();
 
             foreach (var driver in drivers)
@@ -153,22 +145,15 @@ namespace MediatorServices
                     };
                 }
 
-                if (driver.TruckId != null)
+                if (driver.VehicleId != null)
                 {
-                    dto.Truck = new TruckDto()
+                    dto.Vehicle = new VehicleDto()
                     {
-                        Id = driver.Truck.Id,
-                        Model = driver.Truck.Model,
-                        Number = driver.Truck.Number,
-                    };
-                }
-                if (driver.TrailerId != null)
-                {
-                    dto.Trailer = new TrailerDto()
-                    {
-                        Id = driver.Trailer.Id,
-                        Number = driver.Trailer.Number,
-                        Model = driver.Trailer.Model
+                        Id = driver.Vehicle.Id,
+                        TruckModel = driver.Vehicle.TruckModel,
+                        TruckNumber = driver.Vehicle.TruckNumber,
+                        TrailerModel = driver.Vehicle.TrailerModel,
+                        TrailerNumber = driver.Vehicle.TrailerNumber,
                     };
                 }
 
@@ -187,7 +172,7 @@ namespace MediatorServices
 
         protected override async Task<object> Get(int start, int end)
         {
-            IEnumerable<Driver> drivers = await _repository.GetRange<Driver>(start, end, "Carrier,Truck,Trailer");
+            IEnumerable<Driver> drivers = await _repository.GetRange<Driver>(start, end, q=> q.OrderBy(d => $"{d.FamilyName} {d.Name} {d.FamilyName}"), "Carrier,Vehicle");
             List<DriverDto> dtos = new List<DriverDto>();
 
             foreach (var driver in drivers)
@@ -207,22 +192,15 @@ namespace MediatorServices
                     };
                 }
 
-                if (driver.TruckId != null)
+                if (driver.VehicleId != null)
                 {
-                    dto.Truck = new TruckDto()
+                    dto.Vehicle = new VehicleDto()
                     {
-                        Id = driver.Truck.Id,
-                        Model = driver.Truck.Model,
-                        Number = driver.Truck.Number,
-                    };
-                }
-                if (driver.TrailerId != null)
-                {
-                    dto.Trailer = new TrailerDto()
-                    {
-                        Id = driver.Trailer.Id,
-                        Number = driver.Trailer.Number,
-                        Model = driver.Trailer.Model
+                        Id = driver.Vehicle.Id,
+                        TruckModel = driver.Vehicle.TruckModel,
+                        TruckNumber = driver.Vehicle.TruckNumber,
+                        TrailerModel = driver.Vehicle.TrailerModel,
+                        TrailerNumber = driver.Vehicle.TrailerNumber,
                     };
                 }
 
@@ -252,7 +230,6 @@ namespace MediatorServices
 
             Driver driver = new Driver()
             {
-                Id = Guid.NewGuid(),
                 FamilyName = name[0],
                 Name = name[1],
                 FatherName = name.Length > 2 ? name[2] : string.Empty,
@@ -263,16 +240,10 @@ namespace MediatorServices
                 Phones = string.Join(';',dto.Phones)
             };
 
-            if (dto.Truck != null) 
+            if (dto.Vehicle != null) 
             {
-                Truck truck = await _repository.GetById<Truck>(dto.Truck.Id);
-                driver.Truck = truck;
-            }
-
-            if (dto.Trailer != null)
-            {
-                Trailer trailer = await _repository.GetById<Trailer>(dto.Trailer.Id);
-                driver.Trailer = trailer;
+                Vehicle vehicle = await _repository.GetById<Vehicle>(dto.Vehicle.Id);
+                driver.Vehicle = vehicle;
             }
 
             if (dto.Carrier != null) 
@@ -317,39 +288,23 @@ namespace MediatorServices
                 driver.Carrier = carrier;
             }
 
-            if (driver.Trailer != null && driver.Trailer.CarrierId != driver.CarrierId)
+            if (driver.Vehicle != null && driver.Vehicle.CarrierId != driver.CarrierId)
             {
-                driver.Trailer = null;
-                driver.TrailerId = null;
+                driver.Vehicle = null;
+                driver.VehicleId = null;
             }
 
-            if (driver.Truck != null && driver.Truck.CarrierId != driver.CarrierId)
+            if (dto.Vehicle == null)
             {
-                driver.Truck = null;
-                driver.TruckId = null;
-            }
-
-            if (dto.Truck == null)
-            {
-                driver.Truck = null;
-                driver.TruckId = null;
+                driver.Vehicle = null;
+                driver.VehicleId = null;
             }
             else
             {
-                Truck truck = await _repository.GetById<Truck>(dto.Truck.Id);
-                driver.Truck = truck;
+                Vehicle truck = await _repository.GetById<Vehicle>(dto.Vehicle.Id);
+                driver.Vehicle = truck;
             }
 
-            if (dto.Trailer == null)
-            {
-                driver.Trailer = null;
-                driver.TrailerId = null;
-            }
-            else 
-            {
-                Trailer trailer = await _repository.GetById<Trailer>(dto.Trailer.Id);
-                driver.Trailer = trailer;
-            }
 
             return await _repository.Update(driver);
         }

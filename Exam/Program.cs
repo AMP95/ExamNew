@@ -43,7 +43,7 @@ namespace Exam
 
             builder.Services.AddMediatR(cfg =>
             {
-                cfg.RegisterServicesFromAssembly(typeof(Add<TruckDto>).Assembly);
+                cfg.RegisterServicesFromAssembly(typeof(Add<VehicleDto>).Assembly);
             });
 
             var app = builder.Build();

@@ -1,8 +1,8 @@
-﻿using System.ComponentModel;
+﻿using DTOs.Dtos;
 
 namespace DTOs
 {
-    public class RoutePointDto : IDataErrorInfo
+    public class RoutePointDto : IDto
     {
         public string this[string columnName] 
         {

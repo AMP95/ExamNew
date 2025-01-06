@@ -1,66 +1,47 @@
-﻿using System.ComponentModel;
+﻿using DTOs.Dtos;
 
 namespace DTOs
 {
-    public class VehicleDto : IDataErrorInfo
+    public class VehicleDto : IDto
     {
         public virtual string this[string columnName] 
         {
             get 
-            { 
-                if (columnName == nameof(Model))
+            {
+                switch (columnName) 
                 {
-                    if (string.IsNullOrWhiteSpace(Model)) 
-                    {
-                        return "Необходимо указать модель\n";
-                    }
+                    case nameof(TruckModel):
+                        if (string.IsNullOrWhiteSpace(TruckModel))
+                        {
+                            return "Необходимо указать модель тягача\n";
+                        }
+                        break;
+                    case nameof(TrailerModel):
+                        if (string.IsNullOrWhiteSpace(TruckModel))
+                        {
+                            return "Необходимо указать модель прицепа\n";
+                        }
+                        break;
+                    case nameof(TruckNumber):
+                        return ModelsValidator.IsTruckNumberValid(TruckNumber);
+                        break;
+                    case nameof(TrailerNumber):
+                        return ModelsValidator.IsTrailerNumberValid(TrailerNumber);
+                        break;
+
                 }
+
                 return string.Empty;
             }
         }
 
         public Guid Id { get; set; }
         public CarrierDto Carrier { get; set; }
-        public string Model { get; set; }
-        public string Number { get; set; }
+        public string TruckModel { get; set; }
+        public string TruckNumber { get; set; }
+        public string TrailerModel { get; set; }
+        public string TrailerNumber { get; set; }
 
-        public virtual string Error => this[nameof(Model)];
-    }
-    public class TruckDto : VehicleDto
-    {
-        public override string this[string columnName]  
-        {
-            get
-            {
-                if (columnName == nameof(Number))
-                {
-                    return ModelsValidator.IsTruckNumberValid(Number);
-                }
-                else 
-                { 
-                    return base.Error;
-                }
-            }
-        }
-        public override string Error => base.Error + this[nameof(Number)];
-
-    }
-    public class TrailerDto : VehicleDto
-    {
-        public override string this[string columnName]
-        {
-            get
-            {
-                if (columnName == nameof(Number))
-                {
-                    return ModelsValidator.IsTrailerNumberValid(Number);
-                }
-                else
-                {
-                    return base.Error;
-                }
-            }
-        }
-        public override string Error => base.Error + this[nameof(Number)];
+        public virtual string Error => this[nameof(TruckModel)];
     }
 }

@@ -18,25 +18,14 @@ namespace Exam.Controllers
             _logger = logger;
         }
 
-        [HttpPut("truck")]
-        public virtual async Task<ActionResult> PutTruck([FromBody] JObject jobj)
+        [HttpPut("vehicle")]
+        public virtual async Task<ActionResult> PutVehicle([FromBody] JObject jobj)
         {
             if (jobj != null)
             {
-                return Ok(await _updateService.Add(new Update<TruckDto>(jobj.ToObject<TruckDto>())));
+                return Ok(await _updateService.Add(new Update<VehicleDto>(jobj.ToObject<VehicleDto>())));
             }
-            _logger.LogWarning($"TRUCK: Recieved null object");
-            return BadRequest("Передан пустой параметр");
-        }
-
-        [HttpPut("trailer")]
-        public virtual async Task<ActionResult> PutTrailer([FromBody] JObject jobj)
-        {
-            if (jobj != null)
-            {
-                return Ok(await _updateService.Add(new Update<TrailerDto>(jobj.ToObject<TrailerDto>())));
-            }
-            _logger.LogWarning($"TRAILER: Recieved null object");
+            _logger.LogWarning($"VEHICLE: Recieved null object");
             return BadRequest("Передан пустой параметр");
         }
 
