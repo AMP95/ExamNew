@@ -10,6 +10,18 @@ namespace Exam
 {
     public class Program
     {
+        private static void UpdateDatabase(IApplicationBuilder app)
+        {
+            using (var serviceScope = app.ApplicationServices
+                .GetRequiredService<IServiceScopeFactory>()
+                .CreateScope())
+            {
+                using (var context = serviceScope.ServiceProvider.GetService<Context>())
+                {
+                    context.Database.Migrate();
+                }
+            }
+        }
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
@@ -47,6 +59,8 @@ namespace Exam
             });
 
             var app = builder.Build();
+            
+            UpdateDatabase(app);
 
             if (app.Environment.IsDevelopment())
             {
