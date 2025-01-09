@@ -25,13 +25,13 @@ namespace MediatorServices
                     Name = $"{driver.FamilyName} {driver.Name} {driver.FamilyName}",
                     BirthDate = driver.DateOfBirth,
                     Phones = driver.Phones.Split(';').ToList(),
-                    PassportDateOfIssue = dto.PassportDateOfIssue,
-                    PassportIssuer = dto.PassportIssuer,
-                    PassportSerial = dto.PassportSerial,
+                    PassportDateOfIssue = driver.PassportDateOfIssue,
+                    PassportIssuer = driver.PassportIssuer,
+                    PassportSerial = driver.PassportSerial,
                 };
                 if (driver.CarrierId != null)
                 {
-                    IEnumerable<Carrier> carriers = await _repository.Get<Carrier>(c => c.Id == driver.Carrier.Id, null, "Vehicle");
+                    IEnumerable<Carrier> carriers = await _repository.Get<Carrier>(c => c.Id == driver.CarrierId, null, "Vehicles");
                     Carrier carrier = carriers.First();
 
                     dto.Carrier = new CarrierDto()
@@ -78,7 +78,9 @@ namespace MediatorServices
 
         protected override async Task<object> Get(Guid id)
         {
-            IEnumerable<Driver> drivers = await _repository.Get<Driver>(d => d.CarrierId == id, null, "Carrier,Vehicle");
+            IEnumerable<Driver> drivers = await _repository.Get<Driver>(d => d.CarrierId == id, 
+                                                                        q => q.OrderBy(d => d.FamilyName).ThenBy(d => d.Name).ThenBy(d => d.FatherName),
+                                                                        "Carrier,Vehicle");
             List<DriverDto> dtos = new List<DriverDto>();
 
             foreach (var driver in drivers)
@@ -125,7 +127,9 @@ namespace MediatorServices
 
         protected override async Task<object> Get(string name)
         {
-            IEnumerable<Driver> drivers = await _repository.Get<Driver>(d => $"{d.FamilyName} {d.Name} {d.FatherName}".ToLower().Contains(name.ToLower()), null, "Carrier,Vehicle");
+            IEnumerable<Driver> drivers = await _repository.Get<Driver>(d => $"{d.FamilyName} {d.Name} {d.FatherName}".ToLower().Contains(name.ToLower()), 
+                                                                        q => q.OrderBy(d => d.FamilyName).ThenBy(d => d.Name).ThenBy(d => d.FatherName), 
+                                                                        "Carrier,Vehicle");
             List<DriverDto> dtos = new List<DriverDto>();
 
             foreach (var driver in drivers)
@@ -172,7 +176,7 @@ namespace MediatorServices
 
         protected override async Task<object> Get(int start, int end)
         {
-            IEnumerable<Driver> drivers = await _repository.GetRange<Driver>(start, end, q=> q.OrderBy(d => $"{d.FamilyName} {d.Name} {d.FamilyName}"), "Carrier,Vehicle");
+            IEnumerable<Driver> drivers = await _repository.GetRange<Driver>(start, end, q => q.OrderBy(d => d.FamilyName).ThenBy(d => d.Name).ThenBy(d => d.FatherName), "Carrier,Vehicle");
             List<DriverDto> dtos = new List<DriverDto>();
 
             foreach (var driver in drivers)

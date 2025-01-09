@@ -26,7 +26,7 @@ namespace MediatRepos
                     TrailerModel = vehicle.TrailerModel,
                     TrailerNumber = vehicle.TrailerNumber,
                 };
-                if (vehicle.Carrier != null) 
+                if (vehicle.CarrierId != null) 
                 {
                     dto.Carrier = new CarrierDto()
                     {
@@ -47,7 +47,9 @@ namespace MediatRepos
 
         protected override async Task<object> Get(Guid id)
         {
-            IEnumerable<Vehicle> vehicles = await _repository.Get<Vehicle>(t => t.CarrierId == id, q => q.OrderBy(t => $"{t.TruckModel} {t.TruckNumber} {t.TrailerModel} {t.TrailerNumber}"));
+            IEnumerable<Vehicle> vehicles = await _repository.Get<Vehicle>(t => t.CarrierId == id, 
+                                                                           q => q.OrderBy(t => $"{t.TruckModel} {t.TruckNumber} {t.TrailerModel} {t.TrailerNumber}"),
+                                                                           "Carrier");
             List<VehicleDto> dtos = new List<VehicleDto>();
 
             foreach (var vehicle in vehicles)
@@ -61,7 +63,7 @@ namespace MediatRepos
                     TrailerNumber = vehicle.TrailerNumber,
                 };
 
-                if (vehicle.Carrier != null)
+                if (vehicle.CarrierId != null)
                 {
                     dto.Carrier = new CarrierDto()
                     {
@@ -85,7 +87,9 @@ namespace MediatRepos
 
         protected override async Task<object> Get(int start, int end)
         {
-            IEnumerable<Vehicle> vehicles = await _repository.GetRange<Vehicle>(start, end, q => q.OrderBy(t => $"{t.TruckModel} {t.TruckNumber} {t.TrailerModel} {t.TrailerNumber}"));
+            IEnumerable<Vehicle> vehicles = await _repository.GetRange<Vehicle>(start, end, 
+                                                                                q => q.OrderBy(t => t.TruckModel).ThenBy(t => t.TruckNumber).ThenBy(t => t.TrailerNumber),
+                                                                                "Carrier");
             List<VehicleDto> dtos = new List<VehicleDto>();
 
             foreach (var vehicle in vehicles)
@@ -125,7 +129,9 @@ namespace MediatRepos
         {
             string formattedName = name.Trim(" /_-".ToArray()).ToLower();
 
-            IEnumerable<Vehicle> vehicles = await _repository.Get<Vehicle>(t => $"{t.TruckModel}{t.TruckNumber}{t.TrailerModel}{t.TrailerNumber}".Trim(" /_-".ToArray()).ToLower().Contains(formattedName), null, "Carrier");
+            IEnumerable<Vehicle> vehicles = await _repository.Get<Vehicle>(t => $"{t.TruckModel}{t.TruckNumber}{t.TrailerModel}{t.TrailerNumber}".Trim(" /_-".ToArray()).ToLower().Contains(formattedName),
+                                                                           q => q.OrderBy(t => t.TruckModel).ThenBy(t => t.TruckNumber).ThenBy(t => t.TrailerNumber), 
+                                                                           "Carrier");
             List<VehicleDto> dtos = new List<VehicleDto>();
 
             foreach (var vehicle in vehicles)

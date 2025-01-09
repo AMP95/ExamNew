@@ -28,7 +28,7 @@ namespace DTOs
                         }
                         break;
                     case nameof(Phones):
-                        if (Phones.Any())
+                        if (Phones != null && Phones.Any())
                         {
                             error = ModelsValidator.IsPhonesValid(Phones);
                         }
@@ -38,7 +38,7 @@ namespace DTOs
                         }
                         break;
                     case nameof(Emails):
-                        if (Emails.Any())
+                        if (Emails != null && Emails.Any())
                         {
                             error = ModelsValidator.IsMailsValid(Emails);
                         }

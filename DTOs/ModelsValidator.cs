@@ -1,4 +1,6 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Numerics;
+using System.Text.RegularExpressions;
+using System.Xml.Linq;
 
 namespace DTOs
 {
@@ -21,7 +23,7 @@ namespace DTOs
         }
         public static string IsTruckNumberValid(string truckNumber) 
         {
-            if (_truck.IsMatch(truckNumber))
+            if (!string.IsNullOrWhiteSpace(truckNumber) && _truck.IsMatch(truckNumber))
             {
                 return string.Empty;
             }
@@ -33,7 +35,7 @@ namespace DTOs
 
         public static string IsTrailerNumberValid(string trailerNumber)
         {
-            if (_trailer.IsMatch(trailerNumber))
+            if (!string.IsNullOrWhiteSpace(trailerNumber) && _trailer.IsMatch(trailerNumber))
             {
                 return string.Empty;
             }
@@ -45,7 +47,7 @@ namespace DTOs
 
         public static string IsNameValid(string name)
         {
-            if (_name.IsMatch(name))
+            if (!string.IsNullOrWhiteSpace(name) && _name.IsMatch(name))
             {
                 return string.Empty;
             }
@@ -71,7 +73,7 @@ namespace DTOs
 
         public static string IsPhoneValid(string phone)
         {
-            if (_phone.IsMatch(phone))
+            if (!string.IsNullOrWhiteSpace(phone) && _phone.IsMatch(phone))
             {
                 return string.Empty;
             }
@@ -83,7 +85,7 @@ namespace DTOs
 
         public static string IsMailValid(string email)
         {
-            if (_mail.IsMatch(email))
+            if (!string.IsNullOrWhiteSpace(email) && _mail.IsMatch(email))
             {
                 return string.Empty;
             }
@@ -108,7 +110,7 @@ namespace DTOs
         }
         public static string IsInnKppValid(string innKpp)
         {
-            if (_innKpp.IsMatch(innKpp))
+            if (!string.IsNullOrWhiteSpace(innKpp) && _innKpp.IsMatch(innKpp))
             {
                 return string.Empty;
             }

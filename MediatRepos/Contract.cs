@@ -108,7 +108,7 @@ namespace MediatorServices
 
         protected override async Task<object> Get(string name)
         {
-            IEnumerable<Contract> contracts = await _repository.Get<Contract>(c => c.Number.ToString().Contains(name), null, "Carrier,Driver,Truck,Trailer");
+            IEnumerable<Contract> contracts = await _repository.Get<Contract>(c => c.Number.ToString().Contains(name), q => q.OrderBy(c => c.CreationDate).ThenBy(c => c.Number), "Carrier,Driver,Truck,Trailer");
             List<ContractDto> dtos = new List<ContractDto>();
 
             foreach (var contract in contracts)
@@ -168,7 +168,7 @@ namespace MediatorServices
             DateTime startDate = DateTime.FromOADate(start);
             DateTime endDate = DateTime.FromOADate(end);
 
-            IEnumerable<Contract> contracts = await _repository.Get<Contract>(c => c.CreationDate >= startDate && c.CreationDate <= endDate , q => q.OrderBy(c => c.CreationDate) , "Carrier,Driver,Truck,Trailer");
+            IEnumerable<Contract> contracts = await _repository.Get<Contract>(c => c.CreationDate >= startDate && c.CreationDate <= endDate , q => q.OrderBy(c => c.CreationDate).ThenBy(c => c.Number), "Carrier,Driver,Truck,Trailer");
             List<ContractDto> dtos = new List<ContractDto>();
 
             foreach (var contract in contracts)

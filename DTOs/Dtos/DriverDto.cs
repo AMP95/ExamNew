@@ -40,7 +40,7 @@ namespace DTOs
                         }
                         break;
                     case nameof(Phones):
-                        if (Phones.Any())
+                        if (Phones != null && Phones.Any())
                         {
                             error = ModelsValidator.IsPhonesValid(Phones);
                         }
