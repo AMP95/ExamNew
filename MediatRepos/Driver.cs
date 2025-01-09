@@ -2,6 +2,7 @@
 using MediatRepos;
 using Microsoft.Extensions.Logging;
 using Models;
+using System.Linq.Expressions;
 
 namespace MediatorServices
 {
@@ -64,6 +65,10 @@ namespace MediatorServices
                         TrailerModel = driver.Vehicle.TrailerModel,
                         TrailerNumber = driver.Vehicle.TrailerNumber,
                     };
+                    if (driver.CarrierId != null) 
+                    {
+                        dto.Vehicle.Carrier = new CarrierDto() { Id = driver.CarrierId.Value };
+                    }
                 }
             }
             return dto;

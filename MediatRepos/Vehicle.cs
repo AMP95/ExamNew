@@ -47,8 +47,8 @@ namespace MediatRepos
 
         protected override async Task<object> Get(Guid id)
         {
-            IEnumerable<Vehicle> vehicles = await _repository.Get<Vehicle>(t => t.CarrierId == id, 
-                                                                           q => q.OrderBy(t => $"{t.TruckModel} {t.TruckNumber} {t.TrailerModel} {t.TrailerNumber}"),
+            IEnumerable<Vehicle> vehicles = await _repository.Get<Vehicle>(t => t.CarrierId == id,
+                                                                           q => q.OrderBy(t => t.TruckModel).ThenBy(t => t.TruckNumber).ThenBy(t => t.TrailerNumber),
                                                                            "Carrier");
             List<VehicleDto> dtos = new List<VehicleDto>();
 
