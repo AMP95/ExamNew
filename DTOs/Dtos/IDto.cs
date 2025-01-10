@@ -1,8 +1,6 @@
-﻿using System.ComponentModel;
-
-namespace DTOs.Dtos
+﻿namespace DTOs.Dtos
 {
-    public interface IDto : IDataErrorInfo
+    public interface IDto
     {
         public Guid Id { get; }
     }
