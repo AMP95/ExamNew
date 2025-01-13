@@ -10,6 +10,7 @@ namespace Models.Sub
         [MaxLength(50)]
         public string Route { get; set; }
         [MaxLength(200)]
+        public DateTime DateAndTime { get; set; }
         public string Address { get; set; }
         public short Side { get; set; }
         public short Type { get; set; }

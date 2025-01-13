@@ -22,6 +22,7 @@ namespace MediatorServices
                 {
                     Id = point.Id,
                     Route = point.Route,
+                    DateAndTime = point.DateAndTime,
                     Address = point.Address,
                     Phones = point.Phones.Split(';').ToList(),
                     Type = (LoadPointType)point.Type,

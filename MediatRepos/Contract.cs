@@ -31,6 +31,7 @@ namespace MediatorServices
                     { 
                         Id = constract.LoadingPoint.Id,
                         Route = constract.LoadingPoint.Route,
+                        DateAndTime = constract.LoadingPoint.DateAndTime,
                         Address = constract.LoadingPoint.Address,
                         Side = (LoadingSide)constract.LoadingPoint.Side,
                         Phones = constract.LoadingPoint.Phones.Split(';').ToList()
@@ -76,6 +77,7 @@ namespace MediatorServices
                     {
                         Id = point.Id,
                         Address = point.Address,
+                        DateAndTime = point.DateAndTime,
                         Route = point.Route,
                         Side = (LoadingSide)point.Side,
                         Type = (LoadPointType)point.Type,
@@ -310,6 +312,7 @@ namespace MediatorServices
                 contract.LoadingPoint = new RoutePoint()
                 {
                     Address = dto.LoadPoint.Address,
+                    DateAndTime = dto.LoadPoint.DateAndTime,
                     Route = dto.LoadPoint.Route,
                     Phones = string.Join(";", dto.LoadPoint.Phones),
                     Type = (short)LoadPointType.Upload,
@@ -322,6 +325,7 @@ namespace MediatorServices
                 contract.UnloadingPoints.Add(new RoutePoint() 
                 { 
                     Address = pointDto.Address,
+                    DateAndTime = pointDto.DateAndTime,
                     Route = pointDto.Route,
                     Side = (short)pointDto.Side,
                     Type = (short)pointDto.Type,
@@ -375,6 +379,7 @@ namespace MediatorServices
                 {
                     Id = Guid.NewGuid(),
                     Address = dto.LoadPoint.Address,
+                    DateAndTime = dto.LoadPoint.DateAndTime,
                     Route = dto.LoadPoint.Route,
                     Phones = string.Join(";", dto.LoadPoint.Phones),
                     Type = (short)LoadPointType.Upload,
@@ -388,6 +393,7 @@ namespace MediatorServices
                 {
                     Id = Guid.NewGuid(),
                     Address = pointDto.Address,
+                    DateAndTime = pointDto.DateAndTime,
                     Route = pointDto.Route,
                     Side = (short)pointDto.Side,
                     Type = (short)pointDto.Type,
