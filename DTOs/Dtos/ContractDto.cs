@@ -21,6 +21,7 @@ namespace DTOs
         public VehicleDto Vehicle { get; set; }
 
         public float Payment { get; set; }
+        public float ClientPayment { get; set; }
         public float Prepayment { get; set; }
         public PaymentPriority PayPriority { get; set; }
         public RecievingType PaymentCondition { get; set; }

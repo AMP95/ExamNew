@@ -158,7 +158,7 @@ namespace Exam.Controllers
         {
             if (jobj != null)
             {
-                return Ok(await _getService.Add(new ContractFilter(name, jobj["params"].ToArray())));
+                return Ok(await _getService.Add(new ContractFilter(name, jobj["param"].ToArray())));
             }
             _logger.LogWarning($"CONTRACT: Recieved null object");
             return BadRequest("Передан пустой параметр");

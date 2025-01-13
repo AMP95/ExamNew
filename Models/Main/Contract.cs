@@ -43,6 +43,7 @@ namespace Models
 
 
         public float Payment { get; set; }
+        public float ClientPayment { get; set; }
         public float Prepayment { get; set; }
         public short PayPriority { get; set; }
         public short PaymentCondition { get; set; }
