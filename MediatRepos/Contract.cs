@@ -39,6 +39,7 @@ namespace MediatorServices
                     Weight = constract.Weight,
                     Payment = constract.Payment,
                     Prepayment = constract.Prepayment,
+                    ClientPayment = constract.ClientPayment,
                     PayPriority = (PaymentPriority)constract.PayPriority,
                     PaymentCondition = (RecievingType)constract.PaymentCondition,
                     Carrier = new CarrierDto() 
@@ -128,6 +129,7 @@ namespace MediatorServices
                     Status = (ContractStatus)contract.Status,
                     Payment = contract.Payment,
                     Prepayment = contract.Prepayment,
+                    ClientPayment = contract.ClientPayment,
                     Carrier = new CarrierDto()
                     {
                         Id = contract.Carrier.Id,
@@ -221,6 +223,7 @@ namespace MediatorServices
                     Status = (ContractStatus)contract.Status,
                     Payment = contract.Payment,
                     Prepayment = contract.Prepayment,
+                    ClientPayment = contract.ClientPayment,
                     Carrier = new CarrierDto()
                     {
                         Id = contract.Carrier.Id,
@@ -282,6 +285,7 @@ namespace MediatorServices
                 CreationDate = dto.CreationDate,
                 Payment = dto.Payment,
                 Prepayment = dto.Prepayment,
+                ClientPayment = dto.ClientPayment,
                 PaymentCondition = (short)dto.PaymentCondition,
                 PayPriority = (short)dto.PayPriority,
                 Status = (short)ContractStatus.Created,
@@ -346,6 +350,7 @@ namespace MediatorServices
 
             contract.Payment = dto.Payment;
             contract.Prepayment = dto.Prepayment;
+            contract.ClientPayment = dto.ClientPayment;
             contract.PaymentCondition = (short)dto.PaymentCondition;
             contract.PayPriority = (short)dto.PayPriority;
             contract.Status = (short)dto.Status;
