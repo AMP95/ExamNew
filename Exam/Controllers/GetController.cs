@@ -1,8 +1,10 @@
-﻿using Exam.BackgroundServices;
+﻿using DTOs;
+using Exam.BackgroundServices;
 using MediatRepos;
 using Microsoft.AspNetCore.Mvc;
 using Models;
 using Models.Sub;
+using Newtonsoft.Json.Linq;
 
 namespace Exam.Controllers
 {
@@ -139,12 +141,7 @@ namespace Exam.Controllers
         {
             return Ok(await _getService.Add(new GetRange<Carrier>(start, end)));
         }
-
-        [HttpGet("contract/range/{start}/{end}")]
-        public virtual async Task<ActionResult> GetContractRange(int start, int end)
-        {
-            return Ok(await _getService.Add(new GetRange<Document>(start, end)));
-        }
+        
 
         [HttpGet("company/range/{start}/{end}")]
         public virtual async Task<ActionResult> GetCompanyRange(int start, int end)
@@ -153,5 +150,20 @@ namespace Exam.Controllers
         }
 
         #endregion Range
+
+        #region Filter
+
+        [HttpPost("contract/filter/{name}")]
+        public virtual async Task<ActionResult> GetContractFilter([FromRoute] string name, [FromBody] JObject jobj)
+        {
+            if (jobj != null)
+            {
+                return Ok(await _getService.Add(new ContractFilter(name, jobj["params"].ToArray())));
+            }
+            _logger.LogWarning($"CONTRACT: Recieved null object");
+            return BadRequest("Передан пустой параметр");
+        }
+
+        #endregion Filter
     }
 }

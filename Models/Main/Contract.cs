@@ -26,6 +26,10 @@ namespace Models
         public Carrier Carrier { get; set; }
 
 
+        [ForeignKey(nameof(Client))]
+        public Guid ClientId { get; set; }
+        public Company Client { get; set; }
+
 
         [ForeignKey(nameof(Driver))]
         public Guid DriverId { get; set; }

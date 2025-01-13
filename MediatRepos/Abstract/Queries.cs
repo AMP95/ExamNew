@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using DTOs;
+using MediatR;
 
 namespace MediatRepos
 {
@@ -59,6 +60,18 @@ namespace MediatRepos
         public Search(string name)
         {
             Name = name;
+        }
+    }
+
+    public class ContractFilter : IRequest<object>
+    {
+        public ContractFilterProperty FilterName { get; set; }
+        public object[] Params { get; set; }
+
+        public ContractFilter(string filterName, params object[] parameters)
+        {
+            FilterName = (ContractFilterProperty)Enum.Parse(typeof(ContractFilterProperty), filterName);
+            Params = parameters;
         }
     }
 

@@ -1,8 +1,10 @@
 ﻿using DTOs;
+using MediatR;
 using MediatRepos;
 using Microsoft.Extensions.Logging;
 using Models;
 using Models.Sub;
+using System.Linq.Expressions;
 
 namespace MediatorServices
 {
@@ -157,18 +159,51 @@ namespace MediatorServices
         }
     }
 
-    public class GetRangeContractService : GetRangeModelService<Contract>
+    public class GetFilteredContractService : IRequestHandler<ContractFilter, object>
     {
-        public GetRangeContractService(IRepository repository, ILogger<GetRangeModelService<Contract>> logger) : base(repository, logger)
+        protected IRepository _repository;
+        protected ILogger<GetFilteredContractService> _logger;
+        public GetFilteredContractService(IRepository repository, ILogger<GetFilteredContractService> logger)
         {
+            _repository = repository;
+            _logger = logger;
         }
-
-        protected override async Task<object> Get(int start, int end)
+        public async Task<object> Handle(ContractFilter request, CancellationToken cancellationToken)
         {
-            DateTime startDate = DateTime.FromOADate(start);
-            DateTime endDate = DateTime.FromOADate(end);
+            Expression<Func<Contract, bool>> filter = null;
+            switch (request.FilterName) 
+            {
+                case ContractFilterProperty.Date:
+                    DateTime.TryParse(request.Params[0].ToString(), out DateTime start);
+                    DateTime.TryParse(request.Params[1].ToString(), out DateTime end);
+                    filter = c => c.CreationDate >= start && c.CreationDate <= end;
+                    break;
+                case ContractFilterProperty.Route:
+                    string route = request.Params[0].ToString();
+                    filter = c => c.LoadingPoint.Route.Contains(route) || c.UnloadingPoints.Any(p => p.Route.Contains(route));
+                    break;
+                case ContractFilterProperty.Client:
+                    string client = request.Params[0].ToString();
+                    filter = c => c.Client.Name.Contains(client);
+                    break;
+                case ContractFilterProperty.Carrier:
+                    string carrier = request.Params[0].ToString();
+                    filter = c => c.Carrier.Name.Contains(carrier);
+                    break;
+                case ContractFilterProperty.Driver:
+                    string driver = request.Params[0].ToString();
+                    filter = c => $"{c.Driver.FamilyName} {c.Driver.Name} {c.Driver.FatherName}".Contains(driver);
+                    break;
+                case ContractFilterProperty.Status:
+                    ContractStatus status = (ContractStatus)Enum.Parse(typeof(ContractStatus),request.Params[0].ToString());
+                    filter = c => c.Status == (int)status;
+                    break;
+                default: 
+                    filter = c => true; 
+                    break;
+            }
 
-            IEnumerable<Contract> contracts = await _repository.Get<Contract>(c => c.CreationDate >= startDate && c.CreationDate <= endDate , q => q.OrderBy(c => c.CreationDate).ThenBy(c => c.Number), "Carrier,Driver,Truck,Trailer");
+            IEnumerable<Contract> contracts = await _repository.Get(filter, q => q.OrderBy(c => c.CreationDate).ThenBy(c => c.Number), "Carrier,Driver,Truck,Trailer");
             List<ContractDto> dtos = new List<ContractDto>();
 
             foreach (var contract in contracts)
@@ -204,7 +239,7 @@ namespace MediatorServices
                         TruckModel = contract.Vehicle.TruckModel,
                         TruckNumber = contract.Vehicle.TruckNumber,
                         TrailerModel = contract.Vehicle.TrailerModel,
-                        TrailerNumber = contract.Vehicle.TrailerNumber, 
+                        TrailerNumber = contract.Vehicle.TrailerNumber,
                     },
                     UnloadPoints = new List<RoutePointDto>()
                 };
@@ -222,6 +257,7 @@ namespace MediatorServices
             }
 
             return dtos;
+
         }
     }
 
