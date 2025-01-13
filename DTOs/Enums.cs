@@ -24,8 +24,6 @@ namespace DTOs
         Route,
         [Description("Статус")]
         Status,
-        [Description("Заказчик")]
-        Client,
         [Description("Перевозчик")]
         Carrier,
         [Description("Водитель")]

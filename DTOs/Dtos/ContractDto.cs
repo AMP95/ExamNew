@@ -16,7 +16,6 @@ namespace DTOs
         public float Volume { get; set; }
 
         public CarrierDto Carrier { get; set; }
-        public CompanyDto Client { get; set; }
         public DriverDto Driver { get; set; }
         public VehicleDto Vehicle { get; set; }
 
@@ -26,7 +25,5 @@ namespace DTOs
         public PaymentPriority PayPriority { get; set; }
         public RecievingType PaymentCondition { get; set; }
         public List<DocumentDto> Documents { get; set; }
-
-        
     }
 }

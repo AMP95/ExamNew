@@ -184,10 +184,6 @@ namespace MediatorServices
                     string route = request.Params[0].ToString();
                     filter = c => c.LoadingPoint.Route.Contains(route) || c.UnloadingPoints.Any(p => p.Route.Contains(route));
                     break;
-                case ContractFilterProperty.Client:
-                    string client = request.Params[0].ToString();
-                    filter = c => c.Client.Name.Contains(client);
-                    break;
                 case ContractFilterProperty.Carrier:
                     string carrier = request.Params[0].ToString();
                     filter = c => c.Carrier.Name.Contains(carrier);

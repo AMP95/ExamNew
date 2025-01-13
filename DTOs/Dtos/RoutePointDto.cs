@@ -5,6 +5,7 @@ namespace DTOs
     public class RoutePointDto : IDto
     {
         public Guid Id { get; set; }
+        public string Company { get; set; }
         public string Route { get; set; }
         public string Address { get; set; }
         public LoadingSide Side { get; set; }
