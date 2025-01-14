@@ -289,6 +289,16 @@ namespace MediatorServices
                 Status = (short)ContractStatus.Created,
                 Weight = dto.Weight,
                 Volume = dto.Volume,
+                LoadingPoint = new RoutePoint()
+                {
+                    Address = dto.LoadPoint.Address,
+                    Company = dto.LoadPoint.Company,
+                    DateAndTime = dto.LoadPoint.DateAndTime,
+                    Route = dto.LoadPoint.Route,
+                    Phones = string.Join(";", dto.LoadPoint.Phones),
+                    Type = (short)LoadPointType.Upload,
+                    Side = (short)dto.LoadPoint.Side
+                },
                 UnloadingPoints = new List<RoutePoint>()
             };
 
@@ -300,26 +310,6 @@ namespace MediatorServices
 
             Vehicle truck = await _repository.GetById<Vehicle>(dto.Vehicle.Id);
             contract.Vehicle = truck;
-
-            IEnumerable<RoutePoint> loads = await _repository.Get<RoutePoint>(p => p.Address == dto.LoadPoint.Address && p.Side == (short)dto.LoadPoint.Side);
-
-            if (loads.Any())
-            {
-                contract.LoadingPoint = loads.First();
-            }
-            else 
-            {
-                contract.LoadingPoint = new RoutePoint()
-                {
-                    Address = dto.LoadPoint.Address,
-                    Company = dto.LoadPoint.Company,
-                    DateAndTime = dto.LoadPoint.DateAndTime,
-                    Route = dto.LoadPoint.Route,
-                    Phones = string.Join(";", dto.LoadPoint.Phones),
-                    Type = (short)LoadPointType.Upload,
-                    Side = (short)dto.LoadPoint.Side
-                };
-            }
 
             foreach (RoutePointDto pointDto in dto.UnloadPoints) 
             {
