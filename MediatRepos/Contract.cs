@@ -312,6 +312,7 @@ namespace MediatorServices
                 contract.LoadingPoint = new RoutePoint()
                 {
                     Address = dto.LoadPoint.Address,
+                    Company = dto.LoadPoint.Company,
                     DateAndTime = dto.LoadPoint.DateAndTime,
                     Route = dto.LoadPoint.Route,
                     Phones = string.Join(";", dto.LoadPoint.Phones),
@@ -325,6 +326,7 @@ namespace MediatorServices
                 contract.UnloadingPoints.Add(new RoutePoint() 
                 { 
                     Address = pointDto.Address,
+                    Company = pointDto.Company,
                     DateAndTime = pointDto.DateAndTime,
                     Route = pointDto.Route,
                     Side = (short)pointDto.Side,
