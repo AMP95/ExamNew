@@ -2,7 +2,6 @@
 using MediatRepos;
 using Microsoft.Extensions.Logging;
 using Models;
-using System.Linq.Expressions;
 
 namespace MediatorServices
 {
@@ -93,7 +92,7 @@ namespace MediatorServices
                 DriverDto dto = new DriverDto()
                 {
                     Id = driver.Id,
-                    Name = $"{driver.FamilyName} {driver.Name} {driver.FamilyName}"
+                    Name = $"{driver.FamilyName} {driver.Name} {driver.FatherName}"
                 };
 
                 if (driver.Carrier != null) 
@@ -132,7 +131,7 @@ namespace MediatorServices
 
         protected override async Task<object> Get(string name)
         {
-            IEnumerable<Driver> drivers = await _repository.Get<Driver>(d => d.FamilyName.ToLower().Contains(name.ToLower()), 
+            IEnumerable<Driver> drivers = await _repository.Get<Driver>(d => (d.FamilyName+d.Name+d.FatherName).ToLower().Contains(name.ToLower()), 
                                                                         q => q.OrderBy(d => d.FamilyName).ThenBy(d => d.Name).ThenBy(d => d.FatherName), 
                                                                         "Carrier,Vehicle");
             List<DriverDto> dtos = new List<DriverDto>();
@@ -142,7 +141,7 @@ namespace MediatorServices
                 DriverDto dto = new DriverDto()
                 {
                     Id = driver.Id,
-                    Name = $"{driver.FamilyName} {driver.Name} {driver.FamilyName}"
+                    Name = $"{driver.FamilyName} {driver.Name} {driver.FatherName}"
                 };
 
                 if (driver.Carrier != null)

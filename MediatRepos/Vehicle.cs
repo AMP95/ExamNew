@@ -127,9 +127,9 @@ namespace MediatRepos
 
         protected override async Task<object> Get(string name)
         {
-            string formattedName = name.Trim(" /_-".ToArray()).ToLower();
+            string formattedName = name.Replace(" ","").Replace("/","").ToLower();
 
-            IEnumerable<Vehicle> vehicles = await _repository.Get<Vehicle>(t => $"{t.TruckModel}{t.TruckNumber}{t.TrailerModel}{t.TrailerNumber}".Trim(" /_-".ToArray()).ToLower().Contains(formattedName),
+            IEnumerable<Vehicle> vehicles = await _repository.Get<Vehicle>(t => (t.TruckNumber + t.TrailerNumber).Replace("/", "").Replace(" ", "").ToLower().Contains(formattedName),
                                                                            q => q.OrderBy(t => t.TruckModel).ThenBy(t => t.TruckNumber).ThenBy(t => t.TrailerNumber), 
                                                                            "Carrier");
             List<VehicleDto> dtos = new List<VehicleDto>();
