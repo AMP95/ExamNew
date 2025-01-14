@@ -150,7 +150,8 @@ namespace MediatorServices
                     dto.Carrier = new CarrierDto()
                     {
                         Id = driver.Carrier.Id,
-                        Name = driver.Carrier.Name
+                        Name = driver.Carrier.Name,
+                        Vat = (VAT)driver.Carrier.Vat,
                     };
                 }
 
