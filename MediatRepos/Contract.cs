@@ -16,7 +16,7 @@ namespace MediatorServices
 
         protected override async Task<object> Get(Guid id)
         {
-            IEnumerable<Contract> contracts = await _repository.Get<Contract>(t => t.Id == id, null, "Carrier,Driver,Vehicle,Documents");
+            IEnumerable<Contract> contracts = await _repository.Get<Contract>(t => t.Id == id, null, "Carrier,Driver,Vehicle,LoadingPoint,UnloadingPoints,Documents");
             ContractDto dto = null;
             if (contracts.Any())
             {
@@ -30,6 +30,7 @@ namespace MediatorServices
                     LoadPoint = new RoutePointDto() 
                     { 
                         Id = constract.LoadingPoint.Id,
+                        Company = constract.LoadingPoint.Company,
                         Route = constract.LoadingPoint.Route,
                         DateAndTime = constract.LoadingPoint.DateAndTime,
                         Address = constract.LoadingPoint.Address,
@@ -77,6 +78,7 @@ namespace MediatorServices
                     {
                         Id = point.Id,
                         Address = point.Address,
+                        Company = point.Company,
                         DateAndTime = point.DateAndTime,
                         Route = point.Route,
                         Side = (LoadingSide)point.Side,
@@ -85,20 +87,20 @@ namespace MediatorServices
                     });
                 }
 
-                foreach (Document document in constract.Documents)
-                {
-                    dto.Documents.Add(new DocumentDto()
-                    {
-                        Id = document.Id,
-                        Type = (DocumentType)document.DocumentType,
-                        Summ = document.Summ,
-                        CreationDate = document.CreationDate,
-                        RecievingDate = document.RecievingDate,
-                        Number = document.Number,
-                        Direction = (DocumentDirection)document.DocumentDirection,
-                        RecieveType = (RecievingType)document.RecieveType
-                    });
-                }
+                //foreach (Document document in constract.Documents)
+                //{
+                //    dto.Documents.Add(new DocumentDto()
+                //    {
+                //        Id = document.Id,
+                //        Type = (DocumentType)document.DocumentType,
+                //        Summ = document.Summ,
+                //        CreationDate = document.CreationDate,
+                //        RecievingDate = document.RecievingDate,
+                //        Number = document.Number,
+                //        Direction = (DocumentDirection)document.DocumentDirection,
+                //        RecieveType = (RecievingType)document.RecieveType
+                //    });
+                //}
 
             }
             return dto;
@@ -113,7 +115,7 @@ namespace MediatorServices
 
         protected override async Task<object> Get(string name)
         {
-            IEnumerable<Contract> contracts = await _repository.Get<Contract>(c => c.Number.ToString().Contains(name), q => q.OrderBy(c => c.CreationDate).ThenBy(c => c.Number), "Carrier,Driver,Truck,Trailer");
+            IEnumerable<Contract> contracts = await _repository.Get<Contract>(c => c.Number.ToString().Contains(name), q => q.OrderBy(c => c.CreationDate).ThenBy(c => c.Number), "Carrier,Driver,Vehicle,LoadingPoint,UnloadingPoints");
             List<ContractDto> dtos = new List<ContractDto>();
 
             foreach (var contract in contracts)
@@ -203,7 +205,7 @@ namespace MediatorServices
                     break;
             }
 
-            IEnumerable<Contract> contracts = await _repository.Get(filter, q => q.OrderBy(c => c.CreationDate).ThenBy(c => c.Number), "Carrier,Driver,Truck,Trailer");
+            IEnumerable<Contract> contracts = await _repository.Get(filter, q => q.OrderBy(c => c.CreationDate).ThenBy(c => c.Number), "Carrier,Driver,Vehicle,LoadingPoint,UnloadingPoints");
             List<ContractDto> dtos = new List<ContractDto>();
 
             foreach (var contract in contracts)
@@ -242,17 +244,8 @@ namespace MediatorServices
                         TrailerModel = contract.Vehicle.TrailerModel,
                         TrailerNumber = contract.Vehicle.TrailerNumber,
                     },
-                    UnloadPoints = new List<RoutePointDto>()
+                    UnloadPoints = contract.UnloadingPoints.Select(s => new RoutePointDto() { Id = s.Id, Route = s.Route }).ToList()
                 };
-
-                foreach (RoutePoint point in contract.UnloadingPoints)
-                {
-                    dto.UnloadPoints.Add(new RoutePointDto()
-                    {
-                        Id = point.Id,
-                        Route = point.Route,
-                    });
-                }
 
                 dtos.Add(dto);
             }

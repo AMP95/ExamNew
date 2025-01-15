@@ -55,7 +55,7 @@ namespace Exam.Controllers
         [HttpGet("contract/id/{id}")]
         public virtual async Task<ActionResult> GetContract(Guid id)
         {
-            return Ok(await _getService.Add(new GetId<Document>(id)));
+            return Ok(await _getService.Add(new GetId<Contract>(id)));
         }
 
         [HttpGet("route/id/{id}")]

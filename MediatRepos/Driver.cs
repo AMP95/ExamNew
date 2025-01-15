@@ -189,7 +189,7 @@ namespace MediatorServices
                 DriverDto dto = new DriverDto()
                 {
                     Id = driver.Id,
-                    Name = $"{driver.FamilyName} {driver.Name} {driver.FamilyName}"
+                    Name = $"{driver.FamilyName} {driver.Name} {driver.FatherName}"
                 };
 
                 if (driver.Carrier != null)
