@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DAL.Migrations
 {
     [DbContext(typeof(Context))]
-    [Migration("20250113155709_Add_datetime_in_route")]
-    partial class Add_datetime_in_route
+    [Migration("20250115171354_Initial_new")]
+    partial class Initial_new
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,7 +25,46 @@ namespace DAL.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("Models.Company", b =>
+            modelBuilder.Entity("Models.Carrier", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Emails")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("InnKpp")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Phones")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<short>("Vat")
+                        .HasColumnType("smallint");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Carrier");
+                });
+
+            modelBuilder.Entity("Models.Client", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -58,12 +97,7 @@ namespace DAL.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Name")
-                        .IsUnique();
-
-                    b.ToTable("Companies");
-
-                    b.UseTptMappingStrategy();
+                    b.ToTable("Client");
                 });
 
             modelBuilder.Entity("Models.Contract", b =>
@@ -73,6 +107,21 @@ namespace DAL.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("CarrierId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<short>("CarrierPayPriority")
+                        .HasColumnType("smallint");
+
+                    b.Property<float>("CarrierPayment")
+                        .HasColumnType("real");
+
+                    b.Property<short>("CarrierPaymentCondition")
+                        .HasColumnType("smallint");
+
+                    b.Property<float>("CarrierPrepayment")
+                        .HasColumnType("real");
+
+                    b.Property<Guid>("ClientId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<float>("ClientPayment")
@@ -90,18 +139,6 @@ namespace DAL.Migrations
                     b.Property<short>("Number")
                         .HasColumnType("smallint");
 
-                    b.Property<short>("PayPriority")
-                        .HasColumnType("smallint");
-
-                    b.Property<float>("Payment")
-                        .HasColumnType("real");
-
-                    b.Property<short>("PaymentCondition")
-                        .HasColumnType("smallint");
-
-                    b.Property<float>("Prepayment")
-                        .HasColumnType("real");
-
                     b.Property<short>("Status")
                         .HasColumnType("smallint");
 
@@ -117,6 +154,8 @@ namespace DAL.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CarrierId");
+
+                    b.HasIndex("ClientId");
 
                     b.HasIndex("DriverId");
 
@@ -225,6 +264,35 @@ namespace DAL.Migrations
                     b.ToTable("Drivers");
                 });
 
+            modelBuilder.Entity("Models.Payment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ContractId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreationDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<short>("DocumentDirection")
+                        .HasColumnType("smallint");
+
+                    b.Property<string>("Number")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<float>("Summ")
+                        .HasColumnType("real");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ContractId");
+
+                    b.ToTable("Payment");
+                });
+
             modelBuilder.Entity("Models.Sub.RoutePoint", b =>
                 {
                     b.Property<Guid>("Id")
@@ -267,7 +335,7 @@ namespace DAL.Migrations
 
                     b.HasIndex("ContractId");
 
-                    b.ToTable("RoutePoints");
+                    b.ToTable("RoutePoint");
                 });
 
             modelBuilder.Entity("Models.Vehicle", b =>
@@ -309,21 +377,17 @@ namespace DAL.Migrations
                     b.ToTable("Vehicles");
                 });
 
-            modelBuilder.Entity("Models.Carrier", b =>
-                {
-                    b.HasBaseType("Models.Company");
-
-                    b.Property<short>("Vat")
-                        .HasColumnType("smallint");
-
-                    b.ToTable("Carrier");
-                });
-
             modelBuilder.Entity("Models.Contract", b =>
                 {
                     b.HasOne("Models.Carrier", "Carrier")
                         .WithMany("Contracts")
                         .HasForeignKey("CarrierId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Models.Client", "Client")
+                        .WithMany()
+                        .HasForeignKey("ClientId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -346,6 +410,8 @@ namespace DAL.Migrations
                         .IsRequired();
 
                     b.Navigation("Carrier");
+
+                    b.Navigation("Client");
 
                     b.Navigation("Driver");
 
@@ -380,6 +446,17 @@ namespace DAL.Migrations
                     b.Navigation("Vehicle");
                 });
 
+            modelBuilder.Entity("Models.Payment", b =>
+                {
+                    b.HasOne("Models.Contract", "Contract")
+                        .WithMany("Payments")
+                        .HasForeignKey("ContractId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Contract");
+                });
+
             modelBuilder.Entity("Models.Sub.RoutePoint", b =>
                 {
                     b.HasOne("Models.Contract", null)
@@ -398,27 +475,20 @@ namespace DAL.Migrations
 
             modelBuilder.Entity("Models.Carrier", b =>
                 {
-                    b.HasOne("Models.Company", null)
-                        .WithOne()
-                        .HasForeignKey("Models.Carrier", "Id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Navigation("Contracts");
+
+                    b.Navigation("Drivers");
+
+                    b.Navigation("Vehicles");
                 });
 
             modelBuilder.Entity("Models.Contract", b =>
                 {
                     b.Navigation("Documents");
 
+                    b.Navigation("Payments");
+
                     b.Navigation("UnloadingPoints");
-                });
-
-            modelBuilder.Entity("Models.Carrier", b =>
-                {
-                    b.Navigation("Contracts");
-
-                    b.Navigation("Drivers");
-
-                    b.Navigation("Vehicles");
                 });
 #pragma warning restore 612, 618
         }

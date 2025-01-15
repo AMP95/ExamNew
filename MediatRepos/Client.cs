@@ -5,20 +5,20 @@ using Models;
 
 namespace MediatorServices
 {
-    public class GetIdCompanyService : GetIdModelService<Company>
+    public class GetIdClientService : GetIdModelService<Client>
     {
-        public GetIdCompanyService(IRepository repository, ILogger<GetIdModelService<Company>> logger) : base(repository, logger)
+        public GetIdClientService(IRepository repository, ILogger<GetIdModelService<Client>> logger) : base(repository, logger)
         {
         }
 
         protected override async Task<object> Get(Guid id)
         {
-            Company company = await _repository.GetById<Company>(id);
-            CompanyDto dto = null;
+            Client company = await _repository.GetById<Client>(id);
+            ClientDto dto = null;
 
             if (company != null)
             {
-                dto = new CompanyDto()
+                dto = new ClientDto()
                 {
                     Id = company.Id,
                     Name = company.Name,
@@ -32,20 +32,20 @@ namespace MediatorServices
         }
     }
 
-    public class SearchCompanyService : SearchModelService<Company>
+    public class SearchClientService : SearchModelService<Client>
     {
-        public SearchCompanyService(IRepository repository, ILogger<SearchModelService<Company>> logger) : base(repository, logger)
+        public SearchClientService(IRepository repository, ILogger<SearchModelService<Client>> logger) : base(repository, logger)
         {
         }
 
         protected override async Task<object> Get(string name)
         {
-            IEnumerable<Company> carriers = await _repository.Get<Company>(c => c.Name.ToLower().Contains(name.ToLower()));
-            List<CompanyDto> dtos = new List<CompanyDto>();
+            IEnumerable<Client> carriers = await _repository.Get<Client>(c => c.Name.ToLower().Contains(name.ToLower()));
+            List<ClientDto> dtos = new List<ClientDto>();
 
             foreach (var carrier in carriers)
             {
-                dtos.Add(new CompanyDto()
+                dtos.Add(new ClientDto()
                 {
                     Id = carrier.Id,
                     Name = carrier.Name,
@@ -60,20 +60,20 @@ namespace MediatorServices
         }
     }
 
-    public class GetRangeCompanyService : GetRangeModelService<Company>
+    public class GetRangeClientService : GetRangeModelService<Client>
     {
-        public GetRangeCompanyService(IRepository repository, ILogger<GetRangeModelService<Company>> logger) : base(repository, logger)
+        public GetRangeClientService(IRepository repository, ILogger<GetRangeModelService<Client>> logger) : base(repository, logger)
         {
         }
 
         protected override async Task<object> Get(int start, int end)
         {
-            IEnumerable<Company> carriers = await _repository.GetRange<Company>(start, end, q => q.OrderBy(c => c.Name));
-            List<CompanyDto> dtos = new List<CompanyDto>();
+            IEnumerable<Client> carriers = await _repository.GetRange<Client>(start, end, q => q.OrderBy(c => c.Name));
+            List<ClientDto> dtos = new List<ClientDto>();
 
             foreach (var carrier in carriers)
             {
-                dtos.Add(new CompanyDto()
+                dtos.Add(new ClientDto()
                 {
                     Id = carrier.Id,
                     Name = carrier.Name,
@@ -88,22 +88,22 @@ namespace MediatorServices
         }
     }
 
-    public class DeleteCompanyService : DeleteModelService<Company>
+    public class DeleteClientService : DeleteModelService<Client>
     {
-        public DeleteCompanyService(IRepository repository) : base(repository)
+        public DeleteClientService(IRepository repository) : base(repository)
         {
         }
     }
 
-    public class AddCompanyService : AddModelService<CompanyDto>
+    public class AddClientService : AddModelService<ClientDto>
     {
-        public AddCompanyService(IRepository repository) : base(repository)
+        public AddClientService(IRepository repository) : base(repository)
         {
         }
 
-        protected override async Task<bool> Update(CompanyDto dto)
+        protected override async Task<bool> Update(ClientDto dto)
         {
-            Company company = new Company()
+            Client company = new Client()
             {
                 Name = dto.Name,
                 Address = dto.Address,
@@ -116,15 +116,15 @@ namespace MediatorServices
         }
     }
 
-    public class UpdateCompanyService : UpdateModelService<CompanyDto>
+    public class UpdateClientService : UpdateModelService<ClientDto>
     {
-        public UpdateCompanyService(IRepository repository) : base(repository)
+        public UpdateClientService(IRepository repository) : base(repository)
         {
         }
 
-        protected override async Task<bool> Update(CompanyDto dto)
+        protected override async Task<bool> Update(ClientDto dto)
         {
-            Company company = await _repository.GetById<Company>(dto.Id);
+            Client company = await _repository.GetById<Client>(dto.Id);
 
             company.Name = dto.Name;
             company.Address = dto.Address;

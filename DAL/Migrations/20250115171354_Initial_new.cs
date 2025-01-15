@@ -6,13 +6,30 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace DAL.Migrations
 {
     /// <inheritdoc />
-    public partial class Initial : Migration
+    public partial class Initial_new : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Companies",
+                name: "Carrier",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Vat = table.Column<short>(type: "smallint", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    InnKpp = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Address = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    Phones = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    Emails = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Carrier", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Client",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -24,25 +41,7 @@ namespace DAL.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Companies", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Carrier",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Vat = table.Column<short>(type: "smallint", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Carrier", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Carrier_Companies_Id",
-                        column: x => x.Id,
-                        principalTable: "Companies",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                    table.PrimaryKey("PK_Client", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -109,12 +108,14 @@ namespace DAL.Migrations
                     Weight = table.Column<float>(type: "real", nullable: false),
                     Volume = table.Column<float>(type: "real", nullable: false),
                     CarrierId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ClientId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     DriverId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     VehicleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Payment = table.Column<float>(type: "real", nullable: false),
-                    Prepayment = table.Column<float>(type: "real", nullable: false),
-                    PayPriority = table.Column<short>(type: "smallint", nullable: false),
-                    PaymentCondition = table.Column<short>(type: "smallint", nullable: false)
+                    CarrierPayment = table.Column<float>(type: "real", nullable: false),
+                    CarrierPrepayment = table.Column<float>(type: "real", nullable: false),
+                    CarrierPayPriority = table.Column<short>(type: "smallint", nullable: false),
+                    CarrierPaymentCondition = table.Column<short>(type: "smallint", nullable: false),
+                    ClientPayment = table.Column<float>(type: "real", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -124,19 +125,25 @@ namespace DAL.Migrations
                         column: x => x.CarrierId,
                         principalTable: "Carrier",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Contracts_Client_ClientId",
+                        column: x => x.ClientId,
+                        principalTable: "Client",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Contracts_Drivers_DriverId",
                         column: x => x.DriverId,
                         principalTable: "Drivers",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Contracts_Vehicles_VehicleId",
                         column: x => x.VehicleId,
                         principalTable: "Vehicles",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -145,11 +152,11 @@ namespace DAL.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     DocumentType = table.Column<short>(type: "smallint", nullable: false),
-                    DocumentDirection = table.Column<short>(type: "smallint", nullable: false),
-                    CreationDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     RecieveType = table.Column<short>(type: "smallint", nullable: false),
                     RecievingDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Number = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreationDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    DocumentDirection = table.Column<short>(type: "smallint", nullable: false),
                     Summ = table.Column<float>(type: "real", nullable: false),
                     ContractId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
@@ -161,16 +168,40 @@ namespace DAL.Migrations
                         column: x => x.ContractId,
                         principalTable: "Contracts",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "RoutePoints",
+                name: "Payment",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Number = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreationDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    DocumentDirection = table.Column<short>(type: "smallint", nullable: false),
+                    Summ = table.Column<float>(type: "real", nullable: false),
+                    ContractId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Payment", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Payment_Contracts_ContractId",
+                        column: x => x.ContractId,
+                        principalTable: "Contracts",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "RoutePoint",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Company = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     Route = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    Address = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    DateAndTime = table.Column<DateTime>(type: "datetime2", maxLength: 200, nullable: false),
+                    Address = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Side = table.Column<short>(type: "smallint", nullable: false),
                     Type = table.Column<short>(type: "smallint", nullable: false),
                     Phones = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
@@ -178,24 +209,23 @@ namespace DAL.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_RoutePoints", x => x.Id);
+                    table.PrimaryKey("PK_RoutePoint", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_RoutePoints_Contracts_ContractId",
+                        name: "FK_RoutePoint_Contracts_ContractId",
                         column: x => x.ContractId,
                         principalTable: "Contracts",
                         principalColumn: "Id");
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Companies_Name",
-                table: "Companies",
-                column: "Name",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Contracts_CarrierId",
                 table: "Contracts",
                 column: "CarrierId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Contracts_ClientId",
+                table: "Contracts",
+                column: "ClientId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Contracts_DriverId",
@@ -234,8 +264,13 @@ namespace DAL.Migrations
                 column: "VehicleId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_RoutePoints_ContractId",
-                table: "RoutePoints",
+                name: "IX_Payment_ContractId",
+                table: "Payment",
+                column: "ContractId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RoutePoint_ContractId",
+                table: "RoutePoint",
                 column: "ContractId");
 
             migrationBuilder.CreateIndex(
@@ -250,21 +285,17 @@ namespace DAL.Migrations
                 unique: true);
 
             migrationBuilder.AddForeignKey(
-                name: "FK_Contracts_RoutePoints_LoadingPointId",
+                name: "FK_Contracts_RoutePoint_LoadingPointId",
                 table: "Contracts",
                 column: "LoadingPointId",
-                principalTable: "RoutePoints",
+                principalTable: "RoutePoint",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Restrict);
+                onDelete: ReferentialAction.Cascade);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_Carrier_Companies_Id",
-                table: "Carrier");
-
             migrationBuilder.DropForeignKey(
                 name: "FK_Contracts_Carrier_CarrierId",
                 table: "Contracts");
@@ -278,27 +309,34 @@ namespace DAL.Migrations
                 table: "Vehicles");
 
             migrationBuilder.DropForeignKey(
+                name: "FK_Contracts_Client_ClientId",
+                table: "Contracts");
+
+            migrationBuilder.DropForeignKey(
                 name: "FK_Contracts_Drivers_DriverId",
                 table: "Contracts");
 
             migrationBuilder.DropForeignKey(
-                name: "FK_Contracts_RoutePoints_LoadingPointId",
+                name: "FK_Contracts_RoutePoint_LoadingPointId",
                 table: "Contracts");
 
             migrationBuilder.DropTable(
                 name: "Document");
 
             migrationBuilder.DropTable(
-                name: "Companies");
+                name: "Payment");
 
             migrationBuilder.DropTable(
                 name: "Carrier");
 
             migrationBuilder.DropTable(
+                name: "Client");
+
+            migrationBuilder.DropTable(
                 name: "Drivers");
 
             migrationBuilder.DropTable(
-                name: "RoutePoints");
+                name: "RoutePoint");
 
             migrationBuilder.DropTable(
                 name: "Contracts");

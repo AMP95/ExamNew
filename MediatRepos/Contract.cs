@@ -16,7 +16,7 @@ namespace MediatorServices
 
         protected override async Task<object> Get(Guid id)
         {
-            IEnumerable<Contract> contracts = await _repository.Get<Contract>(t => t.Id == id, null, "Carrier,Driver,Vehicle,LoadingPoint,UnloadingPoints,Documents");
+            IEnumerable<Contract> contracts = await _repository.Get<Contract>(t => t.Id == id, null, "Carrier,Client,Driver,Vehicle,LoadingPoint,UnloadingPoints,Documents");
             ContractDto dto = null;
             if (contracts.Any())
             {
@@ -39,16 +39,21 @@ namespace MediatorServices
                     },
                     Volume = constract.Volume,
                     Weight = constract.Weight,
-                    Payment = constract.Payment,
-                    Prepayment = constract.Prepayment,
+                    Payment = constract.CarrierPayment,
+                    Prepayment = constract.CarrierPrepayment,
                     ClientPayment = constract.ClientPayment,
-                    PayPriority = (PaymentPriority)constract.PayPriority,
-                    PaymentCondition = (RecievingType)constract.PaymentCondition,
+                    PayPriority = (PaymentPriority)constract.CarrierPayPriority,
+                    PaymentCondition = (RecievingType)constract.CarrierPaymentCondition,
                     Carrier = new CarrierDto() 
                     { 
                         Id = constract.Carrier.Id,
                         Name = constract.Carrier.Name,
                         Vat = (VAT)constract.Carrier.Vat
+                    },
+                    Client = new ClientDto() 
+                    { 
+                        Id = constract.Client.Id,
+                        Name = constract.Client.Name,
                     },
                     Driver = new DriverDto() 
                     { 
@@ -86,22 +91,6 @@ namespace MediatorServices
                         Phones = point.Phones.Split(';').ToList(),
                     });
                 }
-
-                //foreach (Document document in constract.Documents)
-                //{
-                //    dto.Documents.Add(new DocumentDto()
-                //    {
-                //        Id = document.Id,
-                //        Type = (DocumentType)document.DocumentType,
-                //        Summ = document.Summ,
-                //        CreationDate = document.CreationDate,
-                //        RecievingDate = document.RecievingDate,
-                //        Number = document.Number,
-                //        Direction = (DocumentDirection)document.DocumentDirection,
-                //        RecieveType = (RecievingType)document.RecieveType
-                //    });
-                //}
-
             }
             return dto;
         }
@@ -115,7 +104,7 @@ namespace MediatorServices
 
         protected override async Task<object> Get(string name)
         {
-            IEnumerable<Contract> contracts = await _repository.Get<Contract>(c => c.Number.ToString().Contains(name), q => q.OrderBy(c => c.CreationDate).ThenBy(c => c.Number), "Carrier,Driver,Vehicle,LoadingPoint,UnloadingPoints");
+            IEnumerable<Contract> contracts = await _repository.Get<Contract>(c => c.Number.ToString().Contains(name), q => q.OrderBy(c => c.CreationDate).ThenBy(c => c.Number), "Carrier,Client,Driver,Vehicle,LoadingPoint,UnloadingPoints");
             List<ContractDto> dtos = new List<ContractDto>();
 
             foreach (var contract in contracts)
@@ -131,14 +120,19 @@ namespace MediatorServices
                         Route = contract.LoadingPoint.Route,
                     },
                     Status = (ContractStatus)contract.Status,
-                    Payment = contract.Payment,
-                    Prepayment = contract.Prepayment,
+                    Payment = contract.CarrierPayment,
+                    Prepayment = contract.CarrierPrepayment,
                     ClientPayment = contract.ClientPayment,
                     Carrier = new CarrierDto()
                     {
                         Id = contract.Carrier.Id,
                         Name = contract.Carrier.Name,
                         Vat = (VAT)contract.Carrier.Vat,
+                    },
+                    Client = new ClientDto() 
+                    {
+                        Id = contract.Carrier.Id,
+                        Name = contract.Client.Name,
                     },
                     Driver = new DriverDto()
                     {
@@ -200,12 +194,16 @@ namespace MediatorServices
                     ContractStatus status = (ContractStatus)Enum.Parse(typeof(ContractStatus),request.Params[0].ToString());
                     filter = c => c.Status == (int)status;
                     break;
+                case ContractFilterProperty.Client:
+                    string client = request.Params[0].ToString();
+                    filter = c => c.Client.Name.Contains(client);
+                    break;
                 default: 
                     filter = c => true; 
                     break;
             }
 
-            IEnumerable<Contract> contracts = await _repository.Get(filter, q => q.OrderBy(c => c.CreationDate).ThenBy(c => c.Number), "Carrier,Driver,Vehicle,LoadingPoint,UnloadingPoints");
+            IEnumerable<Contract> contracts = await _repository.Get(filter, q => q.OrderBy(c => c.CreationDate).ThenBy(c => c.Number), "Carrier,Client,Driver,Vehicle,LoadingPoint,UnloadingPoints");
             List<ContractDto> dtos = new List<ContractDto>();
 
             foreach (var contract in contracts)
@@ -221,14 +219,19 @@ namespace MediatorServices
                         Route = contract.LoadingPoint.Route,
                     },
                     Status = (ContractStatus)contract.Status,
-                    Payment = contract.Payment,
-                    Prepayment = contract.Prepayment,
+                    Payment = contract.CarrierPayment,
+                    Prepayment = contract.CarrierPrepayment,
                     ClientPayment = contract.ClientPayment,
                     Carrier = new CarrierDto()
                     {
                         Id = contract.Carrier.Id,
                         Name = contract.Carrier.Name,
                         Vat = (VAT)contract.Carrier.Vat,
+                    },
+                    Client = new ClientDto() 
+                    {
+                        Id = contract.Carrier.Id,
+                        Name = contract.Client.Name,
                     },
                     Driver = new DriverDto()
                     {
@@ -274,11 +277,11 @@ namespace MediatorServices
             {
                 Number = dto.Number,
                 CreationDate = dto.CreationDate,
-                Payment = dto.Payment,
-                Prepayment = dto.Prepayment,
+                CarrierPayment = dto.Payment,
+                CarrierPrepayment = dto.Prepayment,
                 ClientPayment = dto.ClientPayment,
-                PaymentCondition = (short)dto.PaymentCondition,
-                PayPriority = (short)dto.PayPriority,
+                CarrierPaymentCondition = (short)dto.PaymentCondition,
+                CarrierPayPriority = (short)dto.PayPriority,
                 Status = (short)ContractStatus.Created,
                 Weight = dto.Weight,
                 Volume = dto.Volume,
@@ -297,6 +300,9 @@ namespace MediatorServices
 
             Carrier carrier = await _repository.GetById<Carrier>(dto.Carrier.Id);
             contract.Carrier = carrier;
+
+            Client client = await _repository.GetById<Client>(dto.Client.Id);
+            contract.Client = client;
 
             Driver driver = await _repository.GetById<Driver>(dto.Driver.Id);
             contract.Driver = driver;
@@ -333,11 +339,11 @@ namespace MediatorServices
         {
             Contract contract = await _repository.GetById<Contract>(dto.Id);
 
-            contract.Payment = dto.Payment;
-            contract.Prepayment = dto.Prepayment;
+            contract.CarrierPayment = dto.Payment;
+            contract.CarrierPrepayment = dto.Prepayment;
             contract.ClientPayment = dto.ClientPayment;
-            contract.PaymentCondition = (short)dto.PaymentCondition;
-            contract.PayPriority = (short)dto.PayPriority;
+            contract.CarrierPaymentCondition = (short)dto.PaymentCondition;
+            contract.CarrierPayPriority = (short)dto.PayPriority;
             contract.Status = (short)dto.Status;
             contract.Weight = dto.Weight;
             contract.Volume = dto.Volume;
@@ -345,6 +351,9 @@ namespace MediatorServices
 
             Carrier carrier = await _repository.GetById<Carrier>(dto.Carrier.Id);
             contract.Carrier = carrier;
+
+            Client client = await _repository.GetById<Client>(dto.Client.Id);
+            contract.Client = client;
 
             Driver driver = await _repository.GetById<Driver>(dto.Driver.Id);
             contract.Driver = driver;

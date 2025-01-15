@@ -51,14 +51,14 @@ namespace Exam.Controllers
             return BadRequest("Передан пустой параметр");
         }
 
-        [HttpPut("company")]
-        public virtual async Task<ActionResult> PutCompany([FromBody] JObject jobj)
+        [HttpPut("client")]
+        public virtual async Task<ActionResult> PutClient([FromBody] JObject jobj)
         {
             if (jobj != null)
             {
-                return Ok(await _updateService.Add(new Update<CompanyDto>(jobj.ToObject<CompanyDto>())));
+                return Ok(await _updateService.Add(new Update<ClientDto>(jobj.ToObject<ClientDto>())));
             }
-            _logger.LogWarning($"CARRIER: Recieved null object");
+            _logger.LogWarning($"CLIENT: Recieved null object");
             return BadRequest("Передан пустой параметр");
         }
 
@@ -81,6 +81,17 @@ namespace Exam.Controllers
                 return Ok(await _updateService.Add(new Update<DocumentDto>(jobj.ToObject<DocumentDto>())));
             }
             _logger.LogWarning($"DOCUMENT: Recieved null object");
+            return BadRequest("Передан пустой параметр");
+        }
+
+        [HttpPut("payment")]
+        public virtual async Task<ActionResult> PutPayment([FromBody] JObject jobj)
+        {
+            if (jobj != null)
+            {
+                return Ok(await _updateService.Add(new Update<PaymentDto>(jobj.ToObject<PaymentDto>())));
+            }
+            _logger.LogWarning($"PAYMENT: Recieved null object");
             return BadRequest("Передан пустой параметр");
         }
     }

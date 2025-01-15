@@ -40,16 +40,22 @@ namespace Exam.Controllers
             return Ok(await _getService.Add(new GetId<Carrier>(id)));
         }
 
-        [HttpGet("company/id/{id}")]
-        public virtual async Task<ActionResult> GetCompany(Guid id)
+        [HttpGet("client/id/{id}")]
+        public virtual async Task<ActionResult> GetClient(Guid id)
         {
-            return Ok(await _getService.Add(new GetId<Carrier>(id)));
+            return Ok(await _getService.Add(new GetId<Client>(id)));
         }
 
         [HttpGet("document/id/{id}")]
         public virtual async Task<ActionResult> GetDocument(Guid id)
         {
             return Ok(await _getService.Add(new GetId<Document>(id)));
+        }
+
+        [HttpGet("payment/id/{id}")]
+        public virtual async Task<ActionResult> GetPayment(Guid id)
+        {
+            return Ok(await _getService.Add(new GetId<Payment>(id)));
         }
 
         [HttpGet("contract/id/{id}")]
@@ -79,10 +85,17 @@ namespace Exam.Controllers
         {
             return Ok(await _getService.Add(new GetMainId<Driver>(id)));
         }
+
         [HttpGet("document/main/{id}")]
         public virtual async Task<ActionResult> GetDocumentMain(Guid id)
         {
             return Ok(await _getService.Add(new GetMainId<Document>(id)));
+        }
+
+        [HttpGet("payment/main/{id}")]
+        public virtual async Task<ActionResult> GetPaymentMain(Guid id)
+        {
+            return Ok(await _getService.Add(new GetMainId<Payment>(id)));
         }
 
         #endregion MainId
@@ -113,10 +126,10 @@ namespace Exam.Controllers
             return Ok(await _getService.Add(new Search<Document>(name)));
         }
 
-        [HttpGet("company/search/{name}")]
-        public virtual async Task<ActionResult> GetCompanySearch(string name)
+        [HttpGet("client/search/{name}")]
+        public virtual async Task<ActionResult> GetClientSearch(string name)
         {
-            return Ok(await _getService.Add(new Search<Company>(name)));
+            return Ok(await _getService.Add(new Search<Client>(name)));
         }
 
         #endregion Search
@@ -143,10 +156,10 @@ namespace Exam.Controllers
         }
         
 
-        [HttpGet("company/range/{start}/{end}")]
-        public virtual async Task<ActionResult> GetCompanyRange(int start, int end)
+        [HttpGet("client/range/{start}/{end}")]
+        public virtual async Task<ActionResult> GetClientRange(int start, int end)
         {
-            return Ok(await _getService.Add(new GetRange<Company>(start, end)));
+            return Ok(await _getService.Add(new GetRange<Client>(start, end)));
         }
 
         #endregion Range

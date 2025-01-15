@@ -52,14 +52,14 @@ namespace Exam.Controllers
             return BadRequest("Передан пустой параметр");
         }
 
-        [HttpPost("company")]
-        public virtual async Task<ActionResult> PostCompany([FromBody] JObject jobj)
+        [HttpPost("client")]
+        public virtual async Task<ActionResult> PostClient([FromBody] JObject jobj)
         {
             if (jobj != null)
             {
-                return Ok(await _updateService.Add(new Add<CompanyDto>(jobj.ToObject<CompanyDto>())));
+                return Ok(await _updateService.Add(new Add<ClientDto>(jobj.ToObject<ClientDto>())));
             }
-            _logger.LogWarning($"CARRIER: Recieved null object");
+            _logger.LogWarning($"CLIENT: Recieved null object");
             return BadRequest("Передан пустой параметр");
         }
 
@@ -82,6 +82,17 @@ namespace Exam.Controllers
                 return Ok(await _updateService.Add(new Add<DocumentDto>(jobj.ToObject<DocumentDto>())));
             }
             _logger.LogWarning($"DOCUMENT: Recieved null object");
+            return BadRequest("Передан пустой параметр");
+        }
+
+        [HttpPost("payment")]
+        public virtual async Task<ActionResult> PostPayment([FromBody] JObject jobj)
+        {
+            if (jobj != null)
+            {
+                return Ok(await _updateService.Add(new Add<PaymentDto>(jobj.ToObject<PaymentDto>())));
+            }
+            _logger.LogWarning($"PAYMENT: Recieved null object");
             return BadRequest("Передан пустой параметр");
         }
     }

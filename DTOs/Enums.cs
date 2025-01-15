@@ -27,7 +27,9 @@ namespace DTOs
         [Description("Перевозчик")]
         Carrier,
         [Description("Водитель")]
-        Driver
+        Driver,
+        [Description("Заказчик")]
+        Client,
     }
 
     public enum DocumentDirection 

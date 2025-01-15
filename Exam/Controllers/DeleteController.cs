@@ -30,6 +30,12 @@ namespace Exam.Controllers
             return Ok(await _updateService.Add(new Delete<Document>(id)));
         }
 
+        [HttpDelete("payment/{id}")]
+        public virtual async Task<ActionResult> DeletePayment(Guid id)
+        {
+            return Ok(await _updateService.Add(new Delete<Payment>(id)));
+        }
+
         [HttpDelete("driver/{id}")]
         public virtual async Task<ActionResult> DeleteDriver(Guid id)
         {
@@ -42,10 +48,10 @@ namespace Exam.Controllers
             return Ok(await _updateService.Add(new Delete<Carrier>(id)));
         }
 
-        [HttpDelete("company/{id}")]
-        public virtual async Task<ActionResult> DeleteCompany(Guid id)
+        [HttpDelete("client/{id}")]
+        public virtual async Task<ActionResult> DeleteClient(Guid id)
         {
-            return Ok(await _updateService.Add(new Delete<Company>(id)));
+            return Ok(await _updateService.Add(new Delete<Client>(id)));
         }
     }
 }
