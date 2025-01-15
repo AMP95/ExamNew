@@ -34,14 +34,10 @@ namespace DTOs
 
     public enum DocumentDirection 
     {
-        [Description("Входящий документ")]
-        IncomeDocument,
-        [Description("Исходящий документ")]
-        OutcomeDocument,
-        [Description("Входящая оплата")]
-        IncomePayment,
-        [Description("Исходящая оплата")]
-        OutcomePayment
+        [Description("Входящий")]
+        Income,
+        [Description("Исходящий")]
+        Outcome
     }
 
     public enum PaymentPriority
