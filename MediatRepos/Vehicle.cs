@@ -181,14 +181,9 @@ namespace MediatRepos
                 TruckModel = dto.TruckModel,
                 TruckNumber = dto.TruckNumber,
                 TrailerModel = dto.TrailerModel,
-                TrailerNumber = dto.TrailerNumber
+                TrailerNumber = dto.TrailerNumber,
+                CarrierId = dto?.Carrier?.Id
             };
-
-            if (dto.Carrier != null)
-            {
-                Carrier carrier = await _repository.GetById<Carrier>(dto.Carrier.Id);
-                truck.Carrier = carrier;
-            }
 
             return await _repository.Update(truck);
         }
@@ -209,29 +204,24 @@ namespace MediatRepos
             vehicle.TrailerModel = dto.TrailerModel;
             vehicle.TrailerNumber = dto.TrailerNumber;
 
-            if (dto.Carrier != null)
+            if (vehicle.CarrierId != dto.Carrier?.Id) 
             {
-                Carrier carrier = await _repository.GetById<Carrier>(dto.Carrier.Id);
-                vehicle.Carrier = carrier;
-            }
-            else
-            {
-                vehicle.Carrier = null;
-                vehicle.CarrierId = null;
-            }
+                IEnumerable<Driver> drivers = await _repository.Get<Driver>(d => d.VehicleId == dto.Id);
+                drivers = drivers.ToList();
 
-            IEnumerable<Driver> drivers = await _repository.Get<Driver>(d => d.VehicleId == dto.Id);
-
-            foreach (Driver driver in drivers)
-            {
-                if (driver.CarrierId != vehicle.CarrierId)
+                foreach (Driver driver in drivers)
                 {
-                    driver.Vehicle = null;
-                    driver.VehicleId = null;
+                    if (driver.CarrierId != dto.Carrier.Id)
+                    {
+                        driver.Vehicle = null;
+                        driver.VehicleId = null;
 
-                    await _repository.Update(driver);
+                        await _repository.Update(driver);
+                    }
                 }
             }
+
+            vehicle.CarrierId = dto.Carrier?.Id;
 
             return await _repository.Update(vehicle);
         }

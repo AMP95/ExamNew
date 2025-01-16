@@ -83,6 +83,7 @@ namespace MediatorServices
         {
             Document document = new Document()
             {
+                ContractId = dto.ContractId,
                 CreationDate = dto.CreationDate,
                 DocumentType = (short)dto.Type,
                 Summ = dto.Summ,
@@ -92,10 +93,7 @@ namespace MediatorServices
                 RecievingDate = dto.RecievingDate,
             };
 
-            Contract contract = await _repository.GetById<Contract>(dto.ContractId);
-            contract.Documents.Add(document);
-
-            return await _repository.Update(contract);
+            return await _repository.Update(document);
         }
     }
 

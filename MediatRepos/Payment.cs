@@ -78,15 +78,13 @@ namespace MediatorServices
             Payment document = new Payment()
             {
                 CreationDate = dto.CreationDate,
+                ContractId = dto.ContractId,
                 Summ = dto.Summ,
                 DocumentDirection = (short)dto.Direction,
                 Number = dto.Number,
             };
 
-            Contract contract = await _repository.GetById<Contract>(dto.ContractId);
-            contract.Payments.Add(document);
-
-            return await _repository.Update(contract);
+            return await _repository.Update(document);
         }
     }
 

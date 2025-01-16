@@ -2,6 +2,7 @@
 using MediatRepos;
 using Microsoft.Extensions.Logging;
 using Models;
+using System.Threading;
 
 namespace MediatorServices
 {
@@ -239,6 +240,8 @@ namespace MediatorServices
 
             Driver driver = new Driver()
             {
+                CarrierId = dto.Carrier?.Id,
+                VehicleId = dto.Vehicle?.Id,
                 FamilyName = name[0],
                 Name = name[1],
                 FatherName = name.Length > 2 ? name[2] : string.Empty,
@@ -248,18 +251,6 @@ namespace MediatorServices
                 PassportSerial = dto.PassportSerial,
                 Phones = string.Join(';',dto.Phones)
             };
-
-            if (dto.Vehicle != null) 
-            {
-                Vehicle vehicle = await _repository.GetById<Vehicle>(dto.Vehicle.Id);
-                driver.Vehicle = vehicle;
-            }
-
-            if (dto.Carrier != null) 
-            {
-                Carrier carrier = await _repository.GetById<Carrier>(dto.Carrier.Id);
-                driver.Carrier = carrier;
-            }
 
             return await _repository.Update(driver);
         }
@@ -285,35 +276,16 @@ namespace MediatorServices
             driver.PassportDateOfIssue = dto.PassportDateOfIssue;
             driver.PassportIssuer = dto.PassportIssuer;
             driver.PassportSerial = dto.PassportSerial;
+            driver.CarrierId = dto.Carrier?.Id;
 
-            if (dto.Carrier == null)
+            if (dto.Vehicle?.Carrier?.Id != dto.Carrier?.Id)
             {
-                driver.Carrier = null;
-                driver.CarrierId = null;
-            }
-            else
-            {
-                Carrier carrier = await _repository.GetById<Carrier>(dto.Carrier.Id);
-                driver.Carrier = carrier;
-            }
-
-            if (driver.Vehicle != null && driver.Vehicle.CarrierId != driver.CarrierId)
-            {
-                driver.Vehicle = null;
                 driver.VehicleId = null;
             }
-
-            if (dto.Vehicle == null)
-            {
-                driver.Vehicle = null;
-                driver.VehicleId = null;
+            else 
+            { 
+                driver.VehicleId = dto.Vehicle?.Id;
             }
-            else
-            {
-                Vehicle truck = await _repository.GetById<Vehicle>(dto.Vehicle.Id);
-                driver.Vehicle = truck;
-            }
-
 
             return await _repository.Update(driver);
         }

@@ -337,65 +337,70 @@ namespace MediatorServices
 
         protected override async Task<bool> Update(ContractDto dto)
         {
-            Contract contract = await _repository.GetById<Contract>(dto.Id);
+            IEnumerable<Contract> contracts = await _repository.Get<Contract>(c=>c.Id == dto.Id, null, "UnloadingPoints");
 
-            contract.CarrierPayment = dto.Payment;
-            contract.CarrierPrepayment = dto.Prepayment;
-            contract.ClientPayment = dto.ClientPayment;
-            contract.CarrierPaymentCondition = (short)dto.PaymentCondition;
-            contract.CarrierPayPriority = (short)dto.PayPriority;
-            contract.Status = (short)dto.Status;
-            contract.Weight = dto.Weight;
-            contract.Volume = dto.Volume;
-            contract.UnloadingPoints.Clear();
-
-            Carrier carrier = await _repository.GetById<Carrier>(dto.Carrier.Id);
-            contract.Carrier = carrier;
-
-            Client client = await _repository.GetById<Client>(dto.Client.Id);
-            contract.Client = client;
-
-            Driver driver = await _repository.GetById<Driver>(dto.Driver.Id);
-            contract.Driver = driver;
-
-            Vehicle vehicle = await _repository.GetById<Vehicle>(dto.Vehicle.Id);
-            contract.Vehicle = vehicle;
-
-            IEnumerable<RoutePoint> loads = await _repository.Get<RoutePoint>(p => p.Address == dto.LoadPoint.Address && p.Side == (short)dto.LoadPoint.Side);
-
-            if (loads.Any())
+            if (contracts.Any()) 
             {
-                contract.LoadingPoint = loads.First();
-            }
-            else
-            {
-                contract.LoadingPoint = new RoutePoint()
+                Contract contract = contracts.First();
+                contract.CarrierPayment = dto.Payment;
+                contract.CarrierPrepayment = dto.Prepayment;
+                contract.ClientPayment = dto.ClientPayment;
+                contract.CarrierPaymentCondition = (short)dto.PaymentCondition;
+                contract.CarrierPayPriority = (short)dto.PayPriority;
+                contract.Status = (short)dto.Status;
+                contract.Weight = dto.Weight;
+                contract.Volume = dto.Volume;
+                contract.UnloadingPoints.Clear();
+
+                Carrier carrier = await _repository.GetById<Carrier>(dto.Carrier.Id);
+                contract.Carrier = carrier;
+
+                Client client = await _repository.GetById<Client>(dto.Client.Id);
+                contract.Client = client;
+
+                Driver driver = await _repository.GetById<Driver>(dto.Driver.Id);
+                contract.Driver = driver;
+
+                Vehicle vehicle = await _repository.GetById<Vehicle>(dto.Vehicle.Id);
+                contract.Vehicle = vehicle;
+
+                IEnumerable<RoutePoint> loads = await _repository.Get<RoutePoint>(p => p.Address == dto.LoadPoint.Address && p.Side == (short)dto.LoadPoint.Side);
+
+                if (loads.Any())
                 {
-                    Id = Guid.NewGuid(),
-                    Address = dto.LoadPoint.Address,
-                    DateAndTime = dto.LoadPoint.DateAndTime,
-                    Route = dto.LoadPoint.Route,
-                    Phones = string.Join(";", dto.LoadPoint.Phones),
-                    Type = (short)LoadPointType.Upload,
-                    Side = (short)dto.LoadPoint.Side
-                };
-            }
-
-            foreach (RoutePointDto pointDto in dto.UnloadPoints)
-            {
-                contract.UnloadingPoints.Add(new RoutePoint()
+                    contract.LoadingPoint = loads.First();
+                }
+                else
                 {
-                    Id = Guid.NewGuid(),
-                    Address = pointDto.Address,
-                    DateAndTime = pointDto.DateAndTime,
-                    Route = pointDto.Route,
-                    Side = (short)pointDto.Side,
-                    Type = (short)pointDto.Type,
-                    Phones = string.Join(";", pointDto.Phones),
-                });
-            }
+                    contract.LoadingPoint = new RoutePoint()
+                    {
+                        Address = dto.LoadPoint.Address,
+                        Company = dto.LoadPoint.Company,
+                        DateAndTime = dto.LoadPoint.DateAndTime,
+                        Route = dto.LoadPoint.Route,
+                        Phones = string.Join(";", dto.LoadPoint.Phones),
+                        Type = (short)LoadPointType.Upload,
+                        Side = (short)dto.LoadPoint.Side
+                    };
+                }
 
-            return await _repository.Update(contract);
+                foreach (RoutePointDto pointDto in dto.UnloadPoints)
+                {
+                    contract.UnloadingPoints.Add(new RoutePoint()
+                    {
+                        Address = pointDto.Address,
+                        Company = pointDto.Company,
+                        DateAndTime = pointDto.DateAndTime,
+                        Route = pointDto.Route,
+                        Side = (short)pointDto.Side,
+                        Type = (short)pointDto.Type,
+                        Phones = string.Join(";", pointDto.Phones),
+                    });
+                }
+
+                return await _repository.Update(contract);
+            }
+            return false;
         }
     }
 }
