@@ -81,24 +81,33 @@ namespace MediatorServices
         protected override Expression<Func<Document, bool>> GetFilter(string property, params object[] parameters)
         {
             Expression<Func<Document, bool>> filter = null;
-            switch (property) 
+
+            try
             {
-                case nameof(DocumentDto.ContractId):
-                    Guid guid = (Guid)parameters[0];
-                    filter = d => d.ContractId == guid;
-                    break;
-                case nameof(DocumentDto.Type):
-                    DocumentType documentType = (DocumentType)parameters[0];
-                    filter = d => d.DocumentType == (short)documentType;
-                    break;
-                case nameof(DocumentDto.Direction):
-                    DocumentDirection direction = (DocumentDirection)parameters[0];
-                    filter = d => d.DocumentDirection == (short)direction;
-                    break;
-                case nameof(DocumentDto.RecieveType):
-                    RecievingType recieve = (RecievingType)parameters[0];
-                    filter = d => d.RecieveType == (short)recieve;
-                    break;
+                switch (property)
+                {
+                    case nameof(DocumentDto.ContractId):
+                        Guid guid = (Guid)parameters[0];
+                        filter = d => d.ContractId == guid;
+                        break;
+                    case nameof(DocumentDto.Type):
+                        DocumentType documentType = (DocumentType)parameters[0];
+                        filter = d => d.DocumentType == (short)documentType;
+                        break;
+                    case nameof(DocumentDto.Direction):
+                        DocumentDirection direction = (DocumentDirection)parameters[0];
+                        filter = d => d.DocumentDirection == (short)direction;
+                        break;
+                    case nameof(DocumentDto.RecieveType):
+                        RecievingType recieve = (RecievingType)parameters[0];
+                        filter = d => d.RecieveType == (short)recieve;
+                        break;
+                }
+            }
+            catch (Exception ex) 
+            {
+                filter = c => false;
+                _logger.LogError(ex, ex.Message);
             }
 
             return filter;

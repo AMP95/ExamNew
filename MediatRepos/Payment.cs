@@ -63,16 +63,25 @@ namespace MediatorServices
         protected override Expression<Func<Payment, bool>> GetFilter(string property, params object[] parameters)
         {
             Expression<Func<Payment, bool>> filter = null;
-            switch (property)
+            try
             {
-                case nameof(PaymentDto.ContractId):
-                    Guid guid = (Guid)parameters[0];
-                    filter = d => d.ContractId == guid;
-                    break;
-                case nameof(PaymentDto.Direction):
-                    DocumentDirection direction = (DocumentDirection)parameters[0];
-                    filter = d => d.DocumentDirection == (short)direction;
-                    break;
+
+                switch (property)
+                {
+                    case nameof(PaymentDto.ContractId):
+                        Guid guid = (Guid)parameters[0];
+                        filter = d => d.ContractId == guid;
+                        break;
+                    case nameof(PaymentDto.Direction):
+                        DocumentDirection direction = (DocumentDirection)parameters[0];
+                        filter = d => d.DocumentDirection == (short)direction;
+                        break;
+                }
+            }
+            catch (Exception ex) 
+            {
+                filter = c => false;
+                _logger.LogError(ex, ex.Message);
             }
 
             return filter;

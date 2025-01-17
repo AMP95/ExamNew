@@ -97,20 +97,28 @@ namespace MediatorServices
         {
             Expression<Func<Carrier, bool>> filter = null;
 
-            switch (property) 
-            { 
-                case nameof(CarrierDto.Name):
-                    string name = (string)parameters[0];
-                    filter = c => c.Name.ToLower().Contains(name.ToLower());
-                    break;
-                case nameof(CarrierDto.InnKpp):
-                    string innKpp = (string)parameters[0];
-                    filter = c => c.InnKpp.ToLower().Contains(innKpp.ToLower());
-                    break;
-                case nameof(CarrierDto.Vat):
-                    VAT vat = (VAT)Enum.Parse(typeof(VAT), parameters[0].ToString());
-                    filter = c => c.Vat == (short)vat;
-                    break;
+            try
+            {
+                switch (property)
+                {
+                    case nameof(CarrierDto.Name):
+                        string name = (string)parameters[0];
+                        filter = c => c.Name.ToLower().Contains(name.ToLower());
+                        break;
+                    case nameof(CarrierDto.InnKpp):
+                        string innKpp = (string)parameters[0];
+                        filter = c => c.InnKpp.ToLower().Contains(innKpp.ToLower());
+                        break;
+                    case nameof(CarrierDto.Vat):
+                        VAT vat = (VAT)Enum.Parse(typeof(VAT), parameters[0].ToString());
+                        filter = c => c.Vat == (short)vat;
+                        break;
+                }
+            }
+            catch (Exception ex) 
+            {
+                filter = c => false;
+                _logger.LogError(ex, ex.Message);
             }
 
             return filter;

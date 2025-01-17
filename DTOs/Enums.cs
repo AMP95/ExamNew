@@ -16,22 +16,6 @@ namespace DTOs
         TTN
     }
 
-    public enum ContractFilterProperty
-    {
-        [Description("Дата")]
-        Date,
-        [Description("Маршрут")]
-        Route,
-        [Description("Статус")]
-        Status,
-        [Description("Перевозчик")]
-        Carrier,
-        [Description("Водитель")]
-        Driver,
-        [Description("Заказчик")]
-        Client,
-    }
-
     public enum DocumentDirection 
     {
         [Description("Входящий")]

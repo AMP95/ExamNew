@@ -159,40 +159,54 @@ namespace MediatorServices
         protected override Expression<Func<Contract, bool>> GetFilter(string property, params object[] parameters)
         {
             Expression<Func<Contract, bool>> filter = null;
-            switch (property)
+
+            try
             {
-                case nameof(ContractDto.CreationDate):
-                    DateTime.TryParse(parameters[0].ToString(), out DateTime start);
-                    DateTime.TryParse(parameters[1].ToString(), out DateTime end);
-                    filter = c => c.CreationDate >= start && c.CreationDate <= end;
-                    break;
-                case nameof(ContractDto.LoadPoint):
-                    string route = parameters[0].ToString();
-                    filter = c => c.LoadingPoint.Route.Contains(route) || c.UnloadingPoints.Any(p => p.Route.Contains(route));
-                    break;
-                case nameof(ContractDto.Carrier):
-                    string carrier = parameters[0].ToString();
-                    filter = c => c.Carrier.Name.Contains(carrier);
-                    break;
-                case nameof(ContractDto.Driver):
-                    string driver = parameters[0].ToString();
-                    filter = c => $"{c.Driver.FamilyName} {c.Driver.Name} {c.Driver.FatherName}".Contains(driver);
-                    break;
-                case nameof(ContractDto.Status):
-                    ContractStatus status = (ContractStatus)Enum.Parse(typeof(ContractStatus), parameters[0].ToString());
-                    filter = c => c.Status == (int)status;
-                    break;
-                case nameof(ContractDto.Client):
-                    string client = parameters[0].ToString();
-                    filter = c => c.Client.Name.Contains(client);
-                    break;
-                case nameof(ContractDto.Number):
-                    short number = (short)parameters[0];
-                    filter = c => c.Number == number;
-                    break;
-                default:
-                    filter = c => true;
-                    break;
+                switch (property)
+                {
+                    case nameof(ContractDto.CreationDate):
+                        DateTime.TryParse(parameters[0].ToString(), out DateTime start);
+                        DateTime.TryParse(parameters[1].ToString(), out DateTime end);
+                        filter = c => c.CreationDate >= start && c.CreationDate <= end;
+                        break;
+                    case nameof(ContractDto.LoadPoint):
+                        string route = parameters[0].ToString();
+                        filter = c => c.LoadingPoint.Route.Contains(route);
+                        break;
+                    case nameof(ContractDto.UnloadPoints):
+                        string dest = parameters[0].ToString();
+                        filter = c => c.UnloadingPoints.Any(p => p.Route.Contains(dest));
+                        break;
+                    case nameof(ContractDto.Client):
+                        string client = parameters[0].ToString().ToLower();
+                        filter = c => c.Client.Name.Contains(client);
+                        break;
+                    case nameof(ContractDto.Carrier):
+                        string carname = parameters[0].ToString().ToLower();
+                        filter = d => d.Carrier.Name.ToLower().Contains(carname);
+                        break;
+                    case nameof(ContractDto.Driver):
+                        string driver = parameters[0].ToString().ToLower();
+                        filter = c => $"{c.Driver.FamilyName} {c.Driver.Name} {c.Driver.FatherName}".ToLower().Contains(driver);
+                        break;
+                    case nameof(ContractDto.Vehicle):
+                        string formattedName = parameters[0].ToString().Replace(" ", "").Replace("/", "").ToLower();
+                        filter = c => $"{c.Vehicle.TruckNumber}{c.Vehicle.TrailerNumber}".Replace("/", "").Replace(" ", "").ToLower().Contains(formattedName);
+                        break;
+                    case nameof(ContractDto.Status):
+                        ContractStatus status = (ContractStatus)Enum.Parse(typeof(ContractStatus), parameters[0].ToString());
+                        filter = c => c.Status == (int)status;
+                        break;
+                    case nameof(ContractDto.Number):
+                        short number = (short)parameters[0];
+                        filter = c => c.Number == number;
+                        break;
+                }
+            }
+            catch (Exception ex) 
+            {
+                filter = c => false;
+                _logger.LogError(ex, ex.Message);
             }
             return filter;
         }

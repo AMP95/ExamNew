@@ -74,8 +74,8 @@ namespace Exam.Controllers
 
         #region Filter
 
-        [HttpGet("contract/filter/")]
-        public virtual async Task<ActionResult> GetContractFilter([FromQuery] string property, [FromQuery] string[] param)
+        [HttpGet("contract/filter/{property}")]
+        public virtual async Task<ActionResult> GetContractFilter(string property, [FromQuery] string[] param)
         {
             return Ok(await _getService.Add(new GetFilter<Contract>(property, param)));
         }

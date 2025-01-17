@@ -174,16 +174,36 @@ namespace MediatorServices
         protected override Expression<Func<Driver, bool>> GetFilter(string property, params object[] parameters)
         {
             Expression<Func<Driver, bool>> filter = null;
-            switch (property)
+
+            try
             {
-                case nameof(DriverDto.Carrier):
-                    Guid guid = (Guid)parameters[0];
-                    filter = d => d.CarrierId == guid;
-                    break;
-                default:
-                    string name = parameters[0].ToString().ToLower();
-                    filter = d => (d.FamilyName + d.Name + d.FatherName).ToLower().Contains(name);
-                    break;
+                switch (property)
+                {
+                    case nameof(DriverDto.Carrier):
+                        string carname = parameters[0].ToString().ToLower();
+                        filter = d => d.Carrier.Name.ToLower().Contains(carname);
+                        break;
+                    case "CarrierId":
+                        if (parameters == null || !parameters.Any())
+                        {
+                            filter = d => d.CarrierId == null;
+                        }
+                        else
+                        {
+                            Guid.TryParse(parameters[0].ToString(), out Guid id);
+                            filter = d => d.CarrierId == id;
+                        }
+                        break;
+                    default:
+                        string name = parameters[0].ToString().ToLower();
+                        filter = d => (d.FamilyName + d.Name + d.FatherName).ToLower().Contains(name);
+                        break;
+                }
+            }
+            catch (Exception ex) 
+            {
+                filter = d => false;
+                _logger.LogError(ex, ex.Message);
             }
 
             return filter;

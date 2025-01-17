@@ -2,6 +2,7 @@
 using MediatorServices;
 using Microsoft.Extensions.Logging;
 using Models;
+using System;
 using System.Linq.Expressions;
 
 namespace MediatRepos
@@ -122,16 +123,36 @@ namespace MediatRepos
         protected override Expression<Func<Vehicle, bool>> GetFilter(string property, params object[] parameters)
         {
             Expression<Func<Vehicle, bool>> filter = null;
-            switch (property)
+
+            try
             {
-                case nameof(VehicleDto.Carrier):
-                    Guid guid = (Guid)parameters[0];
-                    filter = d => d.CarrierId == guid;
-                    break;
-                default:
-                    string formattedName = parameters[0].ToString().Replace(" ", "").Replace("/", "").ToLower();
-                    filter = t => (t.TruckNumber + t.TrailerNumber).Replace("/", "").Replace(" ", "").ToLower().Contains(formattedName);
-                    break;
+                switch (property)
+                {
+                    case nameof(VehicleDto.Carrier):
+                        string name = parameters[0].ToString().ToLower();
+                        filter = d => d.Carrier.Name.ToLower().Contains(name);
+                        break;
+                    case "CarrierId":
+                        if (parameters == null || !parameters.Any())
+                        {
+                            filter = d => d.CarrierId == null;
+                        }
+                        else 
+                        {
+                            Guid.TryParse(parameters[0].ToString(), out Guid id);
+                            filter = d => d.CarrierId == id;
+                        }
+                        break;
+                    default:
+                        string formattedName = parameters[0].ToString().Replace(" ", "").Replace("/", "").ToLower();
+                        filter = t => (t.TruckNumber + t.TrailerNumber).Replace("/", "").Replace(" ", "").ToLower().Contains(formattedName);
+                        break;
+                }
+            }
+            catch (Exception ex) 
+            {
+                filter = v => false;
+                _logger.LogError(ex, ex.Message);
             }
 
             return filter;

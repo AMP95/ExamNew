@@ -98,20 +98,28 @@ namespace MediatorServices
         {
             Expression<Func<Client, bool>> filter = null;
 
-            switch (property)
+            try
             {
-                case nameof(ClientDto.Name):
-                    string name = (string)parameters[0];
-                    filter = c => c.Name.ToLower().Contains(name.ToLower());
-                    break;
-                case nameof(ClientDto.InnKpp):
-                    string innKpp = (string)parameters[0];
-                    filter = c => c.InnKpp.ToLower().Contains(innKpp.ToLower());
-                    break;
-                case nameof(ClientDto.IsPriority):
-                    bool isPriority = (bool)parameters[0];
-                    filter = c => c.IsPriority == isPriority;
-                    break;
+                switch (property)
+                {
+                    case nameof(ClientDto.Name):
+                        string name = (string)parameters[0];
+                        filter = c => c.Name.ToLower().Contains(name.ToLower());
+                        break;
+                    case nameof(ClientDto.InnKpp):
+                        string innKpp = (string)parameters[0];
+                        filter = c => c.InnKpp.ToLower().Contains(innKpp.ToLower());
+                        break;
+                    case nameof(ClientDto.IsPriority):
+                        bool isPriority = (bool)parameters[0];
+                        filter = c => c.IsPriority == isPriority;
+                        break;
+                }
+            }
+            catch (Exception ex) 
+            {
+                filter = c => false;
+                _logger.LogError(ex, ex.Message);
             }
 
             return filter;
