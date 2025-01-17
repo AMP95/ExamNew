@@ -158,7 +158,7 @@ namespace MediatorServices
             if (company != null)
             {
                 company.Name = dto.Name;
-                company.Vat = company.Vat;
+                company.Vat = (short)dto.Vat;
                 company.Address = dto.Address;
                 company.InnKpp = dto.InnKpp;
                 company.Phones = string.Join(";", dto.Phones);

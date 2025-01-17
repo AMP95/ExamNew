@@ -80,38 +80,38 @@ namespace Exam.Controllers
             return Ok(await _getService.Add(new GetFilter<Contract>(property, param)));
         }
 
-        [HttpGet("vehicle/filter/")]
-        public virtual async Task<ActionResult> GetVehicleFilter([FromQuery] string property, [FromQuery] string[] param)
+        [HttpGet("vehicle/filter/{property}")]
+        public virtual async Task<ActionResult> GetVehicleFilter(string property, [FromQuery] string[] param)
         {
             return Ok(await _getService.Add(new GetFilter<Vehicle>(property, param)));
         }
 
-        [HttpGet("driver/filter/")]
-        public virtual async Task<ActionResult> GetDriverFilter([FromQuery] string property, [FromQuery] string[] param)
+        [HttpGet("driver/filter/{property}")]
+        public virtual async Task<ActionResult> GetDriverFilter(string property, [FromQuery] string[] param)
         {
             return Ok(await _getService.Add(new GetFilter<Driver>(property, param)));
         }
 
-        [HttpGet("document/filter/")]
-        public virtual async Task<ActionResult> GetDocumentFilter([FromQuery] string property, [FromQuery] string[] param)
+        [HttpGet("document/filter/{property}")]
+        public virtual async Task<ActionResult> GetDocumentFilter(string property, [FromQuery] string[] param)
         {
             return Ok(await _getService.Add(new GetFilter<Document>(property, param)));
         }
 
-        [HttpGet("payment/filter/")]
-        public virtual async Task<ActionResult> GetPaymentFilter([FromQuery] string property, [FromQuery] string[] param)
+        [HttpGet("payment/filter/{property}")]
+        public virtual async Task<ActionResult> GetPaymentFilter(string property, [FromQuery] string[] param)
         {
             return Ok(await _getService.Add(new GetFilter<Payment>(property, param)));
         }
 
-        [HttpGet("carrier/filter/")]
-        public virtual async Task<ActionResult> GetCarrierFilter([FromQuery] string property, [FromQuery] string[] param)
+        [HttpGet("carrier/filter/{property}")]
+        public virtual async Task<ActionResult> GetCarrierFilter(string property, [FromQuery] string[] param)
         {
             return Ok(await _getService.Add(new GetFilter<Carrier>(property, param)));
         }
 
-        [HttpGet("client/filter/")]
-        public virtual async Task<ActionResult> GetClientFilter([FromQuery] string property, [FromQuery] string[] param)
+        [HttpGet("client/filter/{property}")]
+        public virtual async Task<ActionResult> GetClientFilter(string property, [FromQuery] string[] param)
         {
             return Ok(await _getService.Add(new GetFilter<Client>(property, param)));
         }

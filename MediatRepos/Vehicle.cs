@@ -129,18 +129,33 @@ namespace MediatRepos
                 switch (property)
                 {
                     case nameof(VehicleDto.Carrier):
-                        string name = parameters[0].ToString().ToLower();
-                        filter = d => d.Carrier.Name.ToLower().Contains(name);
+                        if (parameters[0] == null)
+                        {
+                            filter = d => d.CarrierId == null;
+                        }
+                        else
+                        {
+                            string carname = parameters[0].ToString().ToLower();
+                            filter = d => d.Carrier.Name.ToLower().Contains(carname);
+                        }
                         break;
                     case "CarrierId":
-                        if (parameters == null || !parameters.Any())
+                        if (parameters == null || !parameters.Any() || parameters[0] == null)
                         {
                             filter = d => d.CarrierId == null;
                         }
                         else 
                         {
                             Guid.TryParse(parameters[0].ToString(), out Guid id);
-                            filter = d => d.CarrierId == id;
+
+                            if (id == Guid.Empty)
+                            {
+                                filter = d => d.CarrierId == null;
+                            }
+                            else 
+                            { 
+                                filter = d => d.CarrierId == id;
+                            }
                         }
                         break;
                     default:

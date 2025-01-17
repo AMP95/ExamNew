@@ -187,11 +187,11 @@ namespace MediatorServices
                         break;
                     case nameof(ContractDto.Driver):
                         string driver = parameters[0].ToString().ToLower();
-                        filter = c => $"{c.Driver.FamilyName} {c.Driver.Name} {c.Driver.FatherName}".ToLower().Contains(driver);
+                        filter = c => (c.Driver.FamilyName + " " + c.Driver.Name + " " + c.Driver.FatherName).ToLower().Contains(driver);
                         break;
                     case nameof(ContractDto.Vehicle):
                         string formattedName = parameters[0].ToString().Replace(" ", "").Replace("/", "").ToLower();
-                        filter = c => $"{c.Vehicle.TruckNumber}{c.Vehicle.TrailerNumber}".Replace("/", "").Replace(" ", "").ToLower().Contains(formattedName);
+                        filter = c => (c.Vehicle.TruckNumber + c.Vehicle.TrailerNumber).Replace("/", "").Replace(" ", "").ToLower().Contains(formattedName);
                         break;
                     case nameof(ContractDto.Status):
                         ContractStatus status = (ContractStatus)Enum.Parse(typeof(ContractStatus), parameters[0].ToString());
