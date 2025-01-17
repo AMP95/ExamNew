@@ -1,4 +1,5 @@
-﻿using DTOs;
+﻿using Azure.Core;
+using DTOs;
 using MediatR;
 
 namespace MediatRepos
@@ -44,26 +45,6 @@ namespace MediatRepos
         }
     }
 
-    public class GetMainId<TModel> : IRequest<object>
-    {
-        public Guid Id { get; set; }
-
-        public GetMainId(Guid id)
-        {
-            Id = id;
-        }
-    }
-
-    public class Search<TModel> : IRequest<object>
-    {
-        public string Name { get; set; }
-
-        public Search(string name)
-        {
-            Name = name;
-        }
-    }
-
     public class SetContractStatus : IRequest<bool> 
     {
         public Guid ContractId { get; set; }
@@ -76,14 +57,15 @@ namespace MediatRepos
         }
     }
 
-    public class ContractFilter : IRequest<object>
-    {
-        public ContractFilterProperty FilterName { get; set; }
+    public class GetFilter<TModel> : IRequest<object>
+    { 
+        public string PropertyName { get; set; }
+
         public object[] Params { get; set; }
 
-        public ContractFilter(string filterName, params object[] parameters)
+        public GetFilter(string propertyName, params string[] parameters)
         {
-            FilterName = (ContractFilterProperty)Enum.Parse(typeof(ContractFilterProperty), filterName);
+            PropertyName = propertyName;
             Params = parameters;
         }
     }

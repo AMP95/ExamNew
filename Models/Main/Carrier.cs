@@ -30,6 +30,6 @@ namespace Models
     [Table(nameof(Client))]
     public class Client : Company
     {
-
+        public bool IsPriority { get; set; }
     }
 }

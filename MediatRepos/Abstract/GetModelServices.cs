@@ -2,6 +2,7 @@
 using MediatRepos;
 using Microsoft.Extensions.Logging;
 using Models;
+using System.Linq.Expressions;
 
 namespace MediatorServices
 {
@@ -24,41 +25,25 @@ namespace MediatorServices
 
     }
 
-    public abstract class GetMainIdModelService<TModel> : IRequestHandler<GetMainId<TModel>, object> where TModel : BaseEntity
+    public abstract class GetFilterModelService<TModel> : IRequestHandler<GetFilter<TModel>, object>  where TModel : BaseEntity
     {
         protected IRepository _repository;
-        protected ILogger<GetMainIdModelService<TModel>> _logger;
+        protected ILogger<GetFilterModelService<TModel>> _logger;
 
-        public GetMainIdModelService(IRepository repository, ILogger<GetMainIdModelService<TModel>> logger)
+        public GetFilterModelService(IRepository repository, ILogger<GetFilterModelService<TModel>> logger)
         {
             _repository = repository;
             _logger = logger;
         }
-
-        public async Task<object> Handle(GetMainId<TModel> request, CancellationToken cancellationToken)
+        public async Task<object> Handle(GetFilter<TModel> request, CancellationToken cancellationToken)
         {
-            return await Get(request.Id);
+            Expression<Func<TModel, bool>> filter = GetFilter(request.PropertyName, request.Params);
+            return await Get(filter);
         }
 
-        protected abstract Task<object> Get(Guid id);
-    }
+        protected abstract Expression<Func<TModel, bool>> GetFilter(string property, params object[] parameters);
 
-    public abstract class SearchModelService<TModel> : IRequestHandler<Search<TModel>, object> where TModel : BaseEntity
-    {
-        protected IRepository _repository;
-        protected ILogger<SearchModelService<TModel>> _logger;
-
-        public SearchModelService(IRepository repository, ILogger<SearchModelService<TModel>> logger)
-        {
-            _repository = repository;
-            _logger = logger;
-        }
-        public async Task<object> Handle(Search<TModel> request, CancellationToken cancellationToken)
-        {
-            return await Get(request.Name);
-        }
-
-        protected abstract Task<object> Get(string name);
+        protected abstract Task<object> Get(Expression<Func<TModel, bool>> filter);
     }
 
     public abstract class GetRangeModelService<TModel> : IRequestHandler<GetRange<TModel>, object> where TModel : BaseEntity

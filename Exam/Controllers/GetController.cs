@@ -72,67 +72,51 @@ namespace Exam.Controllers
 
         #endregion ID
 
-        #region MainId
+        #region Filter
 
-        [HttpGet("vehicle/main/{id}")]
-        public virtual async Task<ActionResult> GetVehicleMain(Guid id)
+        [HttpGet("contract/filter/")]
+        public virtual async Task<ActionResult> GetContractFilter([FromQuery] string property, [FromQuery] string[] param)
         {
-            return Ok(await _getService.Add(new GetMainId<Vehicle>(id)));
+            return Ok(await _getService.Add(new GetFilter<Contract>(property, param)));
         }
 
-        [HttpGet("driver/main/{id}")]
-        public virtual async Task<ActionResult> GetDriverMain(Guid id)
+        [HttpGet("vehicle/filter/")]
+        public virtual async Task<ActionResult> GetVehicleFilter([FromQuery] string property, [FromQuery] string[] param)
         {
-            return Ok(await _getService.Add(new GetMainId<Driver>(id)));
+            return Ok(await _getService.Add(new GetFilter<Vehicle>(property, param)));
         }
 
-        [HttpGet("document/main/{id}")]
-        public virtual async Task<ActionResult> GetDocumentMain(Guid id)
+        [HttpGet("driver/filter/")]
+        public virtual async Task<ActionResult> GetDriverFilter([FromQuery] string property, [FromQuery] string[] param)
         {
-            return Ok(await _getService.Add(new GetMainId<Document>(id)));
+            return Ok(await _getService.Add(new GetFilter<Driver>(property, param)));
         }
 
-        [HttpGet("payment/main/{id}")]
-        public virtual async Task<ActionResult> GetPaymentMain(Guid id)
+        [HttpGet("document/filter/")]
+        public virtual async Task<ActionResult> GetDocumentFilter([FromQuery] string property, [FromQuery] string[] param)
         {
-            return Ok(await _getService.Add(new GetMainId<Payment>(id)));
+            return Ok(await _getService.Add(new GetFilter<Document>(property, param)));
         }
 
-        #endregion MainId
-
-        #region Search
-
-        [HttpGet("vehicle/search/{name}")]
-        public virtual async Task<ActionResult> GetVehicleSearch(string name)
+        [HttpGet("payment/filter/")]
+        public virtual async Task<ActionResult> GetPaymentFilter([FromQuery] string property, [FromQuery] string[] param)
         {
-            return Ok(await _getService.Add(new Search<Vehicle>(name)));
+            return Ok(await _getService.Add(new GetFilter<Payment>(property, param)));
         }
 
-        [HttpGet("driver/search/{name}")]
-        public virtual async Task<ActionResult> GetDriverSearch(string name)
+        [HttpGet("carrier/filter/")]
+        public virtual async Task<ActionResult> GetCarrierFilter([FromQuery] string property, [FromQuery] string[] param)
         {
-            return Ok(await _getService.Add(new Search<Driver>(name)));
+            return Ok(await _getService.Add(new GetFilter<Carrier>(property, param)));
         }
 
-        [HttpGet("carrier/search/{name}")]
-        public virtual async Task<ActionResult> GetCarrierSearch(string name)
+        [HttpGet("client/filter/")]
+        public virtual async Task<ActionResult> GetClientFilter([FromQuery] string property, [FromQuery] string[] param)
         {
-            return Ok(await _getService.Add(new Search<Carrier>(name)));
+            return Ok(await _getService.Add(new GetFilter<Client>(property, param)));
         }
 
-        [HttpGet("contract/search/{name}")]
-        public virtual async Task<ActionResult> GetContractSearch(string name)
-        {
-            return Ok(await _getService.Add(new Search<Document>(name)));
-        }
-
-        [HttpGet("client/search/{name}")]
-        public virtual async Task<ActionResult> GetClientSearch(string name)
-        {
-            return Ok(await _getService.Add(new Search<Client>(name)));
-        }
-
-        #endregion Search
+        #endregion Filter
 
         #region Range
 
@@ -141,7 +125,6 @@ namespace Exam.Controllers
         {
             return Ok(await _getService.Add(new GetRange<Vehicle>(start, end)));
         }
-
 
         [HttpGet("driver/range/{start}/{end}")]
         public virtual async Task<ActionResult> GetDriverRange(int start, int end)
@@ -163,20 +146,5 @@ namespace Exam.Controllers
         }
 
         #endregion Range
-
-        #region Filter
-
-        [HttpPost("contract/filter/{name}")]
-        public virtual async Task<ActionResult> GetContractFilter([FromRoute] string name, [FromBody] JObject jobj)
-        {
-            if (jobj != null)
-            {
-                return Ok(await _getService.Add(new ContractFilter(name, jobj["param"].ToArray())));
-            }
-            _logger.LogWarning($"CONTRACT: Recieved null object");
-            return BadRequest("Передан пустой параметр");
-        }
-
-        #endregion Filter
     }
 }

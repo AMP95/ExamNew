@@ -2,6 +2,7 @@
 using MediatRepos;
 using Microsoft.Extensions.Logging;
 using Models;
+using System.Linq.Expressions;
 
 namespace MediatorServices
 {
@@ -32,15 +33,15 @@ namespace MediatorServices
         }
     }
 
-    public class GetMainIdPaymentService : GetMainIdModelService<Payment>
+    public class GetFilterPaymentService : GetFilterModelService<Payment>
     {
-        public GetMainIdPaymentService(IRepository repository, ILogger<GetMainIdModelService<Payment>> logger) : base(repository, logger)
+        public GetFilterPaymentService(IRepository repository, ILogger<GetFilterModelService<Payment>> logger) : base(repository, logger)
         {
         }
 
-        protected async override Task<object> Get(Guid id)
+        protected override async Task<object> Get(Expression<Func<Payment, bool>> filter)
         {
-            IEnumerable<Payment> documents = await _repository.Get<Payment>(d => d.ContractId == id);
+            IEnumerable<Payment> documents = await _repository.Get<Payment>(filter);
             List<PaymentDto> dtos = new List<PaymentDto>();
 
             foreach (var document in documents)
@@ -57,6 +58,24 @@ namespace MediatorServices
             }
 
             return dtos;
+        }
+
+        protected override Expression<Func<Payment, bool>> GetFilter(string property, params object[] parameters)
+        {
+            Expression<Func<Payment, bool>> filter = null;
+            switch (property)
+            {
+                case nameof(PaymentDto.ContractId):
+                    Guid guid = (Guid)parameters[0];
+                    filter = d => d.ContractId == guid;
+                    break;
+                case nameof(PaymentDto.Direction):
+                    DocumentDirection direction = (DocumentDirection)parameters[0];
+                    filter = d => d.DocumentDirection == (short)direction;
+                    break;
+            }
+
+            return filter;
         }
     }
 

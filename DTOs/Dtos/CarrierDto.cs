@@ -18,5 +18,8 @@ namespace DTOs
         public List<VehicleDto> Vehicles { get; set; }
     }
 
-    public class ClientDto : CompanyDto { }
+    public class ClientDto : CompanyDto 
+    {
+        public bool IsPriority { get; set; }
+    }
 }

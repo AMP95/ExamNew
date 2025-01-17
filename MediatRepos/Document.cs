@@ -2,9 +2,44 @@
 using MediatRepos;
 using Microsoft.Extensions.Logging;
 using Models;
+using System.Linq.Expressions;
 
 namespace MediatorServices
 {
+    public static class DocumentConverter
+    {
+        public static DocumentDto Convert(Document document)
+        {
+            return new DocumentDto()
+            {
+                Id = document.Id,
+                ContractId = document.ContractId,
+                CreationDate = document.CreationDate,
+                Direction = (DocumentDirection)document.DocumentDirection,
+                Number = document.Number,
+                RecieveType = (RecievingType)document.RecieveType,
+                RecievingDate = document.RecievingDate,
+                Summ = document.Summ,
+                Type = (DocumentType)document.DocumentType
+            };
+        }
+
+        public static Document Convert(DocumentDto dto)
+        {
+            return new Document()
+            {
+                ContractId = dto.ContractId,
+                CreationDate = dto.CreationDate,
+                DocumentType = (short)dto.Type,
+                Summ = dto.Summ,
+                DocumentDirection = (short)dto.Direction,
+                Number = dto.Number,
+                RecieveType = (short)dto.RecieveType,
+                RecievingDate = dto.RecievingDate,
+            };
+        }
+    }
+
     public class GetIdDocumentService : GetIdModelService<Document>
     {
         public GetIdDocumentService(IRepository repository, ILogger<GetIdModelService<Document>> logger) : base(repository, logger)
@@ -18,51 +53,55 @@ namespace MediatorServices
 
             if (document != null)
             {
-                dto = new DocumentDto()
-                {
-                    Id = document.Id,
-                    ContractId = document.ContractId,
-                    CreationDate = document.CreationDate,
-                    Direction = (DocumentDirection)document.DocumentDirection,
-                    Number = document.Number,
-                    RecieveType = (RecievingType)document.RecieveType,
-                    RecievingDate = document.RecievingDate,
-                    Summ = document.Summ,
-                    Type = (DocumentType)document.DocumentType
-                };
+                dto = DocumentConverter.Convert(document);
             }
             return dto;
         }
     }
 
-    public class GetMainIdDocumentService : GetMainIdModelService<Document>
+    public class GetFilterDocumentService : GetFilterModelService<Document>
     {
-        public GetMainIdDocumentService(IRepository repository, ILogger<GetMainIdModelService<Document>> logger) : base(repository, logger)
+        public GetFilterDocumentService(IRepository repository, ILogger<GetFilterModelService<Document>> logger) : base(repository, logger)
         {
         }
 
-        protected async override Task<object> Get(Guid id)
+        protected override async Task<object> Get(Expression<Func<Document, bool>> filter)
         {
-            IEnumerable<Document> documents = await _repository.Get<Document>(d => d.ContractId == id);
+            IEnumerable<Document> documents = await _repository.Get<Document>(filter);
             List<DocumentDto> dtos = new List<DocumentDto>();
 
             foreach (var document in documents)
             {
-                dtos.Add(new DocumentDto()
-                {
-                    Id = document.Id,
-                    ContractId = document.ContractId,
-                    CreationDate = document.CreationDate,
-                    Direction = (DocumentDirection)document.DocumentDirection,
-                    Number = document.Number,
-                    RecieveType = (RecievingType)document.RecieveType,
-                    RecievingDate = document.RecievingDate,
-                    Summ = document.Summ,
-                    Type = (DocumentType)document.DocumentType
-                });
+                dtos.Add(DocumentConverter.Convert(document));
             }
 
             return dtos;
+        }
+
+        protected override Expression<Func<Document, bool>> GetFilter(string property, params object[] parameters)
+        {
+            Expression<Func<Document, bool>> filter = null;
+            switch (property) 
+            {
+                case nameof(DocumentDto.ContractId):
+                    Guid guid = (Guid)parameters[0];
+                    filter = d => d.ContractId == guid;
+                    break;
+                case nameof(DocumentDto.Type):
+                    DocumentType documentType = (DocumentType)parameters[0];
+                    filter = d => d.DocumentType == (short)documentType;
+                    break;
+                case nameof(DocumentDto.Direction):
+                    DocumentDirection direction = (DocumentDirection)parameters[0];
+                    filter = d => d.DocumentDirection == (short)direction;
+                    break;
+                case nameof(DocumentDto.RecieveType):
+                    RecievingType recieve = (RecievingType)parameters[0];
+                    filter = d => d.RecieveType == (short)recieve;
+                    break;
+            }
+
+            return filter;
         }
     }
 
@@ -81,19 +120,7 @@ namespace MediatorServices
 
         protected override async Task<bool> Update(DocumentDto dto)
         {
-            Document document = new Document()
-            {
-                ContractId = dto.ContractId,
-                CreationDate = dto.CreationDate,
-                DocumentType = (short)dto.Type,
-                Summ = dto.Summ,
-                DocumentDirection = (short)dto.Direction,
-                Number = dto.Number,
-                RecieveType = (short)dto.RecieveType,
-                RecievingDate = dto.RecievingDate,
-            };
-
-            return await _repository.Update(document);
+            return await _repository.Update(DocumentConverter.Convert(dto));
         }
     }
 

@@ -2,7 +2,7 @@
 using MediatRepos;
 using Microsoft.Extensions.Logging;
 using Models;
-using System.Threading;
+using System.Linq.Expressions;
 
 namespace MediatorServices
 {
@@ -75,105 +75,6 @@ namespace MediatorServices
         }
     }
 
-    public class GetMainIdDriverService : GetMainIdModelService<Driver>
-    {
-        public GetMainIdDriverService(IRepository repository, ILogger<GetMainIdModelService<Driver>> logger) : base(repository, logger)
-        {
-        }
-
-        protected override async Task<object> Get(Guid id)
-        {
-            IEnumerable<Driver> drivers = await _repository.Get<Driver>(d => d.CarrierId == id, 
-                                                                        q => q.OrderBy(d => d.FamilyName).ThenBy(d => d.Name).ThenBy(d => d.FatherName),
-                                                                        "Carrier,Vehicle");
-            List<DriverDto> dtos = new List<DriverDto>();
-
-            foreach (var driver in drivers)
-            {
-                DriverDto dto = new DriverDto()
-                {
-                    Id = driver.Id,
-                    Name = $"{driver.FamilyName} {driver.Name} {driver.FatherName}"
-                };
-
-                if (driver.Carrier != null) 
-                {
-                    dto.Carrier = new CarrierDto()
-                    {
-                        Id = driver.Carrier.Id,
-                        Name = driver.Carrier.Name
-                    };
-                }
-
-                if (driver.VehicleId != null)
-                {
-                    dto.Vehicle = new VehicleDto()
-                    {
-                        Id = driver.Vehicle.Id,
-                        TruckModel = driver.Vehicle.TruckModel,
-                        TruckNumber = driver.Vehicle.TruckNumber,
-                        TrailerNumber = driver.Vehicle.TrailerNumber,
-                        TrailerModel = driver.Vehicle.TrailerModel,
-                    };
-                }
-
-                dtos.Add(dto);
-            }
-
-            return dtos;
-        }
-    }
-
-    public class SearchDriverService : SearchModelService<Driver>
-    {
-        public SearchDriverService(IRepository repository, ILogger<SearchModelService<Driver>> logger) : base(repository, logger)
-        {
-        }
-
-        protected override async Task<object> Get(string name)
-        {
-            IEnumerable<Driver> drivers = await _repository.Get<Driver>(d => (d.FamilyName+d.Name+d.FatherName).ToLower().Contains(name.ToLower()), 
-                                                                        q => q.OrderBy(d => d.FamilyName).ThenBy(d => d.Name).ThenBy(d => d.FatherName), 
-                                                                        "Carrier,Vehicle");
-            List<DriverDto> dtos = new List<DriverDto>();
-
-            foreach (var driver in drivers)
-            {
-                DriverDto dto = new DriverDto()
-                {
-                    Id = driver.Id,
-                    Name = $"{driver.FamilyName} {driver.Name} {driver.FatherName}"
-                };
-
-                if (driver.Carrier != null)
-                {
-                    dto.Carrier = new CarrierDto()
-                    {
-                        Id = driver.Carrier.Id,
-                        Name = driver.Carrier.Name,
-                        Vat = (VAT)driver.Carrier.Vat,
-                    };
-                }
-
-                if (driver.VehicleId != null)
-                {
-                    dto.Vehicle = new VehicleDto()
-                    {
-                        Id = driver.Vehicle.Id,
-                        TruckModel = driver.Vehicle.TruckModel,
-                        TruckNumber = driver.Vehicle.TruckNumber,
-                        TrailerModel = driver.Vehicle.TrailerModel,
-                        TrailerNumber = driver.Vehicle.TrailerNumber,
-                    };
-                }
-
-                dtos.Add(dto);
-            }
-
-            return dtos;
-        }
-    }
-
     public class GetRangeDriverService : GetRangeModelService<Driver>
     {
         public GetRangeDriverService(IRepository repository, ILogger<GetRangeModelService<Driver>> logger) : base(repository, logger)
@@ -218,6 +119,74 @@ namespace MediatorServices
             }
 
             return dtos;
+        }
+    }
+
+    public class GetFilterDriverService : GetFilterModelService<Driver>
+    {
+        public GetFilterDriverService(IRepository repository, ILogger<GetFilterModelService<Driver>> logger) : base(repository, logger)
+        {
+        }
+
+        protected override async Task<object> Get(Expression<Func<Driver, bool>> filter)
+        {
+            IEnumerable<Driver> drivers = await _repository.Get<Driver>(filter,
+                                                                         q => q.OrderBy(d => d.FamilyName).ThenBy(d => d.Name).ThenBy(d => d.FatherName),
+                                                                         "Carrier,Vehicle");
+            List<DriverDto> dtos = new List<DriverDto>();
+
+            foreach (var driver in drivers)
+            {
+                DriverDto dto = new DriverDto()
+                {
+                    Id = driver.Id,
+                    Name = $"{driver.FamilyName} {driver.Name} {driver.FatherName}"
+                };
+
+                if (driver.Carrier != null)
+                {
+                    dto.Carrier = new CarrierDto()
+                    {
+                        Id = driver.Carrier.Id,
+                        Name = driver.Carrier.Name,
+                        Vat = (VAT)driver.Carrier.Vat,
+                    };
+                }
+
+                if (driver.VehicleId != null)
+                {
+                    dto.Vehicle = new VehicleDto()
+                    {
+                        Id = driver.Vehicle.Id,
+                        TruckModel = driver.Vehicle.TruckModel,
+                        TruckNumber = driver.Vehicle.TruckNumber,
+                        TrailerModel = driver.Vehicle.TrailerModel,
+                        TrailerNumber = driver.Vehicle.TrailerNumber,
+                    };
+                }
+
+                dtos.Add(dto);
+            }
+
+            return dtos;
+        }
+
+        protected override Expression<Func<Driver, bool>> GetFilter(string property, params object[] parameters)
+        {
+            Expression<Func<Driver, bool>> filter = null;
+            switch (property)
+            {
+                case nameof(DriverDto.Carrier):
+                    Guid guid = (Guid)parameters[0];
+                    filter = d => d.CarrierId == guid;
+                    break;
+                default:
+                    string name = parameters[0].ToString().ToLower();
+                    filter = d => (d.FamilyName + d.Name + d.FatherName).ToLower().Contains(name);
+                    break;
+            }
+
+            return filter;
         }
     }
 

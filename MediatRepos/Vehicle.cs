@@ -2,6 +2,7 @@
 using MediatorServices;
 using Microsoft.Extensions.Logging;
 using Models;
+using System.Linq.Expressions;
 
 namespace MediatRepos
 {
@@ -36,46 +37,6 @@ namespace MediatRepos
                 }
             }
             return dto;
-        }
-    }
-
-    public class GetMainIdVehicleService : GetMainIdModelService<Vehicle>
-    {
-        public GetMainIdVehicleService(IRepository repository, ILogger<GetMainIdModelService<Vehicle>> logger) : base(repository, logger)
-        {
-        }
-
-        protected override async Task<object> Get(Guid id)
-        {
-            IEnumerable<Vehicle> vehicles = await _repository.Get<Vehicle>(t => t.CarrierId == id,
-                                                                           q => q.OrderBy(t => t.TruckModel).ThenBy(t => t.TruckNumber).ThenBy(t => t.TrailerNumber),
-                                                                           "Carrier");
-            List<VehicleDto> dtos = new List<VehicleDto>();
-
-            foreach (var vehicle in vehicles)
-            {
-                VehicleDto dto = new VehicleDto()
-                {
-                    Id = vehicle.Id,
-                    TruckModel = vehicle.TruckModel,
-                    TruckNumber = vehicle.TruckNumber,
-                    TrailerModel = vehicle.TrailerModel,
-                    TrailerNumber = vehicle.TrailerNumber,
-                };
-
-                if (vehicle.CarrierId != null)
-                {
-                    dto.Carrier = new CarrierDto()
-                    {
-                        Id = vehicle.Carrier.Id,
-                        Name = vehicle.Carrier.Name
-                    };
-                }
-
-                dtos.Add(dto);
-            }
-
-            return dtos;
         }
     }
 
@@ -119,18 +80,16 @@ namespace MediatRepos
         }
     }
 
-    public class SearchVehicleService : SearchModelService<Vehicle>
+    public class GetFilterVehicleService : GetFilterModelService<Vehicle>
     {
-        public SearchVehicleService(IRepository repository, ILogger<SearchModelService<Vehicle>> logger) : base(repository, logger)
+        public GetFilterVehicleService(IRepository repository, ILogger<GetFilterModelService<Vehicle>> logger) : base(repository, logger)
         {
         }
 
-        protected override async Task<object> Get(string name)
+        protected override async Task<object> Get(Expression<Func<Vehicle, bool>> filter)
         {
-            string formattedName = name.Replace(" ","").Replace("/","").ToLower();
-
-            IEnumerable<Vehicle> vehicles = await _repository.Get<Vehicle>(t => (t.TruckNumber + t.TrailerNumber).Replace("/", "").Replace(" ", "").ToLower().Contains(formattedName),
-                                                                           q => q.OrderBy(t => t.TruckModel).ThenBy(t => t.TruckNumber).ThenBy(t => t.TrailerNumber), 
+            IEnumerable<Vehicle> vehicles = await _repository.Get<Vehicle>(filter,
+                                                                           q => q.OrderBy(t => t.TruckModel).ThenBy(t => t.TruckNumber).ThenBy(t => t.TrailerNumber),
                                                                            "Carrier");
             List<VehicleDto> dtos = new List<VehicleDto>();
 
@@ -141,11 +100,11 @@ namespace MediatRepos
                     Id = vehicle.Id,
                     TruckModel = vehicle.TruckModel,
                     TruckNumber = vehicle.TruckNumber,
+                    TrailerModel = vehicle.TrailerModel,
                     TrailerNumber = vehicle.TrailerNumber,
-                    TrailerModel = vehicle.TrailerModel
                 };
 
-                if (vehicle.Carrier != null)
+                if (vehicle.CarrierId != null)
                 {
                     dto.Carrier = new CarrierDto()
                     {
@@ -158,6 +117,24 @@ namespace MediatRepos
             }
 
             return dtos;
+        }
+
+        protected override Expression<Func<Vehicle, bool>> GetFilter(string property, params object[] parameters)
+        {
+            Expression<Func<Vehicle, bool>> filter = null;
+            switch (property)
+            {
+                case nameof(VehicleDto.Carrier):
+                    Guid guid = (Guid)parameters[0];
+                    filter = d => d.CarrierId == guid;
+                    break;
+                default:
+                    string formattedName = parameters[0].ToString().Replace(" ", "").Replace("/", "").ToLower();
+                    filter = t => (t.TruckNumber + t.TrailerNumber).Replace("/", "").Replace(" ", "").ToLower().Contains(formattedName);
+                    break;
+            }
+
+            return filter;
         }
     }
 

@@ -96,15 +96,15 @@ namespace MediatorServices
         }
     }
 
-    public class SearchContractService : SearchModelService<Contract>
+    public class GetFilteredContractService : GetFilterModelService<Contract>
     {
-        public SearchContractService(IRepository repository, ILogger<SearchModelService<Contract>> logger) : base(repository, logger)
-        {
-        }
+        public GetFilteredContractService(IRepository repository, ILogger<GetFilteredContractService> logger) : base(repository, logger) { }
 
-        protected override async Task<object> Get(string name)
+        protected override async Task<object> Get(Expression<Func<Contract, bool>> filter)
         {
-            IEnumerable<Contract> contracts = await _repository.Get<Contract>(c => c.Number.ToString().Contains(name), q => q.OrderBy(c => c.CreationDate).ThenBy(c => c.Number), "Carrier,Client,Driver,Vehicle,LoadingPoint,UnloadingPoints");
+            IEnumerable<Contract> contracts = await _repository.Get(filter, 
+                                                                    q => q.OrderBy(c => c.CreationDate).ThenBy(c => c.Number), 
+                                                                    "Carrier,Client,Driver,Vehicle,LoadingPoint,UnloadingPoints");
             List<ContractDto> dtos = new List<ContractDto>();
 
             foreach (var contract in contracts)
@@ -129,128 +129,7 @@ namespace MediatorServices
                         Name = contract.Carrier.Name,
                         Vat = (VAT)contract.Carrier.Vat,
                     },
-                    Client = new ClientDto() 
-                    {
-                        Id = contract.Carrier.Id,
-                        Name = contract.Client.Name,
-                    },
-                    Driver = new DriverDto()
-                    {
-                        Id = contract.Driver.Id,
-                        Name = $"{contract.Driver.FamilyName} {contract.Driver.Name} {contract.Driver.FatherName}",
-                        Phones = contract.Driver.Phones.Split(';').ToList(),
-                    },
-                    Vehicle = new VehicleDto()
-                    {
-                        Id = contract.Vehicle.Id,
-                        TruckModel = contract.Vehicle.TruckModel,
-                        TruckNumber = contract.Vehicle.TruckNumber,
-                        TrailerModel = contract.Vehicle.TrailerModel,
-                        TrailerNumber = contract.Vehicle.TrailerNumber,
-                    },
-                    UnloadPoints = contract.UnloadingPoints.Select(s => new RoutePointDto() { Id = s.Id, Route = s.Route}).ToList(),
-                    Documents = new List<DocumentDto>()
-                };
-
-                dtos.Add(dto);
-            }
-
-            return dtos;
-        }
-    }
-
-    public class SetContractStatusService : IRequestHandler<SetContractStatus, bool>
-    {
-        protected IRepository _repository;
-        protected ILogger<SetContractStatusService> _logger;
-
-        public SetContractStatusService(IRepository repository, ILogger<SetContractStatusService> logger)
-        {
-            _repository = repository;
-            _logger = logger;
-        }
-        public async Task<bool> Handle(SetContractStatus request, CancellationToken cancellationToken)
-        {
-            Contract contract = await _repository.GetById<Contract>(request.ContractId);
-            if (contract != null)
-            {
-                contract.Status = (short)request.ContractStatus;
-                return await _repository.Update(contract);
-            }
-            return false;
-        }
-    }
-
-    public class GetFilteredContractService : IRequestHandler<ContractFilter, object>
-    {
-        protected IRepository _repository;
-        protected ILogger<GetFilteredContractService> _logger;
-        public GetFilteredContractService(IRepository repository, ILogger<GetFilteredContractService> logger)
-        {
-            _repository = repository;
-            _logger = logger;
-        }
-        public async Task<object> Handle(ContractFilter request, CancellationToken cancellationToken)
-        {
-            Expression<Func<Contract, bool>> filter = null;
-            switch (request.FilterName) 
-            {
-                case ContractFilterProperty.Date:
-                    DateTime.TryParse(request.Params[0].ToString(), out DateTime start);
-                    DateTime.TryParse(request.Params[1].ToString(), out DateTime end);
-                    filter = c => c.CreationDate >= start && c.CreationDate <= end;
-                    break;
-                case ContractFilterProperty.Route:
-                    string route = request.Params[0].ToString();
-                    filter = c => c.LoadingPoint.Route.Contains(route) || c.UnloadingPoints.Any(p => p.Route.Contains(route));
-                    break;
-                case ContractFilterProperty.Carrier:
-                    string carrier = request.Params[0].ToString();
-                    filter = c => c.Carrier.Name.Contains(carrier);
-                    break;
-                case ContractFilterProperty.Driver:
-                    string driver = request.Params[0].ToString();
-                    filter = c => $"{c.Driver.FamilyName} {c.Driver.Name} {c.Driver.FatherName}".Contains(driver);
-                    break;
-                case ContractFilterProperty.Status:
-                    ContractStatus status = (ContractStatus)Enum.Parse(typeof(ContractStatus),request.Params[0].ToString());
-                    filter = c => c.Status == (int)status;
-                    break;
-                case ContractFilterProperty.Client:
-                    string client = request.Params[0].ToString();
-                    filter = c => c.Client.Name.Contains(client);
-                    break;
-                default: 
-                    filter = c => true; 
-                    break;
-            }
-
-            IEnumerable<Contract> contracts = await _repository.Get(filter, q => q.OrderBy(c => c.CreationDate).ThenBy(c => c.Number), "Carrier,Client,Driver,Vehicle,LoadingPoint,UnloadingPoints");
-            List<ContractDto> dtos = new List<ContractDto>();
-
-            foreach (var contract in contracts)
-            {
-                ContractDto dto = new ContractDto()
-                {
-                    Id = contract.Id,
-                    Number = contract.Number,
-                    CreationDate = contract.CreationDate,
-                    LoadPoint = new RoutePointDto()
-                    {
-                        Id = contract.LoadingPoint.Id,
-                        Route = contract.LoadingPoint.Route,
-                    },
-                    Status = (ContractStatus)contract.Status,
-                    Payment = contract.CarrierPayment,
-                    Prepayment = contract.CarrierPrepayment,
-                    ClientPayment = contract.ClientPayment,
-                    Carrier = new CarrierDto()
-                    {
-                        Id = contract.Carrier.Id,
-                        Name = contract.Carrier.Name,
-                        Vat = (VAT)contract.Carrier.Vat,
-                    },
-                    Client = new ClientDto() 
+                    Client = new ClientDto()
                     {
                         Id = contract.Carrier.Id,
                         Name = contract.Client.Name,
@@ -276,7 +155,46 @@ namespace MediatorServices
             }
 
             return dtos;
-
+        }
+        protected override Expression<Func<Contract, bool>> GetFilter(string property, params object[] parameters)
+        {
+            Expression<Func<Contract, bool>> filter = null;
+            switch (property)
+            {
+                case nameof(ContractDto.CreationDate):
+                    DateTime.TryParse(parameters[0].ToString(), out DateTime start);
+                    DateTime.TryParse(parameters[1].ToString(), out DateTime end);
+                    filter = c => c.CreationDate >= start && c.CreationDate <= end;
+                    break;
+                case nameof(ContractDto.LoadPoint):
+                    string route = parameters[0].ToString();
+                    filter = c => c.LoadingPoint.Route.Contains(route) || c.UnloadingPoints.Any(p => p.Route.Contains(route));
+                    break;
+                case nameof(ContractDto.Carrier):
+                    string carrier = parameters[0].ToString();
+                    filter = c => c.Carrier.Name.Contains(carrier);
+                    break;
+                case nameof(ContractDto.Driver):
+                    string driver = parameters[0].ToString();
+                    filter = c => $"{c.Driver.FamilyName} {c.Driver.Name} {c.Driver.FatherName}".Contains(driver);
+                    break;
+                case nameof(ContractDto.Status):
+                    ContractStatus status = (ContractStatus)Enum.Parse(typeof(ContractStatus), parameters[0].ToString());
+                    filter = c => c.Status == (int)status;
+                    break;
+                case nameof(ContractDto.Client):
+                    string client = parameters[0].ToString();
+                    filter = c => c.Client.Name.Contains(client);
+                    break;
+                case nameof(ContractDto.Number):
+                    short number = (short)parameters[0];
+                    filter = c => c.Number == number;
+                    break;
+                default:
+                    filter = c => true;
+                    break;
+            }
+            return filter;
         }
     }
 
@@ -420,6 +338,28 @@ namespace MediatorServices
                     });
                 }
 
+                return await _repository.Update(contract);
+            }
+            return false;
+        }
+    }
+
+    public class SetContractStatusService : IRequestHandler<SetContractStatus, bool>
+    {
+        protected IRepository _repository;
+        protected ILogger<SetContractStatusService> _logger;
+
+        public SetContractStatusService(IRepository repository, ILogger<SetContractStatusService> logger)
+        {
+            _repository = repository;
+            _logger = logger;
+        }
+        public async Task<bool> Handle(SetContractStatus request, CancellationToken cancellationToken)
+        {
+            Contract contract = await _repository.GetById<Contract>(request.ContractId);
+            if (contract != null)
+            {
+                contract.Status = (short)request.ContractStatus;
                 return await _repository.Update(contract);
             }
             return false;
