@@ -12,6 +12,7 @@ namespace MediatRepos
             Value = value;
         }
     }
+    
 
     public class Add<TDto> : IRequest<bool>
     {
@@ -60,6 +61,18 @@ namespace MediatRepos
         public Search(string name)
         {
             Name = name;
+        }
+    }
+
+    public class SetContractStatus : IRequest<bool> 
+    {
+        public Guid ContractId { get; set; }
+        public ContractStatus ContractStatus { get; set; }
+
+        public SetContractStatus(Guid id, ContractStatus status)
+        {
+            ContractId = id;
+            ContractStatus = status;
         }
     }
 

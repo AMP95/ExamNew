@@ -159,6 +159,28 @@ namespace MediatorServices
         }
     }
 
+    public class SetContractStatusService : IRequestHandler<SetContractStatus, bool>
+    {
+        protected IRepository _repository;
+        protected ILogger<SetContractStatusService> _logger;
+
+        public SetContractStatusService(IRepository repository, ILogger<SetContractStatusService> logger)
+        {
+            _repository = repository;
+            _logger = logger;
+        }
+        public async Task<bool> Handle(SetContractStatus request, CancellationToken cancellationToken)
+        {
+            Contract contract = await _repository.GetById<Contract>(request.ContractId);
+            if (contract != null)
+            {
+                contract.Status = (short)request.ContractStatus;
+                return await _repository.Update(contract);
+            }
+            return false;
+        }
+    }
+
     public class GetFilteredContractService : IRequestHandler<ContractFilter, object>
     {
         protected IRepository _repository;
