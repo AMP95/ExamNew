@@ -380,25 +380,43 @@ namespace MediatorServices
         }
     }
 
-    //public class SetContractStatusService : IRequestHandler<SetContractStatus, bool>
-    //{
-    //    protected IRepository _repository;
-    //    protected ILogger<SetContractStatusService> _logger;
+    public class UpdateContractPropertyService : IRequestHandler<UpdateProperty<ContractDto>, bool>
+    {
+        protected IRepository _repository;
+        protected ILogger<UpdateContractPropertyService> _logger;
 
-    //    public SetContractStatusService(IRepository repository, ILogger<SetContractStatusService> logger)
-    //    {
-    //        _repository = repository;
-    //        _logger = logger;
-    //    }
-    //    public async Task<bool> Handle(SetContractStatus request, CancellationToken cancellationToken)
-    //    {
-    //        Contract contract = await _repository.GetById<Contract>(request.ContractId);
-    //        if (contract != null)
-    //        {
-    //            contract.Status = (short)request.ContractStatus;
-    //            return await _repository.Update(contract);
-    //        }
-    //        return false;
-    //    }
-    //}
+        public UpdateContractPropertyService(IRepository repository, ILogger<UpdateContractPropertyService> logger)
+        {
+            _repository = repository;
+            _logger = logger;
+        }
+
+        public async Task<bool> Handle(UpdateProperty<ContractDto> request, CancellationToken cancellationToken)
+        {
+            try
+            {
+                Contract contract = await _repository.GetById<Contract>(request.Id);
+
+                foreach (var pair in request.Updates) 
+                {
+                    switch (pair.Key)
+                    {
+                        case nameof(ContractDto.Status):
+                            if (Enum.TryParse<ContractStatus>(pair.Value.ToString(), out ContractStatus newStatus))
+                            {
+                                contract.Status = (short)newStatus;
+                            }
+                            break;
+                    }
+                }
+
+                return await _repository.Update(contract);
+            }
+            catch (Exception ex) 
+            {
+                _logger.LogError(ex,ex.Message);
+            }
+            return false;
+        }
+    }
 }

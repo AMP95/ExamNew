@@ -21,79 +21,134 @@ namespace Exam.Controllers
         [HttpPost("vehicle")]
         public virtual async Task<ActionResult> PostVehicle([FromBody] JObject jobj)
         {
-            if (jobj != null)
+            try
             {
-                return Ok(await _updateService.Add(new Add<VehicleDto>(jobj.ToObject<VehicleDto>())));
+                if (jobj != null)
+                {
+                    return Ok(await _updateService.Add(new Add<VehicleDto>(jobj.ToObject<VehicleDto>())));
+                }
+                _logger.LogWarning($"VEHICLE: Recieved null object");
+                return BadRequest("Передан пустой параметр");
             }
-            _logger.LogWarning($"VEHICLE: Recieved null object");
-            return BadRequest("Передан пустой параметр");
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return BadRequest("Неверный тип данных");
+            }
         }
-
 
         [HttpPost("driver")]
         public virtual async Task<ActionResult> PostDriver([FromBody] JObject jobj)
         {
-            if (jobj != null)
+            try
             {
-                return Ok(await _updateService.Add(new Add<DriverDto>(jobj.ToObject<DriverDto>())));
+                if (jobj != null)
+                {
+                    return Ok(await _updateService.Add(new Add<DriverDto>(jobj.ToObject<DriverDto>())));
+                }
+                _logger.LogWarning($"DRIVER: Recieved null object");
+                return BadRequest("Передан пустой параметр");
             }
-            _logger.LogWarning($"DRIVER: Recieved null object");
-            return BadRequest("Передан пустой параметр");
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return BadRequest("Неверный тип данных");
+            }
         }
 
         [HttpPost("carrier")]
         public virtual async Task<ActionResult> PostCarrier([FromBody] JObject jobj)
         {
-            if (jobj != null)
+            try
             {
-                return Ok(await _updateService.Add(new Add<CarrierDto>(jobj.ToObject<CarrierDto>())));
+                if (jobj != null)
+                {
+                    return Ok(await _updateService.Add(new Add<CarrierDto>(jobj.ToObject<CarrierDto>())));
+                }
+                _logger.LogWarning($"CARRIER: Recieved null object");
+                return BadRequest("Передан пустой параметр");
             }
-            _logger.LogWarning($"CARRIER: Recieved null object");
-            return BadRequest("Передан пустой параметр");
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return BadRequest("Неверный тип данных");
+            }
         }
 
         [HttpPost("client")]
         public virtual async Task<ActionResult> PostClient([FromBody] JObject jobj)
         {
-            if (jobj != null)
+            try
             {
-                return Ok(await _updateService.Add(new Add<ClientDto>(jobj.ToObject<ClientDto>())));
+                if (jobj != null)
+                {
+                    return Ok(await _updateService.Add(new Add<ClientDto>(jobj.ToObject<ClientDto>())));
+                }
+                _logger.LogWarning($"CLIENT: Recieved null object");
+                return BadRequest("Передан пустой параметр");
             }
-            _logger.LogWarning($"CLIENT: Recieved null object");
-            return BadRequest("Передан пустой параметр");
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return BadRequest("Неверный тип данных");
+            }
         }
 
         [HttpPost("contract")]
         public virtual async Task<ActionResult> PostContract([FromBody] JObject jobj)
         {
-            if (jobj != null)
+            try
             {
-                return Ok(await _updateService.Add(new Add<ContractDto>(jobj.ToObject<ContractDto>())));
+                if (jobj != null)
+                {
+                    return Ok(await _updateService.Add(new Add<ContractDto>(jobj.ToObject<ContractDto>())));
+                }
+                _logger.LogWarning($"CONTRACT: Recieved null object");
+                return BadRequest("Передан пустой параметр");
             }
-            _logger.LogWarning($"CONTRACT: Recieved null object");
-            return BadRequest("Передан пустой параметр");
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return BadRequest("Неверный тип данных");
+            }
         }
 
         [HttpPost("document")]
         public virtual async Task<ActionResult> PostDocument([FromBody] JObject jobj)
         {
-            if (jobj != null)
+            try
             {
-                return Ok(await _updateService.Add(new Add<DocumentDto>(jobj.ToObject<DocumentDto>())));
+                if (jobj != null)
+                {
+                    return Ok(await _updateService.Add(new Add<DocumentDto>(jobj.ToObject<DocumentDto>())));
+                }
+                _logger.LogWarning($"DOCUMENT: Recieved null object");
+                return BadRequest("Передан пустой параметр");
             }
-            _logger.LogWarning($"DOCUMENT: Recieved null object");
-            return BadRequest("Передан пустой параметр");
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return BadRequest("Неверный тип данных");
+            }
         }
 
         [HttpPost("payment")]
         public virtual async Task<ActionResult> PostPayment([FromBody] JObject jobj)
         {
-            if (jobj != null)
+            try
             {
-                return Ok(await _updateService.Add(new Add<PaymentDto>(jobj.ToObject<PaymentDto>())));
+                if (jobj != null)
+                {
+                    return Ok(await _updateService.Add(new Add<PaymentDto>(jobj.ToObject<PaymentDto>())));
+                }
+                _logger.LogWarning($"PAYMENT: Recieved null object");
+                return BadRequest("Передан пустой параметр");
             }
-            _logger.LogWarning($"PAYMENT: Recieved null object");
-            return BadRequest("Передан пустой параметр");
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return BadRequest("Неверный тип данных");
+            }
         }
     }
 }

@@ -36,14 +36,12 @@ namespace MediatRepos
     public class UpdateProperty<TDto> : IRequest<bool> where TDto : IDto
     {
         public Guid Id { get; set; }
-        public string PropertyName { get; set; }
-        public object Value { get; set; }
+        public KeyValuePair<string, object>[] Updates { get; set; }
 
-        public UpdateProperty(Guid id, string propName, object value)
+        public UpdateProperty(Guid id, KeyValuePair<string, object>[] updates)
         {
-            Id = Id;
-            PropertyName = propName;
-            Value = value;
+            Id = id;
+            Updates = updates;
         }
     }
 

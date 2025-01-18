@@ -21,7 +21,6 @@ namespace Exam.Controllers
             return Ok(await _updateService.Add(new Delete<VehicleDto>(id)));
         }
 
-
         [HttpDelete("document/{id}")]
         public virtual async Task<ActionResult> DeleteDocument(Guid id)
         {
