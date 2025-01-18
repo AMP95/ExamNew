@@ -1,9 +1,10 @@
-﻿using MediatR;
+﻿using DTOs.Dtos;
+using MediatR;
 using Models;
 
 namespace MediatRepos
 {
-    public abstract class UpdateModelService<TDto> : IRequestHandler<Update<TDto>, bool> where TDto : class
+    public abstract class UpdateModelService<TDto> : IRequestHandler<Update<TDto>, bool> where TDto : IDto
     {
         protected IRepository _repository;
         public UpdateModelService(IRepository repository)

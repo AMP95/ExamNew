@@ -1,4 +1,5 @@
 ﻿using DTOs;
+using MediatR;
 using MediatRepos;
 using Microsoft.Extensions.Logging;
 using Models;
@@ -6,9 +7,9 @@ using System.Linq.Expressions;
 
 namespace MediatorServices
 {
-    public class GetIdPaymentService : GetIdModelService<Payment>
+    public class GetIdPaymentService : GetIdModelService<PaymentDto>
     {
-        public GetIdPaymentService(IRepository repository, ILogger<GetIdModelService<Payment>> logger) : base(repository, logger)
+        public GetIdPaymentService(IRepository repository, ILogger<GetIdModelService<PaymentDto>> logger) : base(repository, logger)
         {
         }
 
@@ -33,13 +34,24 @@ namespace MediatorServices
         }
     }
 
-    public class GetFilterPaymentService : GetFilterModelService<Payment>
+    public class GetFilterPaymentService : IRequestHandler<GetFilter<PaymentDto>, object>
     {
-        public GetFilterPaymentService(IRepository repository, ILogger<GetFilterModelService<Payment>> logger) : base(repository, logger)
+        protected IRepository _repository;
+        protected ILogger<GetFilterPaymentService> _logger;
+
+        public GetFilterPaymentService(IRepository repository, ILogger<GetFilterPaymentService> logger)
         {
+            _repository = repository;
+            _logger = logger;
         }
 
-        protected override async Task<object> Get(Expression<Func<Payment, bool>> filter)
+        public async Task<object> Handle(GetFilter<PaymentDto> request, CancellationToken cancellationToken)
+        {
+            Expression<Func<Payment, bool>> filter = GetFilter(request.PropertyName, request.Params);
+            return await Get(filter);
+        }
+
+        protected async Task<object> Get(Expression<Func<Payment, bool>> filter)
         {
             IEnumerable<Payment> documents = await _repository.Get<Payment>(filter);
             List<PaymentDto> dtos = new List<PaymentDto>();
@@ -60,7 +72,7 @@ namespace MediatorServices
             return dtos;
         }
 
-        protected override Expression<Func<Payment, bool>> GetFilter(string property, params object[] parameters)
+        protected Expression<Func<Payment, bool>> GetFilter(string property, params object[] parameters)
         {
             Expression<Func<Payment, bool>> filter = null;
             try
@@ -78,7 +90,7 @@ namespace MediatorServices
                         break;
                 }
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 filter = c => false;
                 _logger.LogError(ex, ex.Message);
@@ -88,10 +100,18 @@ namespace MediatorServices
         }
     }
 
-    public class DeletePaymentService : DeleteModelService<Payment>
+    public class DeletePaymentService : IRequestHandler<Delete<PaymentDto>, bool>
     {
-        public DeletePaymentService(IRepository repository) : base(repository)
+        private IRepository _repository;
+
+        public DeletePaymentService(IRepository repository)
         {
+            _repository = repository;
+        }
+
+        public async Task<bool> Handle(Delete<PaymentDto> request, CancellationToken cancellationToken)
+        {
+            return await _repository.Remove<Payment>(request.Id);
         }
     }
 

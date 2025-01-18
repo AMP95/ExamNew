@@ -1,4 +1,5 @@
 ﻿using DTOs;
+using MediatR;
 using MediatRepos;
 using Microsoft.Extensions.Logging;
 using Models;
@@ -40,9 +41,9 @@ namespace MediatorServices
         }
     }
 
-    public class GetIdDocumentService : GetIdModelService<Document>
+    public class GetIdDocumentService : GetIdModelService<DocumentDto>
     {
-        public GetIdDocumentService(IRepository repository, ILogger<GetIdModelService<Document>> logger) : base(repository, logger)
+        public GetIdDocumentService(IRepository repository, ILogger<GetIdModelService<DocumentDto>> logger) : base(repository, logger)
         {
         }
 
@@ -59,13 +60,24 @@ namespace MediatorServices
         }
     }
 
-    public class GetFilterDocumentService : GetFilterModelService<Document>
+    public class GetFilterDocumentService : IRequestHandler<GetFilter<DocumentDto>, object>
     {
-        public GetFilterDocumentService(IRepository repository, ILogger<GetFilterModelService<Document>> logger) : base(repository, logger)
+        protected IRepository _repository;
+        protected ILogger<GetFilterDocumentService> _logger;
+
+        public GetFilterDocumentService(IRepository repository, ILogger<GetFilterDocumentService> logger)
         {
+            _repository = repository;
+            _logger = logger;
         }
 
-        protected override async Task<object> Get(Expression<Func<Document, bool>> filter)
+        public async Task<object> Handle(GetFilter<DocumentDto> request, CancellationToken cancellationToken)
+        {
+            Expression<Func<Document, bool>> filter = GetFilter(request.PropertyName, request.Params);
+            return await Get(filter);
+        }
+
+        protected async Task<object> Get(Expression<Func<Document, bool>> filter)
         {
             IEnumerable<Document> documents = await _repository.Get<Document>(filter);
             List<DocumentDto> dtos = new List<DocumentDto>();
@@ -78,7 +90,7 @@ namespace MediatorServices
             return dtos;
         }
 
-        protected override Expression<Func<Document, bool>> GetFilter(string property, params object[] parameters)
+        protected Expression<Func<Document, bool>> GetFilter(string property, params object[] parameters)
         {
             Expression<Func<Document, bool>> filter = null;
 
@@ -104,7 +116,7 @@ namespace MediatorServices
                         break;
                 }
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 filter = c => false;
                 _logger.LogError(ex, ex.Message);
@@ -114,10 +126,18 @@ namespace MediatorServices
         }
     }
 
-    public class DeleteDocumentService : DeleteModelService<Document>
+    public class DeleteDocumentService : IRequestHandler<Delete<DocumentDto>, bool>
     {
-        public DeleteDocumentService(IRepository repository) : base(repository)
+        private IRepository _repository;
+
+        public DeleteDocumentService(IRepository repository)
         {
+            _repository = repository;
+        }
+
+        public async Task<bool> Handle(Delete<DocumentDto> request, CancellationToken cancellationToken)
+        {
+            return await _repository.Remove<Document>(request.Id);
         }
     }
 

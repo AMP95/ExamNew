@@ -1,4 +1,5 @@
 ﻿using DTOs;
+using MediatR;
 using MediatRepos;
 using Microsoft.Extensions.Logging;
 using Models;
@@ -36,9 +37,9 @@ namespace MediatorServices
         }
     }
 
-    public class GetIdClientService : GetIdModelService<Client>
+    public class GetIdClientService : GetIdModelService<ClientDto>
     {
-        public GetIdClientService(IRepository repository, ILogger<GetIdModelService<Client>> logger) : base(repository, logger)
+        public GetIdClientService(IRepository repository, ILogger<GetIdModelService<ClientDto>> logger) : base(repository, logger)
         {
         }
 
@@ -55,9 +56,9 @@ namespace MediatorServices
         }
     }
 
-    public class GetRangeClientService : GetRangeModelService<Client>
+    public class GetRangeClientService : GetRangeModelService<ClientDto>
     {
-        public GetRangeClientService(IRepository repository, ILogger<GetRangeModelService<Client>> logger) : base(repository, logger)
+        public GetRangeClientService(IRepository repository, ILogger<GetRangeModelService<ClientDto>> logger) : base(repository, logger)
         {
         }
 
@@ -75,13 +76,24 @@ namespace MediatorServices
         }
     }
 
-    public class GetFilterClientService : GetFilterModelService<Client>
+    public class GetFilterClientService : IRequestHandler<GetFilter<ClientDto>, object>
     {
-        public GetFilterClientService(IRepository repository, ILogger<GetFilterModelService<Client>> logger) : base(repository, logger)
+        protected IRepository _repository;
+        protected ILogger<GetFilterClientService> _logger;
+
+        public GetFilterClientService(IRepository repository, ILogger<GetFilterClientService> logger)
         {
+            _repository = repository;
+            _logger = logger;
         }
 
-        protected override async Task<object> Get(Expression<Func<Client, bool>> filter)
+        public async Task<object> Handle(GetFilter<ClientDto> request, CancellationToken cancellationToken)
+        {
+            Expression<Func<Client, bool>> filter = GetFilter(request.PropertyName, request.Params);
+            return await Get(filter);
+        }
+
+        protected async Task<object> Get(Expression<Func<Client, bool>> filter)
         {
             IEnumerable<Client> carriers = await _repository.Get<Client>(filter);
             List<ClientDto> dtos = new List<ClientDto>();
@@ -94,7 +106,7 @@ namespace MediatorServices
             return dtos;
         }
 
-        protected override Expression<Func<Client, bool>> GetFilter(string property, params object[] parameters)
+        protected Expression<Func<Client, bool>> GetFilter(string property, params object[] parameters)
         {
             Expression<Func<Client, bool>> filter = null;
 
@@ -116,7 +128,7 @@ namespace MediatorServices
                         break;
                 }
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 filter = c => false;
                 _logger.LogError(ex, ex.Message);
@@ -127,10 +139,19 @@ namespace MediatorServices
         }
     }
 
-    public class DeleteClientService : DeleteModelService<Client>
+
+    public class DeleteClientService : IRequestHandler<Delete<ClientDto>, bool>
     {
-        public DeleteClientService(IRepository repository) : base(repository)
+        private IRepository _repository;
+
+        public DeleteClientService(IRepository repository)
         {
+            _repository = repository;
+        }
+
+        public async Task<bool> Handle(Delete<ClientDto> request, CancellationToken cancellationToken)
+        {
+            return await _repository.Remove<Client>(request.Id);
         }
     }
 

@@ -73,16 +73,16 @@ namespace Exam.Controllers
             return BadRequest("Передан пустой параметр");
         }
 
-        [HttpPut("contract/status/{id}/{status}")]
-        public virtual async Task<ActionResult> PutContract(Guid id, string status)
-        {
-            if (Enum.TryParse<ContractStatus>(status, true, out ContractStatus contractStatus)) 
-            {
-                return Ok(await _updateService.Add(new SetContractStatus(id, contractStatus)));
-            }
-            _logger.LogWarning($"CONTRACT STATUS: Recieved error status value");
-            return BadRequest("Передан неизвестный статус");
-        }
+        //[HttpPut("contract/status/{id}/{status}")]
+        //public virtual async Task<ActionResult> PutContract(Guid id, string status)
+        //{
+        //    if (Enum.TryParse<ContractStatus>(status, true, out ContractStatus contractStatus)) 
+        //    {
+        //        return Ok(await _updateService.Add(new SetContractStatus(id, contractStatus)));
+        //    }
+        //    _logger.LogWarning($"CONTRACT STATUS: Recieved error status value");
+        //    return BadRequest("Передан неизвестный статус");
+        //}
 
 
         [HttpPut("document")]

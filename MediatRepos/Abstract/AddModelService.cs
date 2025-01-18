@@ -1,9 +1,10 @@
-﻿using MediatR;
+﻿using DTOs.Dtos;
+using MediatR;
 using Models;
 
 namespace MediatRepos
 {
-    public abstract class AddModelService<TDto> : IRequestHandler<Add<TDto>, bool> where TDto : class
+    public abstract class AddModelService<TDto> : IRequestHandler<Add<TDto>, bool> where TDto : IDto
     {
         protected IRepository _repository;
         public AddModelService(IRepository repository)

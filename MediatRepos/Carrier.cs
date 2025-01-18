@@ -1,4 +1,6 @@
 ﻿using DTOs;
+using DTOs.Dtos;
+using MediatR;
 using MediatRepos;
 using Microsoft.Extensions.Logging;
 using Models;
@@ -36,9 +38,9 @@ namespace MediatorServices
         }
     }
 
-    public class GetIdCarrierService : GetIdModelService<Carrier>
+    public class GetIdCarrierService : GetIdModelService<CarrierDto>
     {
-        public GetIdCarrierService(IRepository repository, ILogger<GetIdModelService<Carrier>> logger) : base(repository, logger)
+        public GetIdCarrierService(IRepository repository, ILogger<GetIdModelService<CarrierDto>> logger) : base(repository, logger)
         {
         }
 
@@ -55,9 +57,9 @@ namespace MediatorServices
         }
     }
 
-    public class GetRangeCarrierService : GetRangeModelService<Carrier>
+    public class GetRangeCarrierService : GetRangeModelService<CarrierDto>
     {
-        public GetRangeCarrierService(IRepository repository, ILogger<GetRangeModelService<Carrier>> logger) : base(repository, logger)
+        public GetRangeCarrierService(IRepository repository, ILogger<GetRangeModelService<CarrierDto>> logger) : base(repository, logger)
         {
         }
 
@@ -74,13 +76,24 @@ namespace MediatorServices
         }
     }
 
-    public class GetFilterCarrierService : GetFilterModelService<Carrier>
+    public class GetFilterCarrierService : IRequestHandler<GetFilter<CarrierDto>, object>
     {
-        public GetFilterCarrierService(IRepository repository, ILogger<GetFilterModelService<Carrier>> logger) : base(repository, logger)
+        protected IRepository _repository;
+        protected ILogger<GetFilterCarrierService> _logger;
+
+        public GetFilterCarrierService(IRepository repository, ILogger<GetFilterCarrierService> logger)
         {
+            _repository = repository;
+            _logger = logger;
         }
 
-        protected override async Task<object> Get(Expression<Func<Carrier, bool>> filter)
+        public async Task<object> Handle(GetFilter<CarrierDto> request, CancellationToken cancellationToken)
+        {
+            Expression<Func<Carrier, bool>> filter = GetFilter(request.PropertyName, request.Params);
+            return await Get(filter);
+        }
+
+        protected async Task<object> Get(Expression<Func<Carrier, bool>> filter)
         {
             IEnumerable<Carrier> carriers = await _repository.Get<Carrier>(filter);
             List<CarrierDto> dtos = new List<CarrierDto>();
@@ -93,7 +106,7 @@ namespace MediatorServices
             return dtos;
         }
 
-        protected override Expression<Func<Carrier, bool>> GetFilter(string property, params object[] parameters)
+        protected Expression<Func<Carrier, bool>> GetFilter(string property, params object[] parameters)
         {
             Expression<Func<Carrier, bool>> filter = null;
 
@@ -122,14 +135,21 @@ namespace MediatorServices
             }
 
             return filter;
-            
         }
     }
 
-    public class DeleteCarrierService : DeleteModelService<Carrier>
+    public class DeleteCarrierService : IRequestHandler<Delete<CarrierDto>, bool>
     {
-        public DeleteCarrierService(IRepository repository) : base(repository)
+        private IRepository _repository;
+
+        public DeleteCarrierService(IRepository repository)
         {
+            _repository = repository;
+        }
+
+        public async Task<bool> Handle(Delete<CarrierDto> request, CancellationToken cancellationToken)
+        {
+            return await _repository.Remove<Carrier>(request.Id);
         }
     }
 

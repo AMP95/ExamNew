@@ -27,7 +27,6 @@
     <ProjectReference Include="..\DAL\DAL.csproj" />
     <ProjectReference Include="..\DTOs\DTOs.csproj" />
     <ProjectReference Include="..\MediatRepos\MediatorServices.csproj" />
-    <ProjectReference Include="..\Models\Models.csproj" />
   </ItemGroup>
 
 </Project>

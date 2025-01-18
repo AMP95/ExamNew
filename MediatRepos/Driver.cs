@@ -1,4 +1,5 @@
 ﻿using DTOs;
+using MediatR;
 using MediatRepos;
 using Microsoft.Extensions.Logging;
 using Models;
@@ -6,9 +7,9 @@ using System.Linq.Expressions;
 
 namespace MediatorServices
 {
-    public class GetIdDriverService : GetIdModelService<Driver>
+    public class GetIdDriverService : GetIdModelService<DriverDto>
     {
-        public GetIdDriverService(IRepository repository, ILogger<GetIdModelService<Driver>> logger) : base(repository, logger)
+        public GetIdDriverService(IRepository repository, ILogger<GetIdModelService<DriverDto>> logger) : base(repository, logger)
         {
         }
 
@@ -75,9 +76,9 @@ namespace MediatorServices
         }
     }
 
-    public class GetRangeDriverService : GetRangeModelService<Driver>
+    public class GetRangeDriverService : GetRangeModelService<DriverDto>
     {
-        public GetRangeDriverService(IRepository repository, ILogger<GetRangeModelService<Driver>> logger) : base(repository, logger)
+        public GetRangeDriverService(IRepository repository, ILogger<GetRangeModelService<DriverDto>> logger) : base(repository, logger)
         {
         }
 
@@ -122,13 +123,24 @@ namespace MediatorServices
         }
     }
 
-    public class GetFilterDriverService : GetFilterModelService<Driver>
+    public class GetFilterDriverService : IRequestHandler<GetFilter<DriverDto>, object>
     {
-        public GetFilterDriverService(IRepository repository, ILogger<GetFilterModelService<Driver>> logger) : base(repository, logger)
+        protected IRepository _repository;
+        protected ILogger<GetFilterDriverService> _logger;
+
+        public GetFilterDriverService(IRepository repository, ILogger<GetFilterDriverService> logger)
         {
+            _repository = repository;
+            _logger = logger;
         }
 
-        protected override async Task<object> Get(Expression<Func<Driver, bool>> filter)
+        public async Task<object> Handle(GetFilter<DriverDto> request, CancellationToken cancellationToken)
+        {
+            Expression<Func<Driver, bool>> filter = GetFilter(request.PropertyName, request.Params);
+            return await Get(filter);
+        }
+
+        protected async Task<object> Get(Expression<Func<Driver, bool>> filter)
         {
             IEnumerable<Driver> drivers = await _repository.Get<Driver>(filter,
                                                                          q => q.OrderBy(d => d.FamilyName).ThenBy(d => d.Name).ThenBy(d => d.FatherName),
@@ -171,7 +183,7 @@ namespace MediatorServices
             return dtos;
         }
 
-        protected override Expression<Func<Driver, bool>> GetFilter(string property, params object[] parameters)
+        protected Expression<Func<Driver, bool>> GetFilter(string property, params object[] parameters)
         {
             Expression<Func<Driver, bool>> filter = null;
 
@@ -184,7 +196,7 @@ namespace MediatorServices
                         {
                             filter = d => d.CarrierId == null;
                         }
-                        else 
+                        else
                         {
                             string carname = parameters[0].ToString().ToLower();
                             filter = d => d.Carrier.Name.ToLower().Contains(carname);
@@ -215,7 +227,7 @@ namespace MediatorServices
                         break;
                 }
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 filter = d => false;
                 _logger.LogError(ex, ex.Message);
@@ -225,10 +237,18 @@ namespace MediatorServices
         }
     }
 
-    public class DeleteDriverService : DeleteModelService<Driver>
+    public class DeleteDriverService : IRequestHandler<Delete<DriverDto>, bool>
     {
-        public DeleteDriverService(IRepository repository) : base(repository)
+        private IRepository _repository;
+
+        public DeleteDriverService(IRepository repository)
         {
+            _repository = repository;
+        }
+
+        public async Task<bool> Handle(Delete<DriverDto> request, CancellationToken cancellationToken)
+        {
+            return await _repository.Remove<Driver>(request.Id);
         }
     }
 

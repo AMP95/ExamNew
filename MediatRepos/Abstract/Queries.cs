@@ -1,10 +1,9 @@
-﻿using Azure.Core;
-using DTOs;
+﻿using DTOs.Dtos;
 using MediatR;
 
 namespace MediatRepos
 {
-    public class Update<TDto> : IRequest<bool>
+    public class Update<TDto> : IRequest<bool> where TDto : IDto
     {
         public TDto Value { get; set; }
 
@@ -13,9 +12,8 @@ namespace MediatRepos
             Value = value;
         }
     }
-    
 
-    public class Add<TDto> : IRequest<bool>
+    public class Add<TDto> : IRequest<bool> where TDto : IDto
     {
         public TDto Value { get; set; }
 
@@ -25,7 +23,7 @@ namespace MediatRepos
         }
     }
 
-    public class Delete<T> : IRequest<bool>
+    public class Delete<TDto> : IRequest<bool> where TDto : IDto
     {
         public Guid Id { get; set; }
 
@@ -35,7 +33,21 @@ namespace MediatRepos
         }
     }
 
-    public class GetId<TModel> : IRequest<object>
+    public class UpdateProperty<TDto> : IRequest<bool> where TDto : IDto
+    {
+        public Guid Id { get; set; }
+        public string PropertyName { get; set; }
+        public object Value { get; set; }
+
+        public UpdateProperty(Guid id, string propName, object value)
+        {
+            Id = Id;
+            PropertyName = propName;
+            Value = value;
+        }
+    }
+
+    public class GetId<TDto> : IRequest<object> where TDto : IDto
     {
         public Guid Id { get; set; }
 
@@ -45,19 +57,7 @@ namespace MediatRepos
         }
     }
 
-    public class SetContractStatus : IRequest<bool> 
-    {
-        public Guid ContractId { get; set; }
-        public ContractStatus ContractStatus { get; set; }
-
-        public SetContractStatus(Guid id, ContractStatus status)
-        {
-            ContractId = id;
-            ContractStatus = status;
-        }
-    }
-
-    public class GetFilter<TModel> : IRequest<object>
+    public class GetFilter<TDto> : IRequest<object> where TDto : IDto
     { 
         public string PropertyName { get; set; }
 
@@ -70,7 +70,7 @@ namespace MediatRepos
         }
     }
 
-    public class GetRange<TModel> : IRequest<object>
+    public class GetRange<TDto> : IRequest<object> where TDto : IDto
     {
         public int Start { get; set; }
         public int End { get; set; }

@@ -1,7 +1,7 @@
-﻿using Exam.BackgroundServices;
+﻿using DTOs;
+using Exam.BackgroundServices;
 using MediatRepos;
 using Microsoft.AspNetCore.Mvc;
-using Models;
 
 namespace Exam.Controllers
 {
@@ -10,48 +10,46 @@ namespace Exam.Controllers
     public class DeleteController : ControllerBase
     {
         private UpdateService _updateService;
-        private ILogger<AddController> _logger;
-        public DeleteController(UpdateService updateService, ILogger<AddController> logger)
+        public DeleteController(UpdateService updateService)
         {
             _updateService = updateService;
-            _logger = logger;
         }
 
         [HttpDelete("vehicle/{id}")]
         public virtual async Task<ActionResult> DeleteVehicle(Guid id)
         {
-            return Ok(await _updateService.Add(new Delete<Vehicle>(id)));
+            return Ok(await _updateService.Add(new Delete<VehicleDto>(id)));
         }
 
 
         [HttpDelete("document/{id}")]
         public virtual async Task<ActionResult> DeleteDocument(Guid id)
         {
-            return Ok(await _updateService.Add(new Delete<Document>(id)));
+            return Ok(await _updateService.Add(new Delete<DocumentDto>(id)));
         }
 
         [HttpDelete("payment/{id}")]
         public virtual async Task<ActionResult> DeletePayment(Guid id)
         {
-            return Ok(await _updateService.Add(new Delete<Payment>(id)));
+            return Ok(await _updateService.Add(new Delete<PaymentDto>(id)));
         }
 
         [HttpDelete("driver/{id}")]
         public virtual async Task<ActionResult> DeleteDriver(Guid id)
         {
-            return Ok(await _updateService.Add(new Delete<Driver>(id)));
+            return Ok(await _updateService.Add(new Delete<DriverDto>(id)));
         }
 
         [HttpDelete("carrier/{id}")]
         public virtual async Task<ActionResult> DeleteCarrier(Guid id)
         {
-            return Ok(await _updateService.Add(new Delete<Carrier>(id)));
+            return Ok(await _updateService.Add(new Delete<CarrierDto>(id)));
         }
 
         [HttpDelete("client/{id}")]
         public virtual async Task<ActionResult> DeleteClient(Guid id)
         {
-            return Ok(await _updateService.Add(new Delete<Client>(id)));
+            return Ok(await _updateService.Add(new Delete<ClientDto>(id)));
         }
     }
 }

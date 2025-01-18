@@ -8,9 +8,9 @@ using System.Linq.Expressions;
 
 namespace MediatorServices
 {
-    public class GetIdContractService : GetIdModelService<Contract>
+    public class GetIdContractService : GetIdModelService<ContractDto>
     {
-        public GetIdContractService(IRepository repository, ILogger<GetIdModelService<Contract>> logger) : base(repository, logger)
+        public GetIdContractService(IRepository repository, ILogger<GetIdModelService<ContractDto>> logger) : base(repository, logger)
         {
         }
 
@@ -96,14 +96,28 @@ namespace MediatorServices
         }
     }
 
-    public class GetFilteredContractService : GetFilterModelService<Contract>
-    {
-        public GetFilteredContractService(IRepository repository, ILogger<GetFilteredContractService> logger) : base(repository, logger) { }
 
-        protected override async Task<object> Get(Expression<Func<Contract, bool>> filter)
+    public class GetFilteredContractService : IRequestHandler<GetFilter<ContractDto>, object>
+    {
+        protected IRepository _repository;
+        protected ILogger<GetFilteredContractService> _logger;
+
+        public GetFilteredContractService(IRepository repository, ILogger<GetFilteredContractService> logger)
         {
-            IEnumerable<Contract> contracts = await _repository.Get(filter, 
-                                                                    q => q.OrderBy(c => c.CreationDate).ThenBy(c => c.Number), 
+            _repository = repository;
+            _logger = logger;
+        }
+
+        public async Task<object> Handle(GetFilter<ContractDto> request, CancellationToken cancellationToken)
+        {
+            Expression<Func<Contract, bool>> filter = GetFilter(request.PropertyName, request.Params);
+            return await Get(filter);
+        }
+
+        protected async Task<object> Get(Expression<Func<Contract, bool>> filter)
+        {
+            IEnumerable<Contract> contracts = await _repository.Get(filter,
+                                                                    q => q.OrderBy(c => c.CreationDate).ThenBy(c => c.Number),
                                                                     "Carrier,Client,Driver,Vehicle,LoadingPoint,UnloadingPoints");
             List<ContractDto> dtos = new List<ContractDto>();
 
@@ -156,7 +170,7 @@ namespace MediatorServices
 
             return dtos;
         }
-        protected override Expression<Func<Contract, bool>> GetFilter(string property, params object[] parameters)
+        protected Expression<Func<Contract, bool>> GetFilter(string property, params object[] parameters)
         {
             Expression<Func<Contract, bool>> filter = null;
 
@@ -203,7 +217,7 @@ namespace MediatorServices
                         break;
                 }
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 filter = c => false;
                 _logger.LogError(ex, ex.Message);
@@ -212,10 +226,18 @@ namespace MediatorServices
         }
     }
 
-    public class DeleteContractService : DeleteModelService<Contract>
+    public class DeleteContractService : IRequestHandler<Delete<ContractDto>, bool>
     {
-        public DeleteContractService(IRepository repository) : base(repository)
+        private IRepository _repository;
+
+        public DeleteContractService(IRepository repository)
         {
+            _repository = repository;
+        }
+
+        public async Task<bool> Handle(Delete<ContractDto> request, CancellationToken cancellationToken)
+        {
+            return await _repository.Remove<Contract>(request.Id);
         }
     }
 
@@ -358,25 +380,25 @@ namespace MediatorServices
         }
     }
 
-    public class SetContractStatusService : IRequestHandler<SetContractStatus, bool>
-    {
-        protected IRepository _repository;
-        protected ILogger<SetContractStatusService> _logger;
+    //public class SetContractStatusService : IRequestHandler<SetContractStatus, bool>
+    //{
+    //    protected IRepository _repository;
+    //    protected ILogger<SetContractStatusService> _logger;
 
-        public SetContractStatusService(IRepository repository, ILogger<SetContractStatusService> logger)
-        {
-            _repository = repository;
-            _logger = logger;
-        }
-        public async Task<bool> Handle(SetContractStatus request, CancellationToken cancellationToken)
-        {
-            Contract contract = await _repository.GetById<Contract>(request.ContractId);
-            if (contract != null)
-            {
-                contract.Status = (short)request.ContractStatus;
-                return await _repository.Update(contract);
-            }
-            return false;
-        }
-    }
+    //    public SetContractStatusService(IRepository repository, ILogger<SetContractStatusService> logger)
+    //    {
+    //        _repository = repository;
+    //        _logger = logger;
+    //    }
+    //    public async Task<bool> Handle(SetContractStatus request, CancellationToken cancellationToken)
+    //    {
+    //        Contract contract = await _repository.GetById<Contract>(request.ContractId);
+    //        if (contract != null)
+    //        {
+    //            contract.Status = (short)request.ContractStatus;
+    //            return await _repository.Update(contract);
+    //        }
+    //        return false;
+    //    }
+    //}
 }

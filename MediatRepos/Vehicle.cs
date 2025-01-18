@@ -1,15 +1,15 @@
 ﻿using DTOs;
 using MediatorServices;
+using MediatR;
 using Microsoft.Extensions.Logging;
 using Models;
-using System;
 using System.Linq.Expressions;
 
 namespace MediatRepos
 {
-    public class GetIdVehicleService : GetIdModelService<Vehicle>
+    public class GetIdVehicleService : GetIdModelService<VehicleDto>
     {
-        public GetIdVehicleService(IRepository repository, ILogger<GetIdModelService<Vehicle>> logger) : base(repository, logger)
+        public GetIdVehicleService(IRepository repository, ILogger<GetIdModelService<VehicleDto>> logger) : base(repository, logger)
         {
         }
 
@@ -41,9 +41,9 @@ namespace MediatRepos
         }
     }
 
-    public class GetRangeVehicleService : GetRangeModelService<Vehicle>
+    public class GetRangeVehicleService : GetRangeModelService<VehicleDto>
     {
-        public GetRangeVehicleService(IRepository repository, ILogger<GetRangeModelService<Vehicle>> logger) : base(repository, logger)
+        public GetRangeVehicleService(IRepository repository, ILogger<GetRangeModelService<VehicleDto>> logger) : base(repository, logger)
         {
         }
 
@@ -81,13 +81,24 @@ namespace MediatRepos
         }
     }
 
-    public class GetFilterVehicleService : GetFilterModelService<Vehicle>
+    public class GetFilterVehicleService : IRequestHandler<GetFilter<VehicleDto>, object>
     {
-        public GetFilterVehicleService(IRepository repository, ILogger<GetFilterModelService<Vehicle>> logger) : base(repository, logger)
+        protected IRepository _repository;
+        protected ILogger<GetFilterVehicleService> _logger;
+
+        public GetFilterVehicleService(IRepository repository, ILogger<GetFilterVehicleService> logger)
         {
+            _repository = repository;
+            _logger = logger;
         }
 
-        protected override async Task<object> Get(Expression<Func<Vehicle, bool>> filter)
+        public async Task<object> Handle(GetFilter<VehicleDto> request, CancellationToken cancellationToken)
+        {
+            Expression<Func<Vehicle, bool>> filter = GetFilter(request.PropertyName, request.Params);
+            return await Get(filter);
+        }
+
+        protected async Task<object> Get(Expression<Func<Vehicle, bool>> filter)
         {
             IEnumerable<Vehicle> vehicles = await _repository.Get<Vehicle>(filter,
                                                                            q => q.OrderBy(t => t.TruckModel).ThenBy(t => t.TruckNumber).ThenBy(t => t.TrailerNumber),
@@ -120,7 +131,7 @@ namespace MediatRepos
             return dtos;
         }
 
-        protected override Expression<Func<Vehicle, bool>> GetFilter(string property, params object[] parameters)
+        protected Expression<Func<Vehicle, bool>> GetFilter(string property, params object[] parameters)
         {
             Expression<Func<Vehicle, bool>> filter = null;
 
@@ -144,7 +155,7 @@ namespace MediatRepos
                         {
                             filter = d => d.CarrierId == null;
                         }
-                        else 
+                        else
                         {
                             Guid.TryParse(parameters[0].ToString(), out Guid id);
 
@@ -152,8 +163,8 @@ namespace MediatRepos
                             {
                                 filter = d => d.CarrierId == null;
                             }
-                            else 
-                            { 
+                            else
+                            {
                                 filter = d => d.CarrierId == id;
                             }
                         }
@@ -164,7 +175,7 @@ namespace MediatRepos
                         break;
                 }
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 filter = v => false;
                 _logger.LogError(ex, ex.Message);
@@ -174,10 +185,18 @@ namespace MediatRepos
         }
     }
 
-    public class DeleteVehicleService : DeleteModelService<Vehicle>
+    public class DeleteVehicleService : IRequestHandler<Delete<VehicleDto>, bool>
     {
-        public DeleteVehicleService(IRepository repository) : base(repository)
+        private IRepository _repository;
+
+        public DeleteVehicleService(IRepository repository)
         {
+            _repository = repository;
+        }
+
+        public async Task<bool> Handle(Delete<VehicleDto> request, CancellationToken cancellationToken)
+        {
+            return await _repository.Remove<Vehicle>(request.Id);
         }
     }
 
