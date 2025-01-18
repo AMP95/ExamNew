@@ -90,8 +90,6 @@ namespace DAL
             return null;
         }
 
-        
-
         public async Task<bool> Remove<T>(Guid id) where T : BaseEntity
         {
             if (_context != null)
