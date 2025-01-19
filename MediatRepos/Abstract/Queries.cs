@@ -79,4 +79,16 @@ namespace MediatRepos
             End = end;
         }
     }
+
+    public class AddFiles<TDto> : IRequest<bool> where TDto : IDto
+    { 
+        public Guid EntityId { get; set; }
+        public FileDto[] Files { get; set; }
+
+        public AddFiles(Guid id, FileDto[] files)
+        {
+            EntityId = id;
+            Files = files;
+        }
+    }
 }

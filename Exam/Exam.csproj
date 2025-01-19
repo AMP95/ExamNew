@@ -29,4 +29,10 @@
     <ProjectReference Include="..\MediatRepos\MediatorServices.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\Files\Carriers\" />
+    <Folder Include="wwwroot\Files\Templates\" />
+    <Folder Include="wwwroot\Files\Contracts\" />
+  </ItemGroup>
+
 </Project>

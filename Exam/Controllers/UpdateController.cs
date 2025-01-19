@@ -157,5 +157,22 @@ namespace Exam.Controllers
             }
             
         }
+
+
+        [HttpPut("file")]
+        public virtual async Task<ActionResult> PutFile([FromBody] JObject jobj)
+        {
+            try
+            {
+
+                _logger.LogWarning($"FILE: Recieved null object");
+                return BadRequest("Передан пустой параметр");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return BadRequest("Неверный тип данных");
+            }
+        }
     }
 }

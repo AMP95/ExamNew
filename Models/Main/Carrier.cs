@@ -25,6 +25,8 @@ namespace Models
         public virtual ICollection<Driver> Drivers { get; set; }
         public virtual ICollection<Vehicle> Vehicles { get; set; }
         public virtual ICollection<Contract> Contracts { get; set; }
+
+        public virtual ICollection<Models.Sub.File> Files { get; set; }
     }
 
     [Table(nameof(Client))]

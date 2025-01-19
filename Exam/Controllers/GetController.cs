@@ -1,4 +1,5 @@
 ﻿using DTOs;
+using DTOs.Dtos;
 using Exam.BackgroundServices;
 using MediatRepos;
 using Microsoft.AspNetCore.Mvc;
@@ -60,6 +61,14 @@ namespace Exam.Controllers
         }
 
 
+        [HttpGet("file/id/{id}")]
+        public virtual async Task<ActionResult> GetFile(Guid id)
+        {
+            return Ok(await _getService.Add(new GetId<FileDto>(id)));
+        }
+
+
+
         #endregion ID
 
         #region Filter
@@ -104,6 +113,12 @@ namespace Exam.Controllers
         public virtual async Task<ActionResult> GetClientFilter(string property, [FromQuery] string[] param)
         {
             return Ok(await _getService.Add(new GetFilter<ClientDto>(property, param)));
+        }
+
+        [HttpGet("file/filter/{property}")]
+        public virtual async Task<ActionResult> GetFileFilter(string property, [FromQuery] string[] param)
+        {
+            return Ok(await _getService.Add(new GetFilter<FileDto>(property, param)));
         }
 
         #endregion Filter
