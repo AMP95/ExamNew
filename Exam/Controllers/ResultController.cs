@@ -1,5 +1,4 @@
-﻿using Exam.BackgroundServices;
-using Exam.ResultServices;
+﻿using Exam.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Exam.Controllers
@@ -8,10 +7,10 @@ namespace Exam.Controllers
     [ApiController]
     public class ResultController : ControllerBase
     {
-        private RequestStatusService _statusService;
-        public ResultService _resultService;
+        private IRequestStatusService _statusService;
+        private IResultService _resultService;
 
-        public ResultController(RequestStatusService statusService, ResultService resultService)
+        public ResultController(IRequestStatusService statusService, IResultService resultService)
         {
             _statusService = statusService;
             _resultService = resultService;

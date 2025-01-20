@@ -121,7 +121,7 @@ namespace MediatorServices
         {
         }
 
-        protected override async Task<bool> Update(PaymentDto dto)
+        protected override async Task<Guid> Add(PaymentDto dto)
         {
             Payment document = new Payment()
             {
@@ -132,7 +132,7 @@ namespace MediatorServices
                 Number = dto.Number,
             };
 
-            return await _repository.Update(document);
+            return await _repository.Add(document);
         }
     }
 

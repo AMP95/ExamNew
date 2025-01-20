@@ -1,5 +1,5 @@
 ﻿using DTOs;
-using Exam.BackgroundServices;
+using Exam.Interfaces;
 using MediatRepos;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
@@ -10,9 +10,9 @@ namespace Exam.Controllers
     [ApiController]
     public class PatchController : ControllerBase
     {
-        private UpdateService _updateService;
+        private IUpdateService _updateService;
         private ILogger<PatchController> _logger;
-        public PatchController(UpdateService updateService, ILogger<PatchController> logger)
+        public PatchController(IUpdateService updateService, ILogger<PatchController> logger)
         {
             _updateService = updateService;
             _logger = logger;
@@ -25,7 +25,7 @@ namespace Exam.Controllers
             {
                 if (updates != null)
                 {
-                    return Ok(await _updateService.Add(new UpdateProperty<ContractDto>(id, updates.ToObject<KeyValuePair<string, object>[]>())));
+                    return Ok(await _updateService.Add(new Patch<ContractDto>(id, updates.ToObject<KeyValuePair<string, object>[]>())));
                 }
                 _logger.LogWarning($"CONTRACT: Recieved null object");
                 return BadRequest("Передан пустой параметр");

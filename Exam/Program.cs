@@ -1,6 +1,7 @@
 using DAL;
 using DTOs;
 using Exam.BackgroundServices;
+using Exam.Interfaces;
 using Exam.ResultServices;
 using MediatRepos;
 using Microsoft.EntityFrameworkCore;
@@ -34,10 +35,12 @@ namespace Exam
 
             builder.Services.AddTransient<IRepository, ContextRepository>();
 
-            builder.Services.AddSingleton<ResultService>();
-            builder.Services.AddSingleton<RequestStatusService>();
-            builder.Services.AddSingleton<GetService>();
-            builder.Services.AddSingleton<UpdateService>();
+            builder.Services.AddSingleton<IResultService, ResultService>();
+            builder.Services.AddSingleton<IRequestStatusService, RequestStatusService>();
+            builder.Services.AddSingleton<IGetService, GetService>();
+            builder.Services.AddSingleton<IAddService, AddService>();
+            builder.Services.AddSingleton<IUpdateService, UpdateService>();
+            builder.Services.AddSingleton<IFileService, FileService>();
 
             builder.Services.AddCors(options =>
             {
@@ -50,8 +53,10 @@ namespace Exam
 
             builder.Services.AddSwaggerGen();
 
-            builder.Services.AddHostedService(sp => sp.GetService<GetService>());
-            builder.Services.AddHostedService(sp => sp.GetService<UpdateService>());
+            builder.Services.AddHostedService(sp => sp.GetService<IGetService>() as GetService);
+            builder.Services.AddHostedService(sp => sp.GetService<IAddService>() as AddService);
+            builder.Services.AddHostedService(sp => sp.GetService<IUpdateService>() as UpdateService);
+            builder.Services.AddHostedService(sp => sp.GetService<IFileService>() as FileService);
 
             builder.Services.AddMediatR(cfg =>
             {

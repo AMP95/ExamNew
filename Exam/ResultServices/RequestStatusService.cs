@@ -1,16 +1,9 @@
-﻿using System.Collections.Concurrent;
+﻿using Exam.Interfaces;
+using System.Collections.Concurrent;
 
 namespace Exam.ResultServices
 {
-    public enum RequestStatus 
-    { 
-        Created,
-        InProgress,
-        Done,
-        Unknown
-    }
-
-    public class RequestStatusService
+    public class RequestStatusService : IRequestStatusService
     {
         private ConcurrentDictionary<Guid, RequestStatus> _statuses;
 

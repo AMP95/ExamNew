@@ -258,7 +258,7 @@ namespace MediatorServices
         {
         }
 
-        protected override async Task<bool> Update(DriverDto dto)
+        protected override async Task<Guid> Add(DriverDto dto)
         {
             string[] name = dto.Name.Split(' ');
 
@@ -276,7 +276,7 @@ namespace MediatorServices
                 Phones = string.Join(';',dto.Phones)
             };
 
-            return await _repository.Update(driver);
+            return await _repository.Add(driver);
         }
     }
 

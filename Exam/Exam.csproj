@@ -30,9 +30,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="wwwroot\Files\Carriers\" />
-    <Folder Include="wwwroot\Files\Templates\" />
-    <Folder Include="wwwroot\Files\Contracts\" />
+    <Folder Include="wwwroot\Files\" />
   </ItemGroup>
 
 </Project>

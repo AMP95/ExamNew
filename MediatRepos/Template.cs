@@ -1,10 +1,6 @@
-﻿using DTOs;
-using DTOs.Dtos;
-using MediatorServices.Abstract;
+﻿using DTOs.Dtos;
 using MediatR;
 using MediatRepos;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Internal;
 using Microsoft.Extensions.Logging;
 using Models;
 using Models.Main;
@@ -31,23 +27,9 @@ namespace MediatorServices
                     File = new FileDto() 
                     {
                         Id = template.File.Id,
+                        Name = template.File.Name,
                     }
                 };
-
-                if (template.File != null)
-                {
-                    FormFile formFile;
-                    using (MemoryStream stream = new MemoryStream(File.ReadAllBytes(template.File.Path).ToArray()))
-                    {
-                        formFile = new FormFile(stream, 0, stream.Length, "streamFile", template.File.Path.Split(@"\").Last());
-                    }
-
-                    dto.File = new FileDto()
-                    {
-                        Id = template.File.Id,
-                        File = formFile
-                    };
-                }
             }
             return dto;
         }
@@ -104,45 +86,19 @@ namespace MediatorServices
 
     public class AddTemplateService : AddModelService<ContractTemplateDto>
     {
-        private IFileManager _fileManager;
-        public AddTemplateService(IRepository repository, IFileManager fileManager) : base(repository)
+        public AddTemplateService(IRepository repository) : base(repository)
         {
-            _fileManager = fileManager;
         }
 
-        protected override async Task<bool> Update(ContractTemplateDto dto)
+        protected override async Task<Guid> Add(ContractTemplateDto dto)
         {
             ContractTemplate template = new ContractTemplate()
             {
                 Name = dto.Name,
+                FileId = dto.File.Id
             };
 
-            if (await _repository.Update(template))
-            {
-
-                if (dto.File != null)
-                {
-                    string filePath = Path.Combine("Files", "Templates", dto.Name);
-
-                    if (_fileManager.Save(filePath, dto.File.File))
-                    {
-                        template.File = new Models.Sub.File()
-                        {
-                            Path = filePath,
-                            EntityId = template.Id,
-                            EntityType = typeof(ContractTemplate)
-                        };
-
-                        return await _repository.Update(template);
-                    }
-                }
-
-                return true;
-            }
-            else 
-            { 
-                return false;
-            }
+            return await _repository.Add(template);
         }
     }
 }

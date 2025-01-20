@@ -14,6 +14,8 @@ namespace Models
 
         Task<bool> Update<T>(T entity) where T : BaseEntity;
 
+        Task<Guid> Add<T>(T entity) where T : BaseEntity;
+
         Task<bool> Remove<T>(Guid id) where T : BaseEntity;
     }
 }

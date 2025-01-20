@@ -4,7 +4,7 @@ using Models;
 
 namespace MediatRepos
 {
-    public abstract class AddModelService<TDto> : IRequestHandler<Add<TDto>, bool> where TDto : IDto
+    public abstract class AddModelService<TDto> : IRequestHandler<Add<TDto>, Guid> where TDto : IDto
     {
         protected IRepository _repository;
         public AddModelService(IRepository repository)
@@ -12,15 +12,15 @@ namespace MediatRepos
             _repository = repository;
         }
 
-        public async Task<bool> Handle(Add<TDto> request, CancellationToken cancellationToken)
+        public async Task<Guid> Handle(Add<TDto> request, CancellationToken cancellationToken)
         {
             if (request.Value == null)
             {
-                return false;
+                return Guid.Empty;
             }
-            return await Update(request.Value);
+            return await Add(request.Value);
         }
 
-        protected abstract Task<bool> Update(TDto dto);
+        protected abstract Task<Guid> Add(TDto dto);
     }
 }

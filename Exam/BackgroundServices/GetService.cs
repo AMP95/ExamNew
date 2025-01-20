@@ -1,18 +1,21 @@
-﻿using Exam.ResultServices;
+﻿using Exam.Interfaces;
 using MediatR;
 using System.Collections.Concurrent;
 
 namespace Exam.BackgroundServices
 {
-    public class GetService : BackgroundService
+    public class GetService : BackgroundService, IGetService
     {
         private ConcurrentQueue<GetServiceQueueItem> _requests;
         private ILogger<GetService> _logger;
-        private RequestStatusService _statusService;
-        private ResultService _resultService;
+        private IRequestStatusService _statusService;
+        private IResultService _resultService;
         private IMediator _mediator;
 
-        public GetService(RequestStatusService status, ResultService result, IMediator mediator, ILogger<GetService> logger)
+        public GetService(IRequestStatusService status, 
+                          IResultService result, 
+                          IMediator mediator, 
+                          ILogger<GetService> logger)
         {
             _requests = new ConcurrentQueue<GetServiceQueueItem>();
             _statusService = status;

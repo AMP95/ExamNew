@@ -4,34 +4,34 @@ using System.Collections.Concurrent;
 
 namespace Exam.BackgroundServices
 {
-    public class UpdateService : BackgroundService, IUpdateService
+    public class AddService : BackgroundService, IAddService
     {
-        private ConcurrentQueue<UpdateServiceQueueItem> _requests;
+        private ConcurrentQueue<AddServiceQueueItem> _requests;
         private IRequestStatusService _statusService;
         private IResultService _resultService;
         private IMediator _mediator;
-        private ILogger<UpdateService> _logger;
+        private ILogger<AddService> _logger;
 
-        public UpdateService(IRequestStatusService status, 
-                             IResultService result, 
-                             IMediator mediator, 
-                             ILogger<UpdateService> logger)
+        public AddService(IRequestStatusService status,
+                          IResultService result,
+                          IMediator mediator,
+                          ILogger<AddService> logger)
         {
-            _requests = new ConcurrentQueue<UpdateServiceQueueItem>();
+            _requests = new ConcurrentQueue<AddServiceQueueItem>();
             _statusService = status;
             _resultService = result;
             _mediator = mediator;
             _logger = logger;
         }
 
-        public async Task<Guid> Add(IRequest<bool> request)
+        public async Task<Guid> Add(IRequest<Guid> request)
         {
             Guid id = Guid.NewGuid();
 
             try
             {
-                _requests.Enqueue(new UpdateServiceQueueItem() 
-                { 
+                _requests.Enqueue(new AddServiceQueueItem()
+                {
                     RequestId = id,
                     Request = request
                 });
@@ -45,35 +45,35 @@ namespace Exam.BackgroundServices
             return id;
         }
 
-        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        protected async override Task ExecuteAsync(CancellationToken stoppingToken)
         {
             await Task.Run(async () =>
             {
                 while (!stoppingToken.IsCancellationRequested)
                 {
-                    if (_requests.TryDequeue(out UpdateServiceQueueItem item))
+                    if (_requests.TryDequeue(out AddServiceQueueItem item))
                     {
                         try
                         {
                             _statusService.UpdateStatus(item.RequestId, RequestStatus.InProgress);
 
-                            bool result = await _mediator.Send(item.Request);
+                            Guid result = await _mediator.Send(item.Request);
 
                             int code = 200;
                             string message = string.Empty;
 
-                            if (!result)
+                            if (result == Guid.Empty) 
                             {
                                 code = 500;
-                                message = "Внтренняя ошибка сервера";
+                                message = "Не удалось добавить объект";
                             }
 
-                            _resultService.AddResult(item.RequestId, new ServiceResult() 
-                            { 
-                               CreateTime = DateTime.Now,
-                               Result = result,
-                               ResultStatusCode = code,
-                               ResultErrorMessage = message
+                            _resultService.AddResult(item.RequestId, new ServiceResult()
+                            {
+                                CreateTime = DateTime.Now,
+                                Result = result,
+                                ResultStatusCode = code,
+                                ResultErrorMessage = message
                             });
                         }
                         catch (Exception ex)

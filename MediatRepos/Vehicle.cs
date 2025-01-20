@@ -206,7 +206,7 @@ namespace MediatRepos
         {
         }
 
-        protected override async Task<bool> Update(VehicleDto dto)
+        protected override async Task<Guid> Add(VehicleDto dto)
         {
             Vehicle truck = new Vehicle()
             {
@@ -217,7 +217,7 @@ namespace MediatRepos
                 CarrierId = dto?.Carrier?.Id
             };
 
-            return await _repository.Update(truck);
+            return await _repository.Add(truck);
         }
     }
 

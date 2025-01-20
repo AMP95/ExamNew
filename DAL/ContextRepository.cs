@@ -139,5 +139,28 @@ namespace DAL
             }
             return false;
         }
+
+        public async Task<Guid> Add<T>(T entity) where T : BaseEntity
+        {
+            if (_context != null)
+            {
+                using (IDbContextTransaction transaction = _context.Database.BeginTransaction())
+                {
+                    try
+                    {
+                        _context.Set<T>().Update(entity);
+                        await _context.SaveChangesAsync();
+                        await transaction.CommitAsync();
+                        return entity.Id;
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, ex.Message);
+                        await transaction.RollbackAsync();
+                    }
+                }
+            }
+            return Guid.Empty;
+        }
     }
 }

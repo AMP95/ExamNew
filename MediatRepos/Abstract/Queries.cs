@@ -13,7 +13,7 @@ namespace MediatRepos
         }
     }
 
-    public class Add<TDto> : IRequest<bool> where TDto : IDto
+    public class Add<TDto> : IRequest<Guid> where TDto : IDto
     {
         public TDto Value { get; set; }
 
@@ -33,12 +33,12 @@ namespace MediatRepos
         }
     }
 
-    public class UpdateProperty<TDto> : IRequest<bool> where TDto : IDto
+    public class Patch<TDto> : IRequest<bool> where TDto : IDto
     {
         public Guid Id { get; set; }
         public KeyValuePair<string, object>[] Updates { get; set; }
 
-        public UpdateProperty(Guid id, KeyValuePair<string, object>[] updates)
+        public Patch(Guid id, KeyValuePair<string, object>[] updates)
         {
             Id = id;
             Updates = updates;
@@ -77,18 +77,6 @@ namespace MediatRepos
         {
             Start = start;
             End = end;
-        }
-    }
-
-    public class AddFiles<TDto> : IRequest<bool> where TDto : IDto
-    { 
-        public Guid EntityId { get; set; }
-        public FileDto[] Files { get; set; }
-
-        public AddFiles(Guid id, FileDto[] files)
-        {
-            EntityId = id;
-            Files = files;
         }
     }
 }

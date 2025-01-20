@@ -41,7 +41,7 @@ namespace Models
 
 
         [ForeignKey(nameof(File))]
-        public Guid? FileId { get; set; }
+        public Guid FileId { get; set; }
         public Models.Sub.File File { get; set; }
 
         public float CarrierPayment { get; set; }

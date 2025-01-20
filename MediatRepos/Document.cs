@@ -147,9 +147,9 @@ namespace MediatorServices
         {
         }
 
-        protected override async Task<bool> Update(DocumentDto dto)
+        protected override async Task<Guid> Add(DocumentDto dto)
         {
-            return await _repository.Update(DocumentConverter.Convert(dto));
+            return await _repository.Add(DocumentConverter.Convert(dto));
         }
     }
 

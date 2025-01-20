@@ -1,6 +1,6 @@
 ﻿using DTOs;
 using DTOs.Dtos;
-using Exam.BackgroundServices;
+using Exam.Interfaces;
 using MediatRepos;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,8 +10,8 @@ namespace Exam.Controllers
     [ApiController]
     public class GetController : ControllerBase
     {
-        private GetService _getService;
-        public GetController(GetService getService)
+        private IGetService _getService;
+        public GetController(IGetService getService)
         {
             _getService = getService;
         }

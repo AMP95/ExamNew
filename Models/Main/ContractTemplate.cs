@@ -8,7 +8,7 @@ namespace Models.Main
 
 
         [ForeignKey(nameof(File))]
-        public Guid? FileId { get; set; }
-        public Models.Sub.File File { get; set; }
+        public Guid FileId { get; set; }
+        public Sub.File File { get; set; }
     }
 }

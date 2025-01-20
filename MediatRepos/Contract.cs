@@ -247,7 +247,7 @@ namespace MediatorServices
         {
         }
 
-        protected override async Task<bool> Update(ContractDto dto)
+        protected override async Task<Guid> Add(ContractDto dto)
         {
             Contract contract = new Contract()
             {
@@ -301,7 +301,7 @@ namespace MediatorServices
             }
 
 
-            return await _repository.Update(contract);
+            return await _repository.Add(contract);
         }
     }
 
@@ -380,7 +380,7 @@ namespace MediatorServices
         }
     }
 
-    public class UpdateContractPropertyService : IRequestHandler<UpdateProperty<ContractDto>, bool>
+    public class UpdateContractPropertyService : IRequestHandler<Patch<ContractDto>, bool>
     {
         protected IRepository _repository;
         protected ILogger<UpdateContractPropertyService> _logger;
@@ -391,7 +391,7 @@ namespace MediatorServices
             _logger = logger;
         }
 
-        public async Task<bool> Handle(UpdateProperty<ContractDto> request, CancellationToken cancellationToken)
+        public async Task<bool> Handle(Patch<ContractDto> request, CancellationToken cancellationToken)
         {
             try
             {

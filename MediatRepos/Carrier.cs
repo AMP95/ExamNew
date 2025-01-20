@@ -1,5 +1,4 @@
 ﻿using DTOs;
-using DTOs.Dtos;
 using MediatR;
 using MediatRepos;
 using Microsoft.Extensions.Logging;
@@ -159,9 +158,9 @@ namespace MediatorServices
         {
         }
 
-        protected override async Task<bool> Update(CarrierDto dto)
+        protected override async Task<Guid> Add(CarrierDto dto)
         {
-            return await _repository.Update(CarrierConverter.Convert(dto));
+            return await _repository.Add(CarrierConverter.Convert(dto));
         }
     }
 

@@ -161,9 +161,9 @@ namespace MediatorServices
         {
         }
 
-        protected override async Task<bool> Update(ClientDto dto)
+        protected override async Task<Guid> Add(ClientDto dto)
         {
-            return await _repository.Update(ClientConverter.Convert(dto));
+            return await _repository.Add(ClientConverter.Convert(dto));
         }
     }
 

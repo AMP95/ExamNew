@@ -1,5 +1,5 @@
 ﻿using DTOs;
-using Exam.BackgroundServices;
+using Exam.Interfaces;
 using MediatRepos;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,8 +9,8 @@ namespace Exam.Controllers
     [ApiController]
     public class DeleteController : ControllerBase
     {
-        private UpdateService _updateService;
-        public DeleteController(UpdateService updateService)
+        private IUpdateService _updateService;
+        public DeleteController(IUpdateService updateService)
         {
             _updateService = updateService;
         }

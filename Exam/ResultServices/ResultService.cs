@@ -1,14 +1,15 @@
 ﻿using Exam.BackgroundServices;
+using Exam.Interfaces;
 using System.Collections.Concurrent;
 
 namespace Exam.ResultServices
 {
-    public class ResultService
+    public class ResultService: IResultService
     {
         private ConcurrentDictionary<Guid, ServiceResult> _results;
-        private RequestStatusService _statusService;
+        private IRequestStatusService _statusService;
 
-        public ResultService(RequestStatusService status)
+        public ResultService(IRequestStatusService status)
         {
             _statusService = status;
             _results = new ConcurrentDictionary<Guid, ServiceResult>();

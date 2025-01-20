@@ -1,5 +1,5 @@
 ﻿using DTOs;
-using Exam.BackgroundServices;
+using Exam.Interfaces;
 using MediatRepos;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
@@ -10,9 +10,9 @@ namespace Exam.Controllers
     [ApiController]
     public class UpdateController : ControllerBase
     {
-        private UpdateService _updateService;
+        private IUpdateService _updateService;
         private ILogger<UpdateController> _logger;
-        public UpdateController(UpdateService updateService, ILogger<UpdateController> logger)
+        public UpdateController(IUpdateService updateService, ILogger<UpdateController> logger)
         {
             _updateService = updateService;
             _logger = logger;
@@ -159,20 +159,6 @@ namespace Exam.Controllers
         }
 
 
-        [HttpPut("file")]
-        public virtual async Task<ActionResult> PutFile([FromBody] JObject jobj)
-        {
-            try
-            {
-
-                _logger.LogWarning($"FILE: Recieved null object");
-                return BadRequest("Передан пустой параметр");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, ex.Message);
-                return BadRequest("Неверный тип данных");
-            }
-        }
+        
     }
 }

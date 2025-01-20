@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using Exam.Interfaces;
+using MediatR;
 
 namespace Exam.BackgroundServices
 {
@@ -15,5 +16,21 @@ namespace Exam.BackgroundServices
     public class UpdateServiceQueueItem : ServiceQueueItem
     {
         public IRequest<bool> Request { get; set; }
+    }
+
+    public class AddServiceQueueItem : ServiceQueueItem
+    {
+        public IRequest<Guid> Request { get; set; }
+    }
+
+    
+
+    public class FileServiceQueueItem : ServiceQueueItem
+    {
+        public Guid FileId { get; set; }
+
+        public IFormFileCollection Files { get; set; }
+
+        public FileMethod Method { get; set; }
     }
 }

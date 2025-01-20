@@ -1,5 +1,5 @@
 ﻿using DTOs;
-using Exam.BackgroundServices;
+using Exam.Interfaces;
 using MediatRepos;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
@@ -10,11 +10,11 @@ namespace Exam.Controllers
     [ApiController]
     public class AddController : ControllerBase
     {
-        private UpdateService _updateService;
+        private IAddService _addService;
         private ILogger<AddController> _logger;
-        public AddController(UpdateService updateService, ILogger<AddController> logger)
+        public AddController(IAddService addService, ILogger<AddController> logger)
         {
-            _updateService = updateService;
+            _addService = addService;
             _logger = logger;
         }
 
@@ -25,7 +25,7 @@ namespace Exam.Controllers
             {
                 if (jobj != null)
                 {
-                    return Ok(await _updateService.Add(new Add<VehicleDto>(jobj.ToObject<VehicleDto>())));
+                    return Ok(await _addService.Add(new Add<VehicleDto>(jobj.ToObject<VehicleDto>())));
                 }
                 _logger.LogWarning($"VEHICLE: Recieved null object");
                 return BadRequest("Передан пустой параметр");
@@ -44,7 +44,7 @@ namespace Exam.Controllers
             {
                 if (jobj != null)
                 {
-                    return Ok(await _updateService.Add(new Add<DriverDto>(jobj.ToObject<DriverDto>())));
+                    return Ok(await _addService.Add(new Add<DriverDto>(jobj.ToObject<DriverDto>())));
                 }
                 _logger.LogWarning($"DRIVER: Recieved null object");
                 return BadRequest("Передан пустой параметр");
@@ -63,7 +63,7 @@ namespace Exam.Controllers
             {
                 if (jobj != null)
                 {
-                    return Ok(await _updateService.Add(new Add<CarrierDto>(jobj.ToObject<CarrierDto>())));
+                    return Ok(await _addService.Add(new Add<CarrierDto>(jobj.ToObject<CarrierDto>())));
                 }
                 _logger.LogWarning($"CARRIER: Recieved null object");
                 return BadRequest("Передан пустой параметр");
@@ -82,7 +82,7 @@ namespace Exam.Controllers
             {
                 if (jobj != null)
                 {
-                    return Ok(await _updateService.Add(new Add<ClientDto>(jobj.ToObject<ClientDto>())));
+                    return Ok(await _addService.Add(new Add<ClientDto>(jobj.ToObject<ClientDto>())));
                 }
                 _logger.LogWarning($"CLIENT: Recieved null object");
                 return BadRequest("Передан пустой параметр");
@@ -101,7 +101,7 @@ namespace Exam.Controllers
             {
                 if (jobj != null)
                 {
-                    return Ok(await _updateService.Add(new Add<ContractDto>(jobj.ToObject<ContractDto>())));
+                    return Ok(await _addService.Add(new Add<ContractDto>(jobj.ToObject<ContractDto>())));
                 }
                 _logger.LogWarning($"CONTRACT: Recieved null object");
                 return BadRequest("Передан пустой параметр");
@@ -120,7 +120,7 @@ namespace Exam.Controllers
             {
                 if (jobj != null)
                 {
-                    return Ok(await _updateService.Add(new Add<DocumentDto>(jobj.ToObject<DocumentDto>())));
+                    return Ok(await _addService.Add(new Add<DocumentDto>(jobj.ToObject<DocumentDto>())));
                 }
                 _logger.LogWarning($"DOCUMENT: Recieved null object");
                 return BadRequest("Передан пустой параметр");
@@ -139,7 +139,7 @@ namespace Exam.Controllers
             {
                 if (jobj != null)
                 {
-                    return Ok(await _updateService.Add(new Add<PaymentDto>(jobj.ToObject<PaymentDto>())));
+                    return Ok(await _addService.Add(new Add<PaymentDto>(jobj.ToObject<PaymentDto>())));
                 }
                 _logger.LogWarning($"PAYMENT: Recieved null object");
                 return BadRequest("Передан пустой параметр");
@@ -151,21 +151,6 @@ namespace Exam.Controllers
             }
         }
 
-        [HttpPost("file/{id}")]
-        public virtual async Task<ActionResult> PostFiles(Guid id, [FromBody] JArray files)
-        {
-            try
-            {
-
-
-                _logger.LogWarning($"FILE: Recieved null object");
-                return BadRequest("Передан пустой параметр");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, ex.Message);
-                return BadRequest("Неверный тип данных");
-            }
-        }
+        
     }
 }
