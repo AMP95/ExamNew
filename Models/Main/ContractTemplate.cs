@@ -5,10 +5,5 @@ namespace Models.Main
     public class ContractTemplate : BaseEntity
     {
         public string Name { get; set; }
-
-
-        [ForeignKey(nameof(File))]
-        public Guid FileId { get; set; }
-        public Sub.File File { get; set; }
     }
 }

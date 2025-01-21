@@ -35,7 +35,5 @@ namespace Models
 
         [MaxLength(200)]
         public string Phones { get; set; }
-
-        public virtual ICollection<Models.Sub.File> Files { get; set; }
     }
 }

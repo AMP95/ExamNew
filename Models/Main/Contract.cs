@@ -39,11 +39,6 @@ namespace Models
         public Guid VehicleId { get; set; }
         public Vehicle Vehicle { get; set; }
 
-
-        [ForeignKey(nameof(File))]
-        public Guid FileId { get; set; }
-        public Models.Sub.File File { get; set; }
-
         public float CarrierPayment { get; set; }
         public float CarrierPrepayment { get; set; }
         public short CarrierPayPriority { get; set; }

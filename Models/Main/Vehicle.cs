@@ -19,8 +19,5 @@ namespace Models
         [ForeignKey(nameof(Carrier))]
         public Guid? CarrierId { get; set; }
         public virtual Carrier Carrier { get; set; }
-
-
-        public virtual ICollection<Sub.File> Files { get; set; }
     }
 }
