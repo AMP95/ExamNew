@@ -12,6 +12,7 @@ namespace Exam.Controllers
         public FileController(IFileService fileService, ILogger<FileController> logger)
         {
             _logger = logger;
+            _fileService = fileService;
         }
 
         [HttpGet("{id}")]

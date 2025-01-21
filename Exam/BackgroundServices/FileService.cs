@@ -1,6 +1,7 @@
 ﻿using DTOs.Dtos;
 using Exam.Interfaces;
 using MediatRepos;
+using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Http;
 using System.Collections.Concurrent;
 
@@ -29,6 +30,10 @@ namespace Exam.BackgroundServices
             _statusService = status;
             _resultService = result;
             _logger = logger;
+            _add = addService;
+            _get = getService;
+            _update = updateService;
+            _hostEnvironment = hostEnvironment;
         }
 
         public async Task<Guid> Add(FileMethod method, Guid guid, IFormFileCollection files = null)
@@ -72,16 +77,16 @@ namespace Exam.BackgroundServices
                             switch (item.Method) 
                             {
                                 case FileMethod.Get:
-                                    result = await Get(item.FileId);
+                                    result = await Get(item.FileId, stoppingToken);
                                     break;
                                 case FileMethod.Delete:
-                                    result = await Delete(item.FileId);
+                                    result = await Delete(item.FileId, stoppingToken);
                                     break;
                                 case FileMethod.Add:
-                                    result = await Add(item.Files);
+                                    result = await Add(item.Files, stoppingToken);
                                     break;
                                 case FileMethod.Update:
-                                    result = await Update(item.FileId, item.Files);
+                                    result = await Update(item.FileId, item.Files, stoppingToken);
                                     break;
                             }
 
@@ -105,18 +110,23 @@ namespace Exam.BackgroundServices
             throw new NotImplementedException();
         }
 
-        private async Task<ServiceResult> Get(Guid id)
+        private async Task<ServiceResult> Get(Guid id, CancellationToken stoppingToken)
         {
+            ServiceResult getResult = new ServiceResult()
+            {
+                ResultStatusCode = 404,
+                ResultErrorMessage = "Файл не найден"
+            };
+
             Guid requestId = await _get.Add(new GetId<FileDto>(id));
 
-            while (_statusService.GetStatus(requestId).Result != RequestStatus.Done) 
+            while (_statusService.GetStatus(requestId).Result != RequestStatus.Done || stoppingToken.IsCancellationRequested) 
             { 
                 Task.Delay(50).Wait();
             }
 
             ServiceResult result = await _resultService.GetResult(requestId);
-
-            ServiceResult getResult = null;
+            
             if (result.ResultStatusCode == 200)
             {
                 FileDto dto = result.Result as FileDto;
@@ -129,37 +139,184 @@ namespace Exam.BackgroundServices
 
                 getResult = new ServiceResult()
                 {
-                    CreateTime = DateTime.Now,
                     Result = formFile,
                     ResultStatusCode = 200,
-                };
-            }
-            else 
-            {
-                getResult = new ServiceResult()
-                {
-                    CreateTime = DateTime.Now,
-                    ResultStatusCode = result.ResultStatusCode,
-                    ResultErrorMessage = result.ResultErrorMessage
                 };
             }
 
             return getResult;
         }
 
-        private async Task<ServiceResult> Add(IFormFileCollection files)
+        private async Task<ServiceResult> Add(IFormFileCollection files, CancellationToken stoppingToken)
         {
-            throw new NotImplementedException();
+            ServiceResult addResult = new ServiceResult()
+            {
+                ResultStatusCode = 500,
+                ResultErrorMessage = "Не удалось добавить файл"
+            };
+
+            List<Guid> guids = new List<Guid>();
+
+            if (files != null && files.Any()) 
+            {
+                foreach (IFormFile formFile in files) 
+                {
+                    string name = formFile.FileName;
+                    string ext = Path.GetExtension(name);
+                    string saveName = Path.Combine("Files", $"{Guid.NewGuid()}{ext}");
+                    string path = Path.Combine(_hostEnvironment.WebRootPath, saveName); 
+
+                    using (var fileStream = new FileStream(path, FileMode.Create))
+                    {
+                        await formFile.CopyToAsync(fileStream, stoppingToken);
+                    }
+
+                    FileDto dto = new FileDto() { Name = name, SaveName = saveName };
+
+                    Guid requestGuid = await _add.Add(new Add<FileDto>(dto));
+
+                    while (_statusService.GetStatus(requestGuid).Result != RequestStatus.Done || stoppingToken.IsCancellationRequested) 
+                    { 
+                        Task.Delay(50).Wait();
+                    }
+
+                    ServiceResult result = await _resultService.GetResult(requestGuid);
+
+                    if (result.ResultStatusCode == 200) 
+                    {
+                        guids.Add((Guid)result.Result);
+                    }
+                }
+            }
+
+            if (guids.Any())
+            {
+                addResult = new ServiceResult()
+                {
+                    Result = guids,
+                    ResultStatusCode = 200,
+                };
+            }
+
+            return addResult;
         }
 
-        private async Task<ServiceResult> Delete(Guid fileId)
+        private async Task<ServiceResult> Delete(Guid fileId, CancellationToken stoppingToken)
         {
-            throw new NotImplementedException();
+            ServiceResult deleteResult = new ServiceResult()
+            {
+                ResultStatusCode = 500,
+                ResultErrorMessage = "Не удалось удалить файл"
+            };
+
+            Guid requestId = await _get.Add(new GetId<FileDto>(fileId));
+
+            while (_statusService.GetStatus(requestId).Result != RequestStatus.Done || stoppingToken.IsCancellationRequested)
+            {
+                Task.Delay(50).Wait();
+            }
+
+            ServiceResult getrResult = await _resultService.GetResult(requestId);
+
+            if (getrResult.ResultStatusCode == 200) 
+            {
+                FileDto fileDto = getrResult.Result as FileDto;
+
+                requestId = await _update.Add(new Delete<FileDto>(fileId));
+
+                while (_statusService.GetStatus(requestId).Result != RequestStatus.Done || stoppingToken.IsCancellationRequested)
+                {
+                    Task.Delay(50).Wait();
+                }
+
+                ServiceResult result = await _resultService.GetResult(requestId);
+
+                if (result.ResultStatusCode == 200)
+                {
+                    deleteResult = new ServiceResult()
+                    {
+                        Result = true,
+                        ResultStatusCode = 200,
+                    };
+
+                    try
+                    {
+                        File.Delete(Path.Combine(_hostEnvironment.WebRootPath, fileDto.SaveName));
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, ex.Message);
+                    }
+                }
+            }
+
+            return deleteResult;
         }
 
-        private async Task<ServiceResult> Update(Guid fileId, IFormFileCollection files)
+        private async Task<ServiceResult> Update(Guid fileId, IFormFileCollection files, CancellationToken stoppingToken)
         {
-            throw new NotImplementedException();
+            ServiceResult updateResult = new ServiceResult()
+            {
+                ResultStatusCode = 500,
+                Result = false,
+                ResultErrorMessage = "Не удалось обновить файл"
+            };
+
+            Guid requestId = await _get.Add(new GetId<FileDto>(fileId));
+
+            while (_statusService.GetStatus(requestId).Result != RequestStatus.Done || stoppingToken.IsCancellationRequested)
+            {
+                Task.Delay(50).Wait();
+            }
+
+            ServiceResult getrResult = await _resultService.GetResult(requestId);
+
+            if (getrResult.ResultStatusCode == 200)
+            {
+                FileDto fileDto = getrResult.Result as FileDto;
+
+                try
+                {
+                    File.Delete(Path.Combine(_hostEnvironment.WebRootPath, fileDto.SaveName));
+
+                    string name = files.First().FileName;
+                    string ext = Path.GetExtension(name);
+                    string saveName = Path.Combine("Files", $"{Guid.NewGuid()}.{ext}");
+                    string path = Path.Combine(_hostEnvironment.WebRootPath, saveName);
+
+                    using (var fileStream = new FileStream(path, FileMode.Create))
+                    {
+                        await files.First().CopyToAsync(fileStream, stoppingToken);
+                    }
+
+                    fileDto.SaveName = saveName;
+
+                    requestId = await _update.Add(new Update<FileDto>(fileDto));
+
+                    while (_statusService.GetStatus(requestId).Result != RequestStatus.Done || stoppingToken.IsCancellationRequested)
+                    {
+                        Task.Delay(50).Wait();
+                    }
+
+                    ServiceResult result = await _resultService.GetResult(requestId);
+
+                    if (result.ResultStatusCode == 200) 
+                    {
+                        updateResult = new ServiceResult()
+                        {
+                            ResultStatusCode = 200,
+                            Result = true,
+                        };
+                    }
+
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, ex.Message);
+                }
+            }
+
+            return updateResult;
         }
 
         public override Task StopAsync(CancellationToken cancellationToken)

@@ -6,6 +6,11 @@
         public int ResultStatusCode { get; set; }
         public string ResultErrorMessage { get; set; }
         public DateTime CreateTime { get; set; }
+
+        public ServiceResult()
+        {
+            CreateTime = DateTime.Now;
+        }
     }
 
     public interface IResultService

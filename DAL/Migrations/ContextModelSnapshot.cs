@@ -133,6 +133,9 @@ namespace DAL.Migrations
                     b.Property<Guid>("DriverId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid>("FileId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid>("LoadingPointId")
                         .HasColumnType("uniqueidentifier");
 
@@ -158,6 +161,8 @@ namespace DAL.Migrations
                     b.HasIndex("ClientId");
 
                     b.HasIndex("DriverId");
+
+                    b.HasIndex("FileId");
 
                     b.HasIndex("LoadingPointId");
 
@@ -264,6 +269,29 @@ namespace DAL.Migrations
                     b.ToTable("Drivers");
                 });
 
+            modelBuilder.Entity("Models.Main.ContractTemplate", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("FileId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FileId");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("Templates");
+                });
+
             modelBuilder.Entity("Models.Payment", b =>
                 {
                     b.Property<Guid>("Id")
@@ -291,6 +319,43 @@ namespace DAL.Migrations
                     b.HasIndex("ContractId");
 
                     b.ToTable("Payment");
+                });
+
+            modelBuilder.Entity("Models.Sub.File", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("CarrierId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("DriverId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SaveName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<Guid?>("VehicleId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CarrierId");
+
+                    b.HasIndex("DriverId");
+
+                    b.HasIndex("SaveName")
+                        .IsUnique();
+
+                    b.HasIndex("VehicleId");
+
+                    b.ToTable("File");
                 });
 
             modelBuilder.Entity("Models.Sub.RoutePoint", b =>
@@ -397,6 +462,12 @@ namespace DAL.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Models.Sub.File", "File")
+                        .WithMany()
+                        .HasForeignKey("FileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Models.Sub.RoutePoint", "LoadingPoint")
                         .WithMany()
                         .HasForeignKey("LoadingPointId")
@@ -414,6 +485,8 @@ namespace DAL.Migrations
                     b.Navigation("Client");
 
                     b.Navigation("Driver");
+
+                    b.Navigation("File");
 
                     b.Navigation("LoadingPoint");
 
@@ -446,6 +519,17 @@ namespace DAL.Migrations
                     b.Navigation("Vehicle");
                 });
 
+            modelBuilder.Entity("Models.Main.ContractTemplate", b =>
+                {
+                    b.HasOne("Models.Sub.File", "File")
+                        .WithMany()
+                        .HasForeignKey("FileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("File");
+                });
+
             modelBuilder.Entity("Models.Payment", b =>
                 {
                     b.HasOne("Models.Contract", "Contract")
@@ -455,6 +539,21 @@ namespace DAL.Migrations
                         .IsRequired();
 
                     b.Navigation("Contract");
+                });
+
+            modelBuilder.Entity("Models.Sub.File", b =>
+                {
+                    b.HasOne("Models.Carrier", null)
+                        .WithMany("Files")
+                        .HasForeignKey("CarrierId");
+
+                    b.HasOne("Models.Driver", null)
+                        .WithMany("Files")
+                        .HasForeignKey("DriverId");
+
+                    b.HasOne("Models.Vehicle", null)
+                        .WithMany("Files")
+                        .HasForeignKey("VehicleId");
                 });
 
             modelBuilder.Entity("Models.Sub.RoutePoint", b =>
@@ -479,6 +578,8 @@ namespace DAL.Migrations
 
                     b.Navigation("Drivers");
 
+                    b.Navigation("Files");
+
                     b.Navigation("Vehicles");
                 });
 
@@ -489,6 +590,16 @@ namespace DAL.Migrations
                     b.Navigation("Payments");
 
                     b.Navigation("UnloadingPoints");
+                });
+
+            modelBuilder.Entity("Models.Driver", b =>
+                {
+                    b.Navigation("Files");
+                });
+
+            modelBuilder.Entity("Models.Vehicle", b =>
+                {
+                    b.Navigation("Files");
                 });
 #pragma warning restore 612, 618
         }
