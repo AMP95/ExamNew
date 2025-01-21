@@ -22,7 +22,6 @@ namespace DAL
             modelBuilder.Entity<Vehicle>().HasIndex(u => new { u.TruckModel, u.TruckNumber, u.TrailerModel, u.TrailerNumber }).IsUnique(true);
             modelBuilder.Entity<Contract>().HasIndex(u => new { u.Number, u.CreationDate }).IsUnique(true);
             modelBuilder.Entity<ContractTemplate>().HasIndex(u => u.Name).IsUnique(true);
-            modelBuilder.Entity<Models.Sub.File>().HasIndex(u => u.SaveName).IsUnique(true);
 
             base.OnModelCreating(modelBuilder);
         }

@@ -1,8 +1,10 @@
 using DAL;
 using DTOs;
 using Exam.BackgroundServices;
+using Exam.FileManager;
 using Exam.Interfaces;
 using Exam.ResultServices;
+using MediatorServices.Abstract;
 using MediatRepos;
 using Microsoft.EntityFrameworkCore;
 using Models;
@@ -34,13 +36,14 @@ namespace Exam
             builder.Services.AddDbContext<Context>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")), ServiceLifetime.Transient, ServiceLifetime.Transient);
 
             builder.Services.AddTransient<IRepository, ContextRepository>();
+            builder.Services.AddTransient<IFileManager, FilesManager>();
 
             builder.Services.AddSingleton<IResultService, ResultService>();
             builder.Services.AddSingleton<IRequestStatusService, RequestStatusService>();
             builder.Services.AddSingleton<IGetService, GetService>();
             builder.Services.AddSingleton<IAddService, AddService>();
             builder.Services.AddSingleton<IUpdateService, UpdateService>();
-            builder.Services.AddSingleton<IFileService, FileService>();
+            builder.Services.AddSingleton<IDownloadService, DownloadService>();
 
             builder.Services.AddCors(options =>
             {
@@ -56,7 +59,7 @@ namespace Exam
             builder.Services.AddHostedService(sp => sp.GetService<IGetService>() as GetService);
             builder.Services.AddHostedService(sp => sp.GetService<IAddService>() as AddService);
             builder.Services.AddHostedService(sp => sp.GetService<IUpdateService>() as UpdateService);
-            builder.Services.AddHostedService(sp => sp.GetService<IFileService>() as FileService);
+            builder.Services.AddHostedService(sp => sp.GetService<IDownloadService>() as DownloadService);
 
             builder.Services.AddMediatR(cfg =>
             {

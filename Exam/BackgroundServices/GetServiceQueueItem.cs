@@ -28,9 +28,5 @@ namespace Exam.BackgroundServices
     public class FileServiceQueueItem : ServiceQueueItem
     {
         public Guid FileId { get; set; }
-
-        public IFormFileCollection Files { get; set; }
-
-        public FileMethod Method { get; set; }
     }
 }

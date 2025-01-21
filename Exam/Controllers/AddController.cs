@@ -1,4 +1,5 @@
 ﻿using DTOs;
+using DTOs.Dtos;
 using Exam.Interfaces;
 using MediatRepos;
 using Microsoft.AspNetCore.Mvc;
@@ -151,6 +152,25 @@ namespace Exam.Controllers
             }
         }
 
-        
+        [HttpPost("file")]
+        public virtual async Task<ActionResult> PostFile([FromBody] JObject jobj)
+        {
+            try
+            {
+                if (jobj != null)
+                {
+                    return Ok(await _addService.Add(new Add<FileDto>(jobj.ToObject<FileDto>())));
+                }
+                _logger.LogWarning($"FILE: Recieved null object");
+                return BadRequest("Передан пустой параметр");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return BadRequest("Неверный тип данных");
+            }
+        }
+
+
     }
 }

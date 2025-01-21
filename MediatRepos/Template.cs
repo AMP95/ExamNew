@@ -15,21 +15,33 @@ namespace MediatorServices
 
         protected override async Task<object> Get(Guid id)
         {
-            IEnumerable<ContractTemplate> templates = await _repository.Get<ContractTemplate>(t => t.Id == id, null, "File");
+            IEnumerable<ContractTemplate> templates = await _repository.Get<ContractTemplate>(t => t.Id == id);
+
             ContractTemplateDto dto = null;
             if (templates.Any())
             {
                 ContractTemplate template = templates.First();
+                IEnumerable<Models.Sub.File> files = await _repository.Get<Models.Sub.File>(f => f.EntityId == template.Id);
+
                 dto = new ContractTemplateDto()
                 {
                     Id = template.Id,
                     Name = template.Name,
-                    File = new FileDto() 
-                    {
-                        Id = template.File.Id,
-                        Name = template.File.Name,
-                    }
                 };
+
+                if (files.Any()) 
+                {
+                    Models.Sub.File file = files.First();
+
+                    dto.File = new FileDto()
+                    {
+                        Id = file.Id,
+                        FileName = $"{file.Name}{file.Extencion}",
+                        EntityId = file.EntityId,
+                        EntityType = file.EntityType,
+                        SubFolder = file.Subfolder
+                    };
+                }
             }
             return dto;
         }
@@ -43,7 +55,7 @@ namespace MediatorServices
 
         protected override async Task<object> Get(int start, int end)
         {
-            IEnumerable<ContractTemplate> templates = await _repository.Get<ContractTemplate>(null,null, "File");
+            IEnumerable<ContractTemplate> templates = await _repository.Get<ContractTemplate>();
             List<ContractTemplateDto> dtos = new List<ContractTemplateDto>();
 
             foreach (var template in templates)
@@ -53,14 +65,6 @@ namespace MediatorServices
                     Id = template.Id,
                     Name = template.Name,
                 };
-
-                if (template.File != null) 
-                {
-                    dto.File = new FileDto()
-                    {
-                        Id = template.File.Id,
-                    };
-                }
 
                 dtos.Add(dto);
             }
@@ -95,7 +99,6 @@ namespace MediatorServices
             ContractTemplate template = new ContractTemplate()
             {
                 Name = dto.Name,
-                FileId = dto.File.Id
             };
 
             return await _repository.Add(template);

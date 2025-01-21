@@ -1,4 +1,5 @@
 ﻿using DTOs;
+using DTOs.Dtos;
 using Exam.Interfaces;
 using MediatRepos;
 using Microsoft.AspNetCore.Mvc;
@@ -49,6 +50,12 @@ namespace Exam.Controllers
         public virtual async Task<ActionResult> DeleteClient(Guid id)
         {
             return Ok(await _updateService.Add(new Delete<ClientDto>(id)));
+        }
+
+        [HttpDelete("file/{id}")]
+        public virtual async Task<ActionResult> DeleteFile(Guid id)
+        {
+            return Ok(await _updateService.Add(new Delete<FileDto>(id)));
         }
     }
 }
