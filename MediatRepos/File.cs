@@ -26,7 +26,7 @@ namespace MediatorServices
                     FileName = file.Name,
                     SubFolder = file.Subfolder,
                     EntityId = file.EntityId,
-                    EntityType = file.EntityType,
+                    EntityType = Type.GetType(file.EntityType),
                 };
             }
             return null;
@@ -63,7 +63,7 @@ namespace MediatorServices
                     FileName = $"{file.Name}{file.Extencion}",
                     SubFolder = file.Subfolder,
                     EntityId = file.EntityId,
-                    EntityType = file.EntityType,
+                    EntityType = Type.GetType(file.EntityType),
                 };
 
                 dtos.Add(dto);
@@ -141,7 +141,7 @@ namespace MediatorServices
                 Extencion = extencion,
                 Subfolder = dto.SubFolder,
                 EntityId = dto.EntityId,
-                EntityType = dto.EntityType,
+                EntityType = dto.EntityType.Name,
             };
 
             Guid id = await _repository.Add(file);

@@ -38,7 +38,7 @@ namespace MediatorServices
                         Id = file.Id,
                         FileName = $"{file.Name}{file.Extencion}",
                         EntityId = file.EntityId,
-                        EntityType = file.EntityType,
+                        EntityType =Type.GetType(file.EntityType),
                         SubFolder = file.Subfolder
                     };
                 }

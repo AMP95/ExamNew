@@ -12,6 +12,7 @@ namespace DAL
         public DbSet<Vehicle> Vehicles { get; set; }
         public DbSet<Contract> Contracts { get; set; }
         public DbSet<ContractTemplate> Templates { get; set; }
+        public DbSet<Models.Sub.File> Files { get; set; }
 
         public Context(DbContextOptions options) : base(options)
         {

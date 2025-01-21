@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-
-namespace Models.Sub
+﻿namespace Models.Sub
 {
     public class File : BaseEntity
     {
@@ -8,6 +6,6 @@ namespace Models.Sub
         public string Extencion { get; set; }
         public string Subfolder { get; set; }
         public Guid EntityId { get; set; }
-        public Type EntityType { get; set; }
+        public string EntityType { get; set; }
     }
 }
