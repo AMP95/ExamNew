@@ -3,6 +3,7 @@ using DTOs.Dtos;
 using MediatorServices.Abstract;
 using MediatR;
 using MediatRepos;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Models;
 using Models.Main;
@@ -25,19 +26,19 @@ namespace MediatorServices
             switch (file.EntityType)
             {
                 case nameof(Carrier):
-                    dto.DtoType = typeof(CarrierDto);
+                    dto.DtoType = nameof(CarrierDto);
                     break;
                 case nameof(Driver):
-                    dto.DtoType = typeof(DriverDto);
+                    dto.DtoType = nameof(DriverDto);
                     break;
                 case nameof(Vehicle):
-                    dto.DtoType = typeof(VehicleDto);
+                    dto.DtoType = nameof(VehicleDto);
                     break;
                 case nameof(Contract):
-                    dto.DtoType = typeof(ContractDto);
+                    dto.DtoType = nameof(ContractDto);
                     break;
                 case nameof(ContractTemplate):
-                    dto.DtoType = typeof(ContractTemplateDto);
+                    dto.DtoType = nameof(ContractTemplateDto);
                     break;
             }
 
@@ -48,9 +49,13 @@ namespace MediatorServices
 
     public class GetIdFileService : GetIdModelService<FileDto>
     {
+        private IFileManager _fileManager;
+
         public GetIdFileService(IRepository repository, 
-                                ILogger<GetIdModelService<FileDto>> logger) : base(repository, logger)
+                                ILogger<GetIdModelService<FileDto>> logger,
+                                IFileManager fileManager) : base(repository, logger)
         {
+            _fileManager = fileManager;
         }
 
         protected override async Task<object> Get(Guid id)
@@ -58,8 +63,11 @@ namespace MediatorServices
             Models.Sub.File file = await _repository.GetById<Models.Sub.File>(id);
             if (file != null)
             {
-                return FileConverter.Convert(file);
+                FileDto dto = FileConverter.Convert(file);
+                //dto.File = await _fileManager.GetFile(file.FullFilePath, file.ViewNameWithExtencion);
+                return dto;
             }
+
             return null;
         }
     }
@@ -156,7 +164,7 @@ namespace MediatorServices
             string extencion = Path.GetExtension(dto.FileNameWithExtencion);
             string entityCatalog = string.Empty;
 
-            switch (dto.DtoType.Name) 
+            switch (dto.DtoType) 
             {
                 case nameof(CarrierDto):
                     entityCatalog = nameof(Carrier);

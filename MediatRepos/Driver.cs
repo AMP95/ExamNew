@@ -4,6 +4,7 @@ using MediatR;
 using MediatRepos;
 using Microsoft.Extensions.Logging;
 using Models;
+using System.Diagnostics;
 using System.Linq.Expressions;
 
 namespace MediatorServices
@@ -314,7 +315,11 @@ namespace MediatorServices
             driver.PassportDateOfIssue = dto.PassportDateOfIssue;
             driver.PassportIssuer = dto.PassportIssuer;
             driver.PassportSerial = dto.PassportSerial;
-            driver.CarrierId = dto.Carrier?.Id;
+
+            if (dto.Carrier != null && dto.Carrier.Id != Guid.Empty)
+            {
+                driver.CarrierId = dto.Carrier.Id;
+            }
 
             if (dto.Vehicle?.Carrier?.Id != dto.Carrier?.Id)
             {

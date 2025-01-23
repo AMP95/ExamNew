@@ -10,7 +10,7 @@ namespace DTOs.Dtos
         public string Catalog { get; set; }
 
         public Guid DtoId { get; set; }
-        public Type DtoType { get; set; }
+        public string DtoType { get; set; }
 
         public IFormFile File { get; set; }
     }

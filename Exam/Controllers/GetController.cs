@@ -11,8 +11,7 @@ namespace Exam.Controllers
     public class GetController : ControllerBase
     {
         private IGetService _getService;
-        private IDownloadService _downloadService;
-        public GetController(IGetService getService, IDownloadService downloadService)
+        public GetController(IGetService getService)
         {
             _getService = getService;
         }
@@ -61,19 +60,11 @@ namespace Exam.Controllers
             return Ok(await _getService.Add(new GetId<ContractDto>(id)));
         }
 
-
-        [HttpGet("file/id/{id}")]
+        [HttpGet("file/id/{id}")] //with IFormFile
         public virtual async Task<ActionResult> GetFile(Guid id)
         {
             return Ok(await _getService.Add(new GetId<FileDto>(id)));
         }
-
-        [HttpGet("file/download/{id}")]
-        public virtual async Task<ActionResult> DownloadFile(Guid id)
-        {
-            return Ok(await _downloadService.Add(id));
-        }
-
 
 
         #endregion ID

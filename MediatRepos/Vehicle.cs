@@ -227,9 +227,13 @@ namespace MediatRepos
                 TruckModel = dto.TruckModel,
                 TruckNumber = dto.TruckNumber,
                 TrailerModel = dto.TrailerModel,
-                TrailerNumber = dto.TrailerNumber,
-                CarrierId = dto?.Carrier?.Id
+                TrailerNumber = dto.TrailerNumber
             };
+
+            if (dto.Carrier != null && dto.Carrier.Id != Guid.Empty) 
+            { 
+                truck.CarrierId = dto.Carrier.Id;
+            }
 
             return await _repository.Add(truck);
         }

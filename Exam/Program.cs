@@ -43,7 +43,6 @@ namespace Exam
             builder.Services.AddSingleton<IGetService, GetService>();
             builder.Services.AddSingleton<IAddService, AddService>();
             builder.Services.AddSingleton<IUpdateService, UpdateService>();
-            builder.Services.AddSingleton<IDownloadService, DownloadService>();
 
             builder.Services.AddCors(options =>
             {
@@ -59,7 +58,6 @@ namespace Exam
             builder.Services.AddHostedService(sp => sp.GetService<IGetService>() as GetService);
             builder.Services.AddHostedService(sp => sp.GetService<IAddService>() as AddService);
             builder.Services.AddHostedService(sp => sp.GetService<IUpdateService>() as UpdateService);
-            builder.Services.AddHostedService(sp => sp.GetService<IDownloadService>() as DownloadService);
 
             builder.Services.AddMediatR(cfg =>
             {

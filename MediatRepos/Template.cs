@@ -40,7 +40,7 @@ namespace MediatorServices
                         FileNameWithExtencion = file.ViewNameWithExtencion,
                         Catalog = Path.GetFileName(Path.GetDirectoryName(file.FullFilePath)),
                         DtoId = file.EntityId,
-                        DtoType = typeof(ContractTemplateDto)
+                        DtoType = file.EntityType
                     };
                 }
             }
