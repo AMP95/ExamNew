@@ -47,11 +47,13 @@ namespace Exam.FileManager
             }
         }
 
-        public async Task<bool> SaveFile(string path, IFormFile file)
+        public async Task<bool> SaveFile(string directory, string name, IFormFile file)
         {
-            string fullPath = Path.Combine(_environment.WebRootPath, path);
+            string fullPath = Path.Combine(_environment.WebRootPath, directory, name);
             try
             {
+                Directory.CreateDirectory(Path.Combine(_environment.WebRootPath, directory));
+
                 using (var fileStream = new FileStream(fullPath, FileMode.Create))
                 {
                     await file.CopyToAsync(fileStream);
