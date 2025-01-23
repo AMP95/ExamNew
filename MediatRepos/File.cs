@@ -206,8 +206,6 @@ namespace MediatorServices
 
             if (id != Guid.Empty) 
             {
-
-
                 string saveDirectory = Path.Combine(file.EntityType, file.Subfolder);
 
                 if (!await _fileManager.SaveFile(saveDirectory, $"{file.Name}{file.Extencion}", dto.File))

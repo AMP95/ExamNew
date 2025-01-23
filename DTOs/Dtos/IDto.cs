@@ -2,6 +2,6 @@
 {
     public interface IDto
     {
-        public Guid Id { get; }
+        public Guid Id { get; set; }
     }
 }
