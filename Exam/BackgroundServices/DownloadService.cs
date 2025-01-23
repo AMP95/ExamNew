@@ -76,10 +76,10 @@ namespace Exam.BackgroundServices
                             if (getResult.ResultStatusCode == 200)
                             {
                                 FileDto fileDto = getResult.Result as FileDto;
-                                string extensions = Path.GetExtension(fileDto.FileName);
-                                string filePath = Path.Combine(fileDto.SubFolder, $"{fileDto.Id}{extensions}");
+                                string extensions = Path.GetExtension(fileDto.FileNameWithExtencion);
+                                string filePath = Path.Combine(fileDto.Catalog, $"{fileDto.Id}{extensions}");
 
-                                IFormFile formFile = await _fileManager.GetFile(filePath, fileDto.FileName);
+                                IFormFile formFile = await _fileManager.GetFile(filePath, fileDto.FileNameWithExtencion);
                                 if (formFile != null)
                                 {
                                     currentResult = new ServiceResult()

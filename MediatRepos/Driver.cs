@@ -1,4 +1,5 @@
 ﻿using DTOs;
+using MediatorServices.Abstract;
 using MediatR;
 using MediatRepos;
 using Microsoft.Extensions.Logging;
@@ -240,15 +241,28 @@ namespace MediatorServices
     public class DeleteDriverService : IRequestHandler<Delete<DriverDto>, bool>
     {
         private IRepository _repository;
+        private IFileManager _fileManager;
 
-        public DeleteDriverService(IRepository repository)
+        public DeleteDriverService(IRepository repository, IFileManager fileManager)
         {
             _repository = repository;
+            _fileManager = fileManager;
         }
 
         public async Task<bool> Handle(Delete<DriverDto> request, CancellationToken cancellationToken)
         {
-            return await _repository.Remove<Driver>(request.Id);
+            bool result = await _repository.Remove<Driver>(request.Id);
+
+            IEnumerable<Models.Sub.File> files = await _repository.Get<Models.Sub.File>(f => f.EntityType == nameof(Driver) && f.EntityId == request.Id);
+
+            if (files.Any())
+            {
+                string catalog = Path.GetFileName(Path.GetDirectoryName(files.First().FullFilePath));
+
+                await _fileManager.RemoveAllFiles(nameof(Driver), catalog);
+            }
+
+            return result;
         }
     }
 

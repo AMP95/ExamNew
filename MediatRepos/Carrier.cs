@@ -1,8 +1,10 @@
 ﻿using DTOs;
+using MediatorServices.Abstract;
 using MediatR;
 using MediatRepos;
 using Microsoft.Extensions.Logging;
 using Models;
+using Models.Main;
 using System.Linq.Expressions;
 
 namespace MediatorServices
@@ -140,15 +142,28 @@ namespace MediatorServices
     public class DeleteCarrierService : IRequestHandler<Delete<CarrierDto>, bool>
     {
         private IRepository _repository;
+        private IFileManager _fileManager;
 
-        public DeleteCarrierService(IRepository repository)
+        public DeleteCarrierService(IRepository repository, IFileManager fileManager)
         {
             _repository = repository;
+            _fileManager = fileManager;
         }
 
         public async Task<bool> Handle(Delete<CarrierDto> request, CancellationToken cancellationToken)
         {
-            return await _repository.Remove<Carrier>(request.Id);
+            bool result = await _repository.Remove<Carrier>(request.Id);
+
+            IEnumerable<Models.Sub.File> files = await _repository.Get<Models.Sub.File>(f => f.EntityType == nameof(Carrier) && f.EntityId == request.Id);
+
+            if (files.Any())
+            {
+                string catalog = Path.GetFileName(Path.GetDirectoryName(files.First().FullFilePath));
+
+                await _fileManager.RemoveAllFiles(nameof(Carrier), catalog);
+            }
+
+            return result;
         }
     }
 

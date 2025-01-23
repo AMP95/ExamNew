@@ -10,6 +10,42 @@ using System.Linq.Expressions;
 
 namespace MediatorServices
 {
+    internal static class FileConverter
+    {
+        public static FileDto Convert(Models.Sub.File file)
+        {
+            FileDto dto = new FileDto()
+            {
+                Id = file.Id,
+                FileNameWithExtencion = file.ViewNameWithExtencion,
+                Catalog = Path.GetFileName(Path.GetDirectoryName(file.FullFilePath)),
+                DtoId = file.EntityId,
+            };
+
+            switch (file.EntityType)
+            {
+                case nameof(Carrier):
+                    dto.DtoType = typeof(CarrierDto);
+                    break;
+                case nameof(Driver):
+                    dto.DtoType = typeof(DriverDto);
+                    break;
+                case nameof(Vehicle):
+                    dto.DtoType = typeof(VehicleDto);
+                    break;
+                case nameof(Contract):
+                    dto.DtoType = typeof(ContractDto);
+                    break;
+                case nameof(ContractTemplate):
+                    dto.DtoType = typeof(ContractTemplateDto);
+                    break;
+            }
+
+            return dto;
+        }
+    }
+
+
     public class GetIdFileService : GetIdModelService<FileDto>
     {
         public GetIdFileService(IRepository repository, 
@@ -22,33 +58,7 @@ namespace MediatorServices
             Models.Sub.File file = await _repository.GetById<Models.Sub.File>(id);
             if (file != null)
             {
-                FileDto dto = new FileDto()
-                {
-                    Id = id,
-                    FileName = file.Name,
-                    SubFolder = file.Subfolder,
-                    EntityId = file.EntityId,
-                };
-
-                switch (file.EntityType) 
-                {
-                    case nameof(Carrier):
-                        dto.EntityType = typeof(CarrierDto);
-                        break;
-                    case nameof(Driver):
-                        dto.EntityType = typeof(DriverDto);
-                        break;
-                    case nameof(Vehicle):
-                        dto.EntityType = typeof(VehicleDto);
-                        break;
-                    case nameof(Contract):
-                        dto.EntityType = typeof(ContractDto);
-                        break;
-                    case nameof(ContractTemplate):
-                        dto.EntityType = typeof(ContractTemplateDto);
-                        break;
-                }
-                return dto;
+                return FileConverter.Convert(file);
             }
             return null;
         }
@@ -78,34 +88,7 @@ namespace MediatorServices
 
             foreach (var file in files)
             {
-                FileDto dto = new FileDto()
-                {
-                    Id = file.Id,
-                    FileName = $"{file.Name}{file.Extencion}",
-                    SubFolder = file.Subfolder,
-                    EntityId = file.EntityId,
-                };
-
-                switch (file.EntityType)
-                {
-                    case nameof(Carrier):
-                        dto.EntityType = typeof(CarrierDto);
-                        break;
-                    case nameof(Driver):
-                        dto.EntityType = typeof(DriverDto);
-                        break;
-                    case nameof(Vehicle):
-                        dto.EntityType = typeof(VehicleDto);
-                        break;
-                    case nameof(Contract):
-                        dto.EntityType = typeof(ContractDto);
-                        break;
-                    case nameof(ContractTemplate):
-                        dto.EntityType = typeof(ContractTemplateDto);
-                        break;
-                }
-
-                dtos.Add(dto);
+                dtos.Add(FileConverter.Convert(file));
             }
 
             return dtos;
@@ -117,7 +100,7 @@ namespace MediatorServices
 
             try
             {
-                if (property == nameof(FileDto.EntityId) && Guid.TryParse(parameters[0].ToString(), out var entityId)) 
+                if (property == nameof(FileDto.DtoId) && Guid.TryParse(parameters[0].ToString(), out var entityId)) 
                 { 
                     filter = f => f.EntityId == entityId;
                 }
@@ -149,10 +132,9 @@ namespace MediatorServices
 
             if (file != null)
             {
-                string path = Path.Combine(file.Subfolder, $"{file.Id}{file.Extencion}");
                 if (await _repository.Remove<Models.Sub.File>(request.Id))
                 {
-                    _fileManager.RemoveFile(path);
+                    _fileManager.RemoveFile(file.FullFilePath);
                     return true;
                 }
             }
@@ -171,51 +153,44 @@ namespace MediatorServices
 
         protected override async Task<Guid> Add(FileDto dto)
         {
-            string extencion = Path.GetExtension(dto.FileName);
-            string name = Path.GetFileNameWithoutExtension(dto.FileName);
+            string extencion = Path.GetExtension(dto.FileNameWithExtencion);
+            string entityCatalog = string.Empty;
 
-            Models.Sub.File file = new Models.Sub.File()
-            {
-                Name = name,
-                Extencion = extencion,
-                Subfolder = dto.SubFolder,
-                EntityId = dto.EntityId,
-            };
-
-            switch (dto.EntityType.Name) 
+            switch (dto.DtoType.Name) 
             {
                 case nameof(CarrierDto):
-                    file.EntityType = nameof(Carrier);
+                    entityCatalog = nameof(Carrier);
                     break;
                 case nameof(DriverDto):
-                    file.EntityType = nameof(Driver);
+                    entityCatalog = nameof(Driver);
                     break;
                 case nameof(VehicleDto):
-                    file.EntityType = nameof(Vehicle);
+                    entityCatalog = nameof(Vehicle);
                     break;
                 case nameof(ContractDto):
-                    file.EntityType = nameof(Contract);
+                    entityCatalog = nameof(Contract);
                     break;
                 case nameof(ContractTemplateDto):
-                    file.EntityType = nameof(ContractTemplate);
+                    entityCatalog = nameof(ContractTemplate);
                     break;
-
             }
 
-            Guid id = await _repository.Add(file);
+            string fullSavePath = Path.Combine(entityCatalog, dto.Catalog, $"{Guid.NewGuid()}{extencion}");
 
-            if (id != Guid.Empty) 
+            if (await _fileManager.SaveFile(fullSavePath, dto.File)) 
             {
-                string saveDirectory = Path.Combine(file.EntityType, file.Subfolder);
-
-                if (!await _fileManager.SaveFile(saveDirectory, $"{file.Name}{file.Extencion}", dto.File))
+                Models.Sub.File entityFile = new Models.Sub.File()
                 {
-                    await _repository.Remove<Models.Sub.File>(id);
-                    id = Guid.Empty;
-                }
+                    ViewNameWithExtencion = dto.FileNameWithExtencion,
+                    FullFilePath = fullSavePath,
+                    EntityId = dto.DtoId,
+                    EntityType = entityCatalog,
+                };
+
+                return await _repository.Add(entityFile);
             }
 
-            return id;
+            return Guid.Empty;
         }
     }
 
@@ -231,23 +206,19 @@ namespace MediatorServices
 
         protected override async Task<bool> Update(FileDto dto)
         {
-            string extencion = Path.GetExtension(dto.FileName);
-            string name = Path.GetFileNameWithoutExtension(dto.FileName);
-
             Models.Sub.File file = await _repository.GetById<Models.Sub.File>(dto.Id);
+            
+            file.ViewNameWithExtencion = dto.FileNameWithExtencion;
+            string extencion = Path.GetExtension(dto.FileNameWithExtencion);
 
-            file.Name = name;
-            file.Extencion = extencion;
+            await _fileManager.RemoveFile(file.FullFilePath);
 
-            if (await _repository.Update(file)) 
+            string newFulSavePath = Path.Combine(file.EntityType, dto.Catalog, $"{Guid.NewGuid()}{extencion}");
+
+            if (await _fileManager.SaveFile(newFulSavePath, dto.File)) 
             {
-                string fileDirectory = Path.Combine(file.EntityType, file.Subfolder);
-                string filePath = Path.Combine(fileDirectory, $"{file.Id}{file.Extencion}");
-                if (await _fileManager.RemoveFile(filePath)) 
-                { 
-                    _fileManager.SaveFile(fileDirectory, $"{file.Id}{file.Extencion}", dto.File);
-                    return true;
-                }
+                file.FullFilePath = newFulSavePath;
+                return await _repository.Update(file);
             }
 
             return false;

@@ -1,4 +1,5 @@
 ﻿using DTOs.Dtos;
+using MediatorServices.Abstract;
 using MediatR;
 using MediatRepos;
 using Microsoft.Extensions.Logging;
@@ -21,7 +22,7 @@ namespace MediatorServices
             if (templates.Any())
             {
                 ContractTemplate template = templates.First();
-                IEnumerable<Models.Sub.File> files = await _repository.Get<Models.Sub.File>(f => f.EntityId == template.Id);
+                IEnumerable<Models.Sub.File> files = await _repository.Get<Models.Sub.File>(f => f.EntityType == nameof(ContractTemplate) && f.EntityId == template.Id);
 
                 dto = new ContractTemplateDto()
                 {
@@ -36,10 +37,10 @@ namespace MediatorServices
                     dto.File = new FileDto()
                     {
                         Id = file.Id,
-                        FileName = $"{file.Name}{file.Extencion}",
-                        EntityId = file.EntityId,
-                        EntityType =Type.GetType(file.EntityType),
-                        SubFolder = file.Subfolder
+                        FileNameWithExtencion = file.ViewNameWithExtencion,
+                        Catalog = Path.GetFileName(Path.GetDirectoryName(file.FullFilePath)),
+                        DtoId = file.EntityId,
+                        DtoType = typeof(ContractTemplateDto)
                     };
                 }
             }
@@ -76,6 +77,7 @@ namespace MediatorServices
     public class DeleteTemplateService : IRequestHandler<Delete<ContractTemplateDto>, bool>
     {
         private IRepository _repository;
+        private IFileManager _fileManager;
 
         public DeleteTemplateService(IRepository repository)
         {
@@ -84,7 +86,18 @@ namespace MediatorServices
 
         public async Task<bool> Handle(Delete<ContractTemplateDto> request, CancellationToken cancellationToken)
         {
-            return await _repository.Remove<ContractTemplate>(request.Id);
+            bool result = await _repository.Remove<ContractTemplate>(request.Id);
+
+            IEnumerable<Models.Sub.File> files = await _repository.Get<Models.Sub.File>(f => f.EntityType == nameof(ContractTemplate) && f.EntityId == request.Id);
+
+            if (files.Any()) 
+            {
+                string catalog = Path.GetFileName(Path.GetDirectoryName(files.First().FullFilePath));
+
+                await _fileManager.RemoveAllFiles(nameof(ContractTemplate), catalog);
+            }
+
+            return result;
         }
     }
 

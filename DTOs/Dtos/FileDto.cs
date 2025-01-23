@@ -6,11 +6,11 @@ namespace DTOs.Dtos
     public class FileDto : IDto
     {
         public Guid Id { get; set; }
-        public string FileName { get; set; }
-        public string SubFolder { get; set; }
+        public string FileNameWithExtencion { get; set; }
+        public string Catalog { get; set; }
 
-        public Guid EntityId { get; set; }
-        public Type EntityType { get; set; }
+        public Guid DtoId { get; set; }
+        public Type DtoType { get; set; }
 
         public IFormFile File { get; set; }
     }

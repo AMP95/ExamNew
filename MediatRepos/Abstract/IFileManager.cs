@@ -4,8 +4,9 @@ namespace MediatorServices.Abstract
 {
     public interface IFileManager
     {
-        Task<bool> RemoveFile(string path);
-        Task<bool> SaveFile(string directory, string name, IFormFile file);
-        Task<IFormFile> GetFile(string path, string name);
+        Task<bool> RemoveFile(string filePathWithoutRoot);
+        Task<bool> SaveFile(string filePathWithoutRoot, IFormFile file);
+        Task<IFormFile> GetFile(string filePathWithoutRoot, string viewNameVithExtencion);
+        Task<bool> RemoveAllFiles(string entityCatalog, string catalog);
     }
 }

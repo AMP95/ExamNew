@@ -14,15 +14,15 @@ namespace Exam.FileManager
             _logger = logger;
         }
 
-        public Task<IFormFile> GetFile(string path, string name)
+        public Task<IFormFile> GetFile(string filePathWithoutRoot, string viewNameVithExtencion)
         {
-            string fullPath = Path.Combine(_environment.WebRootPath, path);
+            string fullPath = Path.Combine(_environment.WebRootPath, filePathWithoutRoot);
             IFormFile file = null;
             try
             {
                 using (var stream = new MemoryStream(File.ReadAllBytes(fullPath).ToArray())) 
                 {
-                    file = new FormFile(stream, 0, stream.Length, null, name);
+                    file = new FormFile(stream, 0, stream.Length, null, viewNameVithExtencion);
                 }
             }
             catch (Exception ex)
@@ -32,9 +32,25 @@ namespace Exam.FileManager
             return Task.FromResult<IFormFile>(file);
         }
 
-        public Task<bool> RemoveFile(string path)
+        public Task<bool> RemoveAllFiles(string entityCatalog, string catalog)
         {
-            string fullPath = Path.Combine(_environment.WebRootPath, path);
+            string directory = Path.Combine(_environment.WebRootPath, entityCatalog, catalog);
+            try
+            {
+                DirectoryInfo directoryInfo = new DirectoryInfo(directory);
+                directoryInfo.Delete(true);
+                return Task.FromResult(true);
+            }
+            catch (Exception ex) 
+            {
+                _logger.LogError(ex, ex.Message);
+                return Task.FromResult(false);
+            }
+        }
+
+        public Task<bool> RemoveFile(string filePathWithoutRoot)
+        {
+            string fullPath = Path.Combine(_environment.WebRootPath, filePathWithoutRoot);
             try 
             { 
                 File.Delete(fullPath);
@@ -47,22 +63,23 @@ namespace Exam.FileManager
             }
         }
 
-        public async Task<bool> SaveFile(string directory, string name, IFormFile file)
+        public async Task<bool> SaveFile(string filePathWithoutRoot, IFormFile file)
         {
-            string fullPath = Path.Combine(_environment.WebRootPath, directory, name);
+            string fullPath = Path.Combine(_environment.WebRootPath, filePathWithoutRoot);
+
             try
             {
-                Directory.CreateDirectory(Path.Combine(_environment.WebRootPath, directory));
+                Directory.CreateDirectory(Path.GetDirectoryName(fullPath));
 
-                using (var fileStream = new FileStream(fullPath, FileMode.Create))
+                using (FileStream fileStream = new FileStream(fullPath, FileMode.Create))
                 {
                     await file.CopyToAsync(fileStream);
                     return true;
                 }
             }
-            catch (Exception ex) 
-            { 
-                _logger.LogError(ex,ex.Message);
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
                 return false;
             }
         }

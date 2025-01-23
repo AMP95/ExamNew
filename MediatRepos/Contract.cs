@@ -1,4 +1,5 @@
 ﻿using DTOs;
+using MediatorServices.Abstract;
 using MediatR;
 using MediatRepos;
 using Microsoft.Extensions.Logging;
@@ -229,15 +230,28 @@ namespace MediatorServices
     public class DeleteContractService : IRequestHandler<Delete<ContractDto>, bool>
     {
         private IRepository _repository;
+        private IFileManager _fileManager;
 
-        public DeleteContractService(IRepository repository)
+        public DeleteContractService(IRepository repository, IFileManager fileManager)
         {
             _repository = repository;
+            _fileManager = fileManager;
         }
 
         public async Task<bool> Handle(Delete<ContractDto> request, CancellationToken cancellationToken)
         {
-            return await _repository.Remove<Contract>(request.Id);
+            bool result = await _repository.Remove<Contract>(request.Id);
+
+            IEnumerable<Models.Sub.File> files = await _repository.Get<Models.Sub.File>(f => f.EntityType == nameof(Contract) && f.EntityId == request.Id);
+
+            if (files.Any())
+            {
+                string catalog = Path.GetFileName(Path.GetDirectoryName(files.First().FullFilePath));
+
+                await _fileManager.RemoveAllFiles(nameof(Contract), catalog);
+            }
+
+            return result;
         }
     }
 
