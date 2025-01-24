@@ -3,6 +3,7 @@ using DTOs.Dtos;
 using Exam.Interfaces;
 using MediatRepos;
 using Microsoft.AspNetCore.Mvc;
+using System.Net.Http.Headers;
 
 namespace Exam.Controllers
 {
@@ -60,10 +61,16 @@ namespace Exam.Controllers
             return Ok(await _getService.Add(new GetId<ContractDto>(id)));
         }
 
-        [HttpGet("file/id/{id}")] //with IFormFile
+        [HttpGet("file/id/{id}")] // only DTO
         public virtual async Task<ActionResult> GetFile(Guid id)
         {
             return Ok(await _getService.Add(new GetId<FileDto>(id)));
+        }
+
+        [HttpGet("file/download/{id}")] //only File
+        public virtual async Task<ActionResult> DownloadFile(Guid id)
+        {
+            return Ok(await _getService.Add(new GetFile(id)));
         }
 
 

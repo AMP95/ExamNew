@@ -45,35 +45,63 @@ namespace MediatorServices
         }
     }
 
-
-    public class GetIdFileService : IRequestHandler<GetFile, FileData>
+    public class GetIdFileService : GetIdModelService<FileDto>
     {
-        private IFileManager _fileManager;
-        private IRepository _repository;
-        private ILogger<GetIdModelService<FileDto>> _logger;
-
         public GetIdFileService(IRepository repository, 
-                                ILogger<GetIdModelService<FileDto>> logger,
-                                IFileManager fileManager)
+                                ILogger<GetIdModelService<FileDto>> logger) : base(repository, logger)
+        {
+            _repository = repository;
+            _logger = logger;
+        }
+
+        protected async override Task<object> Get(Guid id)
+        {
+            Models.Sub.File file = await _repository.GetById<Models.Sub.File>(id);
+
+            if (file != null)
+            {
+                return FileConverter.Convert(file);
+            }
+
+            return null;
+        }
+    }
+
+    public class FileSendResult 
+    { 
+        public byte[] Data { get; set; }
+        public string ContentType { get; set; }
+        public string FileName { get; set; }
+    }
+
+    public class DownloadFileService : IRequestHandler<GetFile, object>
+    {
+        protected IRepository _repository;
+        protected ILogger<DownloadFileService> _logger;
+        protected IFileManager _fileManager;
+
+        public DownloadFileService(IRepository repository,
+                                   ILogger<DownloadFileService> logger,
+                                   IFileManager fileManager)
         {
             _repository = repository;
             _logger = logger;
             _fileManager = fileManager;
         }
-
-        public async Task<FileData> Handle(GetFile request, CancellationToken cancellationToken)
+        public async Task<object> Handle(GetFile request, CancellationToken cancellationToken)
         {
             Models.Sub.File file = await _repository.GetById<Models.Sub.File>(request.Id);
 
             if (file != null)
             {
-                FileData data = new FileData()
+                FileSendResult result = new FileSendResult()
                 {
-                    FileDto = FileConverter.Convert(file),
+                    FileName = file.ViewNameWithExtencion,
+                    ContentType = "application/octet-stream",
+                    Data = await _fileManager.GetFile(file.FullFilePath, file.ViewNameWithExtencion)
+                    
                 };
-                data.File = await _fileManager.GetFile(file.FullFilePath, file.ViewNameWithExtencion);
-
-                return data;
+                return result;
             }
 
             return null;

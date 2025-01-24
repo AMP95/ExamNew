@@ -81,7 +81,7 @@ namespace MediatRepos
         }
     }
 
-    public class GetFile : IRequest<FileData> 
+    public class GetFile : IRequest<object> 
     {
         public Guid Id { get; set; }
 
@@ -90,4 +90,5 @@ namespace MediatRepos
             Id = id;
         }
     }
+
 }

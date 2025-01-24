@@ -1,4 +1,5 @@
 ﻿using Exam.Interfaces;
+using MediatorServices;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Exam.Controllers
@@ -35,6 +36,26 @@ namespace Exam.Controllers
                 else 
                 {
                     return StatusCode(result.ResultStatusCode, result.Result);
+                }
+            }
+            return NotFound("Результат не найден");
+        }
+
+        [HttpGet("file/{id}")]
+        public async Task<ActionResult> GetFileResult(Guid id)
+        {
+            ServiceResult result = await _resultService.GetResult(id);
+            if (result != null)
+            {
+                if (result.Result == null)
+                {
+                    return StatusCode(result.ResultStatusCode, result.ResultErrorMessage);
+                }
+                else
+                {
+                    var fileRusult = result.Result as FileSendResult;
+
+                    return File(fileRusult.Data, fileRusult.ContentType, fileRusult.FileName);
                 }
             }
             return NotFound("Результат не найден");

@@ -14,24 +14,6 @@ namespace Exam.FileManager
             _logger = logger;
         }
 
-        public Task<IFormFile> GetFile(string filePathWithoutRoot, string viewNameVithExtencion)
-        {
-            string fullPath = Path.Combine(_environment.WebRootPath, filePathWithoutRoot);
-            IFormFile file = null;
-            try
-            {
-                using (var stream = new MemoryStream(File.ReadAllBytes(fullPath).ToArray())) 
-                {
-                    file = new FormFile(stream, 0, stream.Length, null, viewNameVithExtencion);
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, ex.Message);
-            }
-            return Task.FromResult<IFormFile>(file);
-        }
-
         public Task<bool> RemoveAllFiles(string entityCatalog, string catalog)
         {
             string directory = Path.Combine(_environment.WebRootPath, entityCatalog, catalog);
@@ -108,6 +90,21 @@ namespace Exam.FileManager
                 _logger.LogError(ex, ex.Message);
                 return false;
             }
+        }
+
+        public async Task<byte[]> GetFile(string filePathWithoutRoot, string viewNameVithExtencion)
+        {
+            string fullPath = Path.Combine(_environment.WebRootPath, "Files", filePathWithoutRoot);
+            try
+            {
+                return await File.ReadAllBytesAsync(fullPath);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+            }
+
+            return null;
         }
     }
 }
