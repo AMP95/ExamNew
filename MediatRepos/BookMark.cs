@@ -30,6 +30,7 @@ namespace MediatorServices
             new BookMarkDto(){ Name = "Способ выгрузки", InsertView = "{{UnloadType}}" },
             new BookMarkDto(){ Name = "Стоимость услуг", InsertView = "{{Payment}}" },
             new BookMarkDto(){ Name = "Условия оплаты", InsertView = "{{PaymentCondition}}" },
+            new BookMarkDto(){ Name = "Приоритет оплаты", InsertView = "{{PayPriority}}" },
             new BookMarkDto(){ Name = "Имя водиетля", InsertView = "{{Driver}}" },
             new BookMarkDto(){ Name = "Паспорт водителя", InsertView = "{{DriverPassport}}" },
             new BookMarkDto(){ Name = "Водитель контакт", InsertView = "{{DriverPone}}" },

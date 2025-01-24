@@ -9,5 +9,6 @@ namespace MediatorServices.Abstract
         Task<bool> SaveFile(string filePathWithoutRoot, string fileNameInTempRoot);
         Task<bool> RemoveFile(string filePathWithoutRoot);
         Task<bool> RemoveAllFiles(string entityCatalog, string catalog);
+        string GetFullPath(string pathWithOutRoot);
     }
 }

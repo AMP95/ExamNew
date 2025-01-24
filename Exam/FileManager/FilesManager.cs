@@ -106,5 +106,10 @@ namespace Exam.FileManager
 
             return null;
         }
+
+        public string GetFullPath(string pathWithOutRoot)
+        {
+           return Path.Combine(_environment.WebRootPath, "Files", pathWithOutRoot);
+        }
     }
 }
