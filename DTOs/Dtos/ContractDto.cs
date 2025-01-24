@@ -19,6 +19,7 @@ namespace DTOs
         public ClientDto Client { get; set; }
         public DriverDto Driver { get; set; }
         public VehicleDto Vehicle { get; set; }
+        public ContractTemplateDto Template { get; set; }
 
         public float Payment { get; set; }
         public float ClientPayment { get; set; }

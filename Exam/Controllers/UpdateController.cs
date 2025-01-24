@@ -168,7 +168,7 @@ namespace Exam.Controllers
                 {
                     return Ok(await _updateService.Add(new Update<ContractTemplateDto>(jobj.ToObject<ContractTemplateDto>())));
                 }
-                _logger.LogWarning($"PAYMENT: Recieved null object");
+                _logger.LogWarning($"TEMPLATE: Recieved null object");
                 return BadRequest("Передан пустой параметр");
             }
             catch (Exception ex)

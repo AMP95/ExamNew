@@ -1,4 +1,5 @@
-﻿using DTOs.Dtos;
+﻿using DTOs;
+using DTOs.Dtos;
 using MediatorServices.Abstract;
 using MediatR;
 using MediatRepos;
@@ -176,6 +177,22 @@ namespace MediatorServices
             };
 
             return await _repository.Add(template);
+        }
+    }
+
+    public class UpdateTemplateService : UpdateModelService<ContractTemplateDto>
+    {
+        public UpdateTemplateService(IRepository repository) : base(repository)
+        {
+        }
+
+        protected override async Task<bool> Update(ContractTemplateDto dto)
+        {
+            ContractTemplate template = await _repository.GetById<ContractTemplate>(dto.Id);
+
+            template.Name = dto.Name;
+
+            return await _repository.Update(template);
         }
     }
 }

@@ -17,7 +17,7 @@ namespace MediatorServices
 
         protected override async Task<object> Get(Guid id)
         {
-            IEnumerable<Contract> contracts = await _repository.Get<Contract>(t => t.Id == id, null, "Carrier,Client,Driver,Vehicle,LoadingPoint,UnloadingPoints,Documents");
+            IEnumerable<Contract> contracts = await _repository.Get<Contract>(t => t.Id == id, null, "Carrier,Client,Driver,Vehicle,LoadingPoint,UnloadingPoints,Documents,Template");
             ContractDto dto = null;
             if (contracts.Any())
             {
@@ -75,7 +75,12 @@ namespace MediatorServices
                         TrailerModel = constract.Vehicle.TrailerModel,
                     },
                     UnloadPoints = new List<RoutePointDto>(),
-                    Documents = new List<DocumentDto>()
+                    Documents = new List<DocumentDto>(),
+                    Template = new DTOs.Dtos.ContractTemplateDto() 
+                    { 
+                        Id = constract.Template.Id,
+                        Name = constract.Template.Name,
+                    }
                 };
 
                 foreach (RoutePoint point in constract.UnloadingPoints) 
@@ -285,20 +290,15 @@ namespace MediatorServices
                     Type = (short)LoadPointType.Upload,
                     Side = (short)dto.LoadPoint.Side
                 },
-                UnloadingPoints = new List<RoutePoint>()
+                UnloadingPoints = new List<RoutePoint>(),
+                CarrierId = dto.Carrier.Id,
+                ClientId = dto.Client.Id,
+                DriverId = dto.Driver.Id,
+                VehicleId = dto.Vehicle.Id,
+                TemplateId = dto.Template.Id,
             };
 
-            Carrier carrier = await _repository.GetById<Carrier>(dto.Carrier.Id);
-            contract.Carrier = carrier;
-
-            Client client = await _repository.GetById<Client>(dto.Client.Id);
-            contract.Client = client;
-
-            Driver driver = await _repository.GetById<Driver>(dto.Driver.Id);
-            contract.Driver = driver;
-
-            Vehicle truck = await _repository.GetById<Vehicle>(dto.Vehicle.Id);
-            contract.Vehicle = truck;
+         
 
             foreach (RoutePointDto pointDto in dto.UnloadPoints) 
             {
@@ -341,18 +341,11 @@ namespace MediatorServices
                 contract.Weight = dto.Weight;
                 contract.Volume = dto.Volume;
                 contract.UnloadingPoints.Clear();
-
-                Carrier carrier = await _repository.GetById<Carrier>(dto.Carrier.Id);
-                contract.Carrier = carrier;
-
-                Client client = await _repository.GetById<Client>(dto.Client.Id);
-                contract.Client = client;
-
-                Driver driver = await _repository.GetById<Driver>(dto.Driver.Id);
-                contract.Driver = driver;
-
-                Vehicle vehicle = await _repository.GetById<Vehicle>(dto.Vehicle.Id);
-                contract.Vehicle = vehicle;
+                contract.CarrierId = dto.Carrier.Id;
+                contract.ClientId = dto.Client.Id;
+                contract.DriverId = dto.Driver.Id;
+                contract.VehicleId = dto.Vehicle.Id;
+                contract.TemplateId = dto.Template.Id;
 
                 IEnumerable<RoutePoint> loads = await _repository.Get<RoutePoint>(p => p.Address == dto.LoadPoint.Address && p.Side == (short)dto.LoadPoint.Side);
 

@@ -1,4 +1,5 @@
-﻿using Models.Sub;
+﻿using Models.Main;
+using Models.Sub;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Models
@@ -33,6 +34,11 @@ namespace Models
         [ForeignKey(nameof(Driver))]
         public Guid DriverId { get; set; }
         public Driver Driver { get; set; }
+
+
+        [ForeignKey(nameof(Template))]
+        public Guid TemplateId { get; set; }
+        public ContractTemplate Template { get; set; }
 
 
         [ForeignKey(nameof(Vehicle))]
