@@ -153,13 +153,13 @@ namespace Exam.Controllers
         }
 
         [HttpPost("file")]
-        public virtual async Task<ActionResult> PostFile(FileDto jobj)
+        public virtual async Task<ActionResult> PostFile(FileData jobj)
         {
             try
             {
                 if (jobj != null)
                 {
-                    return Ok(await _addService.Add(new Add<FileDto>(jobj)));
+                    return Ok(await _addService.Add(new AddFile(jobj)));
                 }
                 _logger.LogWarning($"FILE: Recieved null object");
                 return BadRequest("Передан пустой параметр");

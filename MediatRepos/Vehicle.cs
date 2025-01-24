@@ -271,7 +271,14 @@ namespace MediatRepos
                 }
             }
 
-            vehicle.CarrierId = dto.Carrier?.Id;
+            if (dto.Carrier != null && dto.Carrier.Id != Guid.Empty)
+            {
+                vehicle.CarrierId = dto.Carrier.Id;
+            }
+            else 
+            {
+                vehicle.CarrierId = null;
+            }
 
             return await _repository.Update(vehicle);
         }

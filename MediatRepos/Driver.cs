@@ -279,7 +279,6 @@ namespace MediatorServices
 
             Driver driver = new Driver()
             {
-                CarrierId = dto.Carrier?.Id,
                 VehicleId = dto.Vehicle?.Id,
                 FamilyName = name[0],
                 Name = name[1],
@@ -290,6 +289,16 @@ namespace MediatorServices
                 PassportSerial = dto.PassportSerial,
                 Phones = string.Join(';',dto.Phones)
             };
+
+            if (dto.Carrier != null && dto.Carrier.Id != Guid.Empty)
+            {
+                driver.CarrierId = dto.Carrier.Id;
+            }
+
+            if (dto.Vehicle != null && dto.Vehicle.Id != Guid.Empty)
+            {
+                driver.VehicleId = dto.Vehicle.Id;
+            }
 
             return await _repository.Add(driver);
         }
@@ -321,14 +330,22 @@ namespace MediatorServices
                 driver.CarrierId = dto.Carrier.Id;
             }
 
-            if (dto.Vehicle?.Carrier?.Id != dto.Carrier?.Id)
+            if (dto.Vehicle != null && dto.Vehicle.Id != Guid.Empty)
+            {
+                if (dto.Vehicle.Carrier?.Id != dto.Carrier?.Id)
+                {
+                    driver.VehicleId = null;
+                }
+                else
+                {
+                    driver.VehicleId = dto.Vehicle.Id;
+                }
+            }
+            else 
             {
                 driver.VehicleId = null;
             }
-            else 
-            { 
-                driver.VehicleId = dto.Vehicle?.Id;
-            }
+            
 
             return await _repository.Update(driver);
         }

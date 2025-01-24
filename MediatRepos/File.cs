@@ -3,7 +3,6 @@ using DTOs.Dtos;
 using MediatorServices.Abstract;
 using MediatR;
 using MediatRepos;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Models;
 using Models.Main;
@@ -47,25 +46,34 @@ namespace MediatorServices
     }
 
 
-    public class GetIdFileService : GetIdModelService<FileDto>
+    public class GetIdFileService : IRequestHandler<GetFile, FileData>
     {
         private IFileManager _fileManager;
+        private IRepository _repository;
+        private ILogger<GetIdModelService<FileDto>> _logger;
 
         public GetIdFileService(IRepository repository, 
                                 ILogger<GetIdModelService<FileDto>> logger,
-                                IFileManager fileManager) : base(repository, logger)
+                                IFileManager fileManager)
         {
+            _repository = repository;
+            _logger = logger;
             _fileManager = fileManager;
         }
 
-        protected override async Task<object> Get(Guid id)
+        public async Task<FileData> Handle(GetFile request, CancellationToken cancellationToken)
         {
-            Models.Sub.File file = await _repository.GetById<Models.Sub.File>(id);
+            Models.Sub.File file = await _repository.GetById<Models.Sub.File>(request.Id);
+
             if (file != null)
             {
-                FileDto dto = FileConverter.Convert(file);
-                //dto.File = await _fileManager.GetFile(file.FullFilePath, file.ViewNameWithExtencion);
-                return dto;
+                FileData data = new FileData()
+                {
+                    FileDto = FileConverter.Convert(file),
+                };
+                data.File = await _fileManager.GetFile(file.FullFilePath, file.ViewNameWithExtencion);
+
+                return data;
             }
 
             return null;
@@ -150,21 +158,23 @@ namespace MediatorServices
         }
     }
 
-    public class AddFileService : AddModelService<FileDto>
+    public class AddFileService : IRequestHandler<AddFile, Guid>
     {
         private IFileManager _fileManager;
+        private IRepository _repository;
         public AddFileService(IRepository repository, 
-                              IFileManager fileManager) : base(repository)
+                              IFileManager fileManager)
         {
+            _repository = repository;
             _fileManager = fileManager;
         }
 
-        protected override async Task<Guid> Add(FileDto dto)
+        public async Task<Guid> Handle(AddFile request, CancellationToken cancellationToken)
         {
-            string extencion = Path.GetExtension(dto.FileNameWithExtencion);
+            string extencion = Path.GetExtension(request.FileDto.FileNameWithExtencion);
             string entityCatalog = string.Empty;
 
-            switch (dto.DtoType) 
+            switch (request.FileDto.DtoType)
             {
                 case nameof(CarrierDto):
                     entityCatalog = nameof(Carrier);
@@ -183,15 +193,15 @@ namespace MediatorServices
                     break;
             }
 
-            string fullSavePath = Path.Combine(entityCatalog, dto.Catalog, $"{Guid.NewGuid()}{extencion}");
+            string fullSavePath = Path.Combine(entityCatalog, request.FileDto.Catalog, $"{Guid.NewGuid()}{extencion}");
 
-            if (await _fileManager.SaveFile(fullSavePath, dto.File)) 
+            if (await _fileManager.SaveFile(fullSavePath, request.FormFile))
             {
                 Models.Sub.File entityFile = new Models.Sub.File()
                 {
-                    ViewNameWithExtencion = dto.FileNameWithExtencion,
+                    ViewNameWithExtencion = request.FileDto.FileNameWithExtencion,
                     FullFilePath = fullSavePath,
-                    EntityId = dto.DtoId,
+                    EntityId = request.FileDto.DtoId,
                     EntityType = entityCatalog,
                 };
 
@@ -200,36 +210,7 @@ namespace MediatorServices
 
             return Guid.Empty;
         }
-    }
 
-    public class UpdateFileService : UpdateModelService<FileDto>
-    {
-        private IFileManager _fileManager;
 
-        public UpdateFileService(IRepository repository, 
-                                 IFileManager fileManager) : base(repository)
-        {
-            _fileManager = fileManager;
-        }
-
-        protected override async Task<bool> Update(FileDto dto)
-        {
-            Models.Sub.File file = await _repository.GetById<Models.Sub.File>(dto.Id);
-            
-            file.ViewNameWithExtencion = dto.FileNameWithExtencion;
-            string extencion = Path.GetExtension(dto.FileNameWithExtencion);
-
-            await _fileManager.RemoveFile(file.FullFilePath);
-
-            string newFulSavePath = Path.Combine(file.EntityType, dto.Catalog, $"{Guid.NewGuid()}{extencion}");
-
-            if (await _fileManager.SaveFile(newFulSavePath, dto.File)) 
-            {
-                file.FullFilePath = newFulSavePath;
-                return await _repository.Update(file);
-            }
-
-            return false;
-        }
     }
 }
