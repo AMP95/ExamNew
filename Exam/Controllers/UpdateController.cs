@@ -159,6 +159,26 @@ namespace Exam.Controllers
             
         }
 
+        [HttpPut("template")]
+        public virtual async Task<ActionResult> PutTemplate([FromBody] JObject jobj)
+        {
+            try
+            {
+                if (jobj != null)
+                {
+                    return Ok(await _updateService.Add(new Update<ContractTemplateDto>(jobj.ToObject<ContractTemplateDto>())));
+                }
+                _logger.LogWarning($"PAYMENT: Recieved null object");
+                return BadRequest("Передан пустой параметр");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return BadRequest("Неверный тип данных");
+            }
+
+        }
+
 
         [HttpPut("file")]
         public virtual async Task<ActionResult> PutFile([FromBody] JObject jobj)

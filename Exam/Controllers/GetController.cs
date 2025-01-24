@@ -61,6 +61,12 @@ namespace Exam.Controllers
             return Ok(await _getService.Add(new GetId<ContractDto>(id)));
         }
 
+        [HttpGet("template/id/{id}")]
+        public virtual async Task<ActionResult> GetTemplate(Guid id)
+        {
+            return Ok(await _getService.Add(new GetId<ContractTemplateDto>(id)));
+        }
+
         [HttpGet("file/id/{id}")] // only DTO
         public virtual async Task<ActionResult> GetFile(Guid id)
         {
@@ -126,6 +132,12 @@ namespace Exam.Controllers
             return Ok(await _getService.Add(new GetFilter<FileDto>(property, param)));
         }
 
+        [HttpGet("template/filter/{property}")]
+        public virtual async Task<ActionResult> GetTemplateFilter(string property, [FromQuery] string[] param)
+        {
+            return Ok(await _getService.Add(new GetFilter<ContractTemplateDto>(property, param)));
+        }
+
         #endregion Filter
 
         #region Range
@@ -153,6 +165,12 @@ namespace Exam.Controllers
         public virtual async Task<ActionResult> GetClientRange(int start, int end)
         {
             return Ok(await _getService.Add(new GetRange<ClientDto>(start, end)));
+        }
+
+        [HttpGet("template/range/{start}/{end}")]
+        public virtual async Task<ActionResult> GetTemplateRange(int start, int end)
+        {
+            return Ok(await _getService.Add(new GetRange<ContractTemplateDto>(start, end)));
         }
 
         #endregion Range

@@ -57,5 +57,11 @@ namespace Exam.Controllers
         {
             return Ok(await _updateService.Add(new Delete<FileDto>(id)));
         }
+
+        [HttpDelete("template/{id}")]
+        public virtual async Task<ActionResult> DeleteTemplate(Guid id)
+        {
+            return Ok(await _updateService.Add(new Delete<ContractTemplateDto>(id)));
+        }
     }
 }

@@ -5,6 +5,7 @@ using MediatRepos;
 using Microsoft.Extensions.Logging;
 using Models;
 using Models.Main;
+using System.Linq.Expressions;
 
 namespace MediatorServices
 {
@@ -71,6 +72,66 @@ namespace MediatorServices
             }
 
             return dtos;
+        }
+    }
+
+    public class GetFilterTemplateService : IRequestHandler<GetFilter<ContractTemplateDto>, object>
+    {
+        protected IRepository _repository;
+        protected ILogger<GetFilterTemplateService> _logger;
+
+        public GetFilterTemplateService(IRepository repository, ILogger<GetFilterTemplateService> logger)
+        {
+            _repository = repository;
+            _logger = logger;
+        }
+
+        public async Task<object> Handle(GetFilter<ContractTemplateDto> request, CancellationToken cancellationToken)
+        {
+            Expression<Func<ContractTemplate, bool>> filter = GetFilter(request.PropertyName, request.Params);
+            return await Get(filter);
+        }
+
+        protected async Task<object> Get(Expression<Func<ContractTemplate, bool>> filter)
+        {
+            IEnumerable<ContractTemplate> templates = await _repository.Get<ContractTemplate>(filter);
+            List<ContractTemplateDto> dtos = new List<ContractTemplateDto>();
+
+            foreach (var template in templates)
+            {
+                ContractTemplateDto dto = new ContractTemplateDto()
+                {
+                    Id = template.Id,
+                    Name = template.Name,
+                };
+
+                dtos.Add(dto);
+            }
+
+            return dtos;
+        }
+
+        protected Expression<Func<ContractTemplate, bool>> GetFilter(string property, params object[] parameters)
+        {
+            Expression<Func<ContractTemplate, bool>> filter = null;
+
+            try
+            {
+                switch (property)
+                {
+                    case nameof(ContractTemplateDto.Name):
+                        string name = parameters[0].ToString().ToLower();
+                        filter = d => d.Name.ToLower().Contains(name);
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                filter = v => false;
+                _logger.LogError(ex, ex.Message);
+            }
+
+            return filter;
         }
     }
 
