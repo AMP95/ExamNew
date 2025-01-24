@@ -158,23 +158,23 @@ namespace MediatorServices
         }
     }
 
-    public class AddFileService : IRequestHandler<AddFile, Guid>
+    public class AddFileService : AddModelService<FileDto>
     {
         private IFileManager _fileManager;
         private IRepository _repository;
         public AddFileService(IRepository repository, 
-                              IFileManager fileManager)
+                              IFileManager fileManager) : base(repository)
         {
             _repository = repository;
             _fileManager = fileManager;
         }
 
-        public async Task<Guid> Handle(AddFile request, CancellationToken cancellationToken)
+        protected async override Task<Guid> Add(FileDto dto)
         {
-            string extencion = Path.GetExtension(request.FileDto.FileNameWithExtencion);
+            string extencion = Path.GetExtension(dto.FileNameWithExtencion);
             string entityCatalog = string.Empty;
 
-            switch (request.FileDto.DtoType)
+            switch (dto.DtoType)
             {
                 case nameof(CarrierDto):
                     entityCatalog = nameof(Carrier);
@@ -193,15 +193,15 @@ namespace MediatorServices
                     break;
             }
 
-            string fullSavePath = Path.Combine(entityCatalog, request.FileDto.Catalog, $"{Guid.NewGuid()}{extencion}");
+            string fullSavePath = Path.Combine(entityCatalog, dto.Catalog, $"{Guid.NewGuid()}{extencion}");
 
-            if (await _fileManager.SaveFile(fullSavePath, request.FormFile))
+            if (await _fileManager.SaveFile(fullSavePath, dto.FileNameWithExtencion))
             {
                 Models.Sub.File entityFile = new Models.Sub.File()
                 {
-                    ViewNameWithExtencion = request.FileDto.FileNameWithExtencion,
+                    ViewNameWithExtencion = dto.FileNameWithExtencion,
                     FullFilePath = fullSavePath,
-                    EntityId = request.FileDto.DtoId,
+                    EntityId = dto.DtoId,
                     EntityType = entityCatalog,
                 };
 
@@ -210,7 +210,5 @@ namespace MediatorServices
 
             return Guid.Empty;
         }
-
-
     }
 }

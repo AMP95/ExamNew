@@ -1,9 +1,11 @@
 ﻿using DTOs;
 using DTOs.Dtos;
 using Exam.Interfaces;
+using MediatorServices.Abstract;
 using MediatRepos;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
+using System.IO;
 
 namespace Exam.Controllers
 {
@@ -13,10 +15,12 @@ namespace Exam.Controllers
     {
         private IAddService _addService;
         private ILogger<AddController> _logger;
-        public AddController(IAddService addService, ILogger<AddController> logger)
+        private IFileManager _fileManager;
+        public AddController(IAddService addService, ILogger<AddController> logger, IFileManager manager)
         {
             _addService = addService;
             _logger = logger;
+            _fileManager = manager;
         }
 
         [HttpPost("vehicle")]
@@ -153,13 +157,16 @@ namespace Exam.Controllers
         }
 
         [HttpPost("file")]
-        public virtual async Task<ActionResult> PostFile(FileData jobj)
+        public virtual async Task<ActionResult> PostFile([FromForm]FileData data)
         {
             try
             {
-                if (jobj != null)
+                if (data != null)
                 {
-                    return Ok(await _addService.Add(new AddFile(jobj)));
+                    if (await _fileManager.TempSave(data.FileDto.FileNameWithExtencion, data.File)) 
+                    {
+                        return Ok(await _addService.Add(new Add<FileDto>(data.FileDto)));
+                    }
                 }
                 _logger.LogWarning($"FILE: Recieved null object");
                 return BadRequest("Передан пустой параметр");

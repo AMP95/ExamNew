@@ -4,7 +4,6 @@ using MediatR;
 using MediatRepos;
 using Microsoft.Extensions.Logging;
 using Models;
-using System.Diagnostics;
 using System.Linq.Expressions;
 
 namespace MediatorServices

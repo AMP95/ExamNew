@@ -81,18 +81,6 @@ namespace MediatRepos
         }
     }
 
-    public class AddFile : IRequest<Guid> 
-    { 
-        public IFormFile FormFile { get; set; }
-        public FileDto FileDto { get; set; }
-
-        public AddFile(FileData fileData)
-        {
-            FormFile = fileData.File;
-            FileDto = fileData.FileDto;
-        }
-    }
-
     public class GetFile : IRequest<FileData> 
     {
         public Guid Id { get; set; }
