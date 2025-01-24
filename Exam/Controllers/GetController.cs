@@ -138,6 +138,12 @@ namespace Exam.Controllers
             return Ok(await _getService.Add(new GetFilter<ContractTemplateDto>(property, param)));
         }
 
+        [HttpGet("bookmark/filter/{property}")]
+        public virtual async Task<ActionResult> GetBookmarkFilter(string property, [FromQuery] string[] param)
+        {
+            return Ok(await _getService.Add(new GetFilter<BookMarkDto>(property, param)));
+        }
+
         #endregion Filter
 
         #region Range

@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Models;
 using Models.Main;
+using Models.Sub;
 
 namespace DAL
 {
@@ -13,6 +14,7 @@ namespace DAL
         public DbSet<Contract> Contracts { get; set; }
         public DbSet<ContractTemplate> Templates { get; set; }
         public DbSet<Models.Sub.File> Files { get; set; }
+        public DbSet<BookMark> BookMarks { get; set; }
 
         public Context(DbContextOptions options) : base(options)
         {
