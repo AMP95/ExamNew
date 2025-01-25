@@ -1,7 +1,6 @@
 ﻿using DTOs;
-using DTOs.Dtos;
 
-namespace Exam.Interfaces
+namespace MediatorServices.Abstract
 {
     public interface IContractCreator
     {

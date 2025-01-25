@@ -37,6 +37,7 @@ namespace Exam
 
             builder.Services.AddTransient<IRepository, ContextRepository>();
             builder.Services.AddTransient<IFileManager, FilesManager>();
+            builder.Services.AddTransient<IContractCreator, IronContractCreator>();
 
             builder.Services.AddSingleton<IResultService, ResultService>();
             builder.Services.AddSingleton<IRequestStatusService, RequestStatusService>();

@@ -4,6 +4,7 @@ using MediatR;
 using MediatRepos;
 using Microsoft.Extensions.Logging;
 using Models;
+using Models.Main;
 using Models.Sub;
 using System.Linq.Expressions;
 
@@ -262,8 +263,12 @@ namespace MediatorServices
 
     public class AddContractService : AddModelService<ContractDto>
     {
-        public AddContractService(IRepository repository) : base(repository)
+        IContractCreator _contractCreator;
+
+        public AddContractService(IRepository repository, 
+                                  IContractCreator contractCreator) : base(repository)
         {
+            _contractCreator = contractCreator;
         }
 
         protected override async Task<Guid> Add(ContractDto dto)
@@ -315,14 +320,43 @@ namespace MediatorServices
             }
 
 
-            return await _repository.Add(contract);
+            Guid id =  await _repository.Add(contract);
+
+            if (id != Guid.Empty)
+            {
+                dto.Id = id;
+
+                var files = await _repository.Get<Models.Sub.File>(f => f.EntityId == contract.TemplateId);
+
+                string filePath = files.FirstOrDefault().FullFilePath;
+
+                string contractFilePath = _contractCreator.CreateContractDocument(dto, filePath);
+
+                string ext = Path.GetExtension(contractFilePath);
+
+                Models.Sub.File contractFile = new Models.Sub.File()
+                {
+                    ViewNameWithExtencion = $"{contract.Number}{ext}",
+                    EntityType = nameof(Contract),
+                    EntityId = contract.Id,
+                    FullFilePath = contractFilePath,
+                };
+
+                await _repository.Add(contractFile);
+            }
+
+            return id;
         }
     }
 
     public class UpdateContractService : UpdateModelService<ContractDto>
     {
-        public UpdateContractService(IRepository repository) : base(repository)
+        private IFileManager _fileManager;
+        private IContractCreator _contractCreator;
+        public UpdateContractService(IRepository repository, IFileManager fileManager, IContractCreator contractCreator) : base(repository)
         {
+            _fileManager = fileManager;
+            _contractCreator = contractCreator;
         }
 
         protected override async Task<bool> Update(ContractDto dto)
@@ -381,7 +415,46 @@ namespace MediatorServices
                     });
                 }
 
-                return await _repository.Update(contract);
+                bool result = await _repository.Update(contract);
+
+                if (result) 
+                {
+                    var files = await _repository.Get<Models.Sub.File>(f => f.EntityId == contract.Id);
+
+                    if (files.Any())
+                    {
+                        Models.Sub.File file = files.First();
+
+                        if (await _repository.Remove<Models.Sub.File>(file.Id))
+                        {
+                            _fileManager.RemoveFile(file.FullFilePath);
+                        }
+                    }
+
+                    files = await _repository.Get<Models.Sub.File>(f => f.EntityId == contract.TemplateId);
+
+                    if (files.Any())
+                    {
+
+                        string filePath = files.FirstOrDefault().FullFilePath;
+
+                        string contractFilePath = _contractCreator.CreateContractDocument(dto, filePath);
+
+                        string ext = Path.GetExtension(contractFilePath);
+
+                        Models.Sub.File contractFile = new Models.Sub.File()
+                        {
+                            ViewNameWithExtencion = $"{contract.Number}{ext}",
+                            EntityType = nameof(Contract),
+                            EntityId = contract.Id,
+                            FullFilePath = contractFilePath,
+                        };
+
+                        await _repository.Add(contractFile);
+                    }
+                }
+
+                return result;
             }
             return false;
         }

@@ -1,6 +1,4 @@
 ﻿using DTOs;
-using DTOs.Dtos;
-using Exam.Interfaces;
 using IronWord;
 using MediatorServices.Abstract;
 using System.ComponentModel;
@@ -71,44 +69,66 @@ namespace Exam.FileManager
 
             replacements.Add("{{ContractNumber}}", contract.Number.ToString());
             replacements.Add("{{ConractDate}}", contract.CreationDate.ToString("dd.MM.yyyy"));
-            replacements.Add("{{CarrierTop}}", contract.Carrier.Name);
 
-            //TO DO
-            replacements.Add("{{Route}}", contract.Number.ToString());
+            string route = contract.LoadPoint.Route;
+
+            foreach (RoutePointDto point in contract.UnloadPoints) 
+            {
+                route += $" - {point.Route}"; 
+            }
+
+            replacements.Add("{{Route}}", route);
 
 
             replacements.Add("{{Weight}}", contract.Weight.ToString());
             replacements.Add("{{Volume}}", contract.Volume.ToString());
 
-            replacements.Add("{{CargoSender}}", contract.LoadPoint.Company.ToString());
-            replacements.Add("{{LoadingPoint}}", contract.LoadPoint.Address.ToString());
-            replacements.Add("{{LoadingDate}}", contract.LoadPoint.DateAndTime.ToString("dd.MM.yyyy HH:mm"));
-            replacements.Add("{{SenderPhone}}", string.Join(";", contract.LoadPoint.Phones));
-            replacements.Add("{{LoadingType}}", contract.LoadPoint.Side.GetDescription());
+            string loadingPoint = $"Грузоотправитель: {contract.LoadPoint.Company}\n" +
+                                    $"Адрес погрузки: {contract.LoadPoint.Address}\n" +
+                                      $"Дата и время: {contract.LoadPoint.DateAndTime.ToString("dd.MM.yyyy HH:mm")}\n" +
+                                          $"Контакты: {string.Join(";", contract.LoadPoint.Phones)}\n" +
+                                   $"Способ погрузки: {contract.LoadPoint.Side.GetDescription()}";
 
-            //TO DO
-            replacements.Add("{{CargoReciever}}", contract.Number.ToString());
-            replacements.Add("{{UnloadingPoint}}", contract.Number.ToString());
-            replacements.Add("{{UnloadingDate}}", contract.Number.ToString());
-            replacements.Add("{{RecievePhone}}", contract.Number.ToString());
-            replacements.Add("{{UnloadType}}", contract.Number.ToString());
+            replacements.Add("{{LoadingPoint}}", loadingPoint);
 
+            string unloadingPoints =string.Empty;
+            foreach (RoutePointDto point in contract.UnloadPoints) 
+            {
+                unloadingPoints += $"Грузополучатель: {point.Company}\n" +
+                                    $"Адрес выгрузки: {point.Address}\n" +
+                                      $"Дата и время: {point.DateAndTime.ToString("dd.MM.yyyy HH:mm")}\n" +
+                                          $"Контакты: {string.Join(";", point.Phones)}\n" +
+                                   $"Способ выгрузки: {point.Side.GetDescription()}\n\n";
+            }
 
-            replacements.Add("{{Payment}}", $"{contract.Payment} руб., предоплата {contract.Prepayment} руб.");
-            replacements.Add("{{PaymentCondition}}", contract.PaymentCondition.GetDescription());
-            replacements.Add("{{PayPriority}}", contract.PayPriority.GetDescription());
+            replacements.Add("{{UnloadingPoint}}", unloadingPoints);
 
-            replacements.Add("{{Driver}}", contract.Driver.Name);
-            replacements.Add("{{DriverPassport}}", contract.Driver.PassportSerial + contract.Driver.PassportIssuer + contract.Driver.PassportDateOfIssue.ToString("dd.MM.yyyy"));
-            replacements.Add("{{DriverPone}}", string.Join(";", contract.Driver.Phones));
+            string payment = $"{contract.Payment} руб.";
+
+            if (contract.Prepayment > 0) 
+            {
+                payment += $"\nПредоплата: {contract.Prepayment.ToString()} руб.";
+            }
+
+            replacements.Add("{{Payment}}", payment);
+            replacements.Add("{{PayConditions}}", $"{contract.PaymentCondition.GetDescription()}, {contract.PayPriority.GetDescription()}" );
+
+            string driver = $"ФИО: {contract.Driver.Name}\n" +
+                            $"Паспорт: {contract.Driver.PassportSerial}," +
+                            $"выдан {contract.Driver.PassportIssuer}, {contract.Driver.PassportDateOfIssue.ToString("dd.MM.yyyy")}\n" +
+                            $"Тел.: {string.Join(";", contract.Driver.Phones)}";
+
+            replacements.Add("{{Driver}}", driver);
 
             replacements.Add("{{Vehicle}}", $"{contract.Vehicle.TruckModel} {contract.Vehicle.TruckNumber}, {contract.Vehicle.TrailerNumber}");
 
-            replacements.Add("{{CarrierBottom}}", contract.Carrier.Name);
-            replacements.Add("{{CarrierAddress}}", contract.Carrier.Address);
-            replacements.Add("{{CarrierInnKpp}}", contract.Carrier.InnKpp);
-            replacements.Add("{{CarrierPhone}}", string.Join(";", contract.Carrier.Phones));
-            replacements.Add("{{CarrierMail}}", string.Join(";", contract.Carrier.Emails));
+            string carrier = $"Перевозчик: {contract.Carrier.Name}\n" +
+                             $"Адрес: {contract.Carrier.Address}\n" +
+                             $"Инн/КПП: {contract.Carrier.InnKpp}\n" +
+                             $"Тел.: {string.Join(";", contract.Carrier.Phones)}\n" +
+                             $"E-mail: {string.Join(";", contract.Carrier.Emails)}";
+
+            replacements.Add("{{Carrier}}", carrier);
 
             foreach (var replacement in replacements)
             {
@@ -120,7 +140,7 @@ namespace Exam.FileManager
 
             doc.Save(fullSavePath);
 
-            return fullSavePath;
+            return cntractPath;
         }
     }
 }
