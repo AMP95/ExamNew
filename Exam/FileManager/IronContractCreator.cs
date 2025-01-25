@@ -66,7 +66,7 @@ namespace Exam.FileManager
         {
             string fullPath = _fileManager.GetFullPath(templatePathWithoutRoot);
 
-            WordDocument doc = new WordDocument(fullPath);
+           
 
             Dictionary<string, string> replacements = new Dictionary<string, string>();
 
@@ -132,6 +132,8 @@ namespace Exam.FileManager
                              $"E-mail: {string.Join(";", contract.Carrier.Emails)}";
 
             replacements.Add(BookMarksList.GetValue("Перевозчик"), carrier);
+
+            WordDocument doc = new WordDocument(fullPath);
 
             foreach (var replacement in replacements)
             {

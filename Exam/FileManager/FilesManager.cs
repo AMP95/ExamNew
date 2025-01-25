@@ -16,7 +16,7 @@ namespace Exam.FileManager
 
         public Task<bool> RemoveAllFiles(string entityCatalog, string catalog)
         {
-            string directory = Path.Combine(_environment.WebRootPath, entityCatalog, catalog);
+            string directory = Path.Combine(_environment.WebRootPath, "Files", entityCatalog, catalog);
             try
             {
                 DirectoryInfo directoryInfo = new DirectoryInfo(directory);
@@ -32,7 +32,7 @@ namespace Exam.FileManager
 
         public Task<bool> RemoveFile(string filePathWithoutRoot)
         {
-            string fullPath = Path.Combine(_environment.WebRootPath, filePathWithoutRoot);
+            string fullPath = Path.Combine(_environment.WebRootPath, "Files", filePathWithoutRoot);
             try 
             { 
                 File.Delete(fullPath);

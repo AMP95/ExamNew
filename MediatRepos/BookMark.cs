@@ -4,7 +4,6 @@ using MediatRepos;
 using Microsoft.Extensions.Logging;
 using Models;
 using Models.Sub;
-using System.Diagnostics.Metrics;
 using System.Linq.Expressions;
 
 namespace MediatorServices
@@ -18,8 +17,8 @@ namespace MediatorServices
             new BookMarkDto(){ Name = "Маршрут", InsertView = "Route" },
             new BookMarkDto(){ Name = "Вес", InsertView = "Weight" },
             new BookMarkDto(){ Name = "Объем", InsertView = "Volume" },
-            new BookMarkDto(){ Name = "Погрузка", InsertView = "Loading" },
-            new BookMarkDto(){ Name = "Выгрузка", InsertView = "Unloading" },
+            new BookMarkDto(){ Name = "Погрузка", InsertView = "Send" },
+            new BookMarkDto(){ Name = "Выгрузка", InsertView = "Recieve" },
             new BookMarkDto(){ Name = "Оплата", InsertView = "Payment" },
             new BookMarkDto(){ Name = "Условия оплаты", InsertView = "Conditions" },
             new BookMarkDto(){ Name = "Перевозчик", InsertView = "Carrier" },

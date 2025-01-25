@@ -141,9 +141,10 @@ namespace MediatorServices
         private IRepository _repository;
         private IFileManager _fileManager;
 
-        public DeleteTemplateService(IRepository repository)
+        public DeleteTemplateService(IRepository repository, IFileManager fileManager)
         {
             _repository = repository;
+            _fileManager = fileManager;
         }
 
         public async Task<bool> Handle(Delete<ContractTemplateDto> request, CancellationToken cancellationToken)
