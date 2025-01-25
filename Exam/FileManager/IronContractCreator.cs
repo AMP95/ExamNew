@@ -1,6 +1,8 @@
 ﻿using DTOs;
 using IronWord;
+using MediatorServices;
 using MediatorServices.Abstract;
+using Models.Sub;
 using System.ComponentModel;
 using System.Diagnostics.Contracts;
 using System.Reflection;
@@ -59,6 +61,7 @@ namespace Exam.FileManager
         {
             _fileManager = fileManager;
         }
+
         public string CreateContractDocument(ContractDto contract, string templatePathWithoutRoot)
         {
             string fullPath = _fileManager.GetFullPath(templatePathWithoutRoot);
@@ -67,8 +70,8 @@ namespace Exam.FileManager
 
             Dictionary<string, string> replacements = new Dictionary<string, string>();
 
-            replacements.Add("{{ContractNumber}}", contract.Number.ToString());
-            replacements.Add("{{ConractDate}}", contract.CreationDate.ToString("dd.MM.yyyy"));
+            replacements.Add(BookMarksList.GetValue("Номер"), contract.Number.ToString());
+            replacements.Add(BookMarksList.GetValue("Дата"), contract.CreationDate.ToString("dd.MM.yyyy"));
 
             string route = contract.LoadPoint.Route;
 
@@ -77,11 +80,11 @@ namespace Exam.FileManager
                 route += $" - {point.Route}"; 
             }
 
-            replacements.Add("{{Route}}", route);
+            replacements.Add(BookMarksList.GetValue("Маршрут"), route);
 
 
-            replacements.Add("{{Weight}}", contract.Weight.ToString());
-            replacements.Add("{{Volume}}", contract.Volume.ToString());
+            replacements.Add(BookMarksList.GetValue("Вес"), contract.Weight.ToString());
+            replacements.Add(BookMarksList.GetValue("Объем"), contract.Volume.ToString());
 
             string loadingPoint = $"Грузоотправитель: {contract.LoadPoint.Company}\n" +
                                     $"Адрес погрузки: {contract.LoadPoint.Address}\n" +
@@ -89,7 +92,7 @@ namespace Exam.FileManager
                                           $"Контакты: {string.Join(";", contract.LoadPoint.Phones)}\n" +
                                    $"Способ погрузки: {contract.LoadPoint.Side.GetDescription()}";
 
-            replacements.Add("{{LoadingPoint}}", loadingPoint);
+            replacements.Add(BookMarksList.GetValue("Погрузка"), loadingPoint);
 
             string unloadingPoints =string.Empty;
             foreach (RoutePointDto point in contract.UnloadPoints) 
@@ -101,26 +104,26 @@ namespace Exam.FileManager
                                    $"Способ выгрузки: {point.Side.GetDescription()}\n\n";
             }
 
-            replacements.Add("{{UnloadingPoint}}", unloadingPoints);
+            replacements.Add(BookMarksList.GetValue("Выгрузка"), unloadingPoints);
 
-            string payment = $"{contract.Payment} руб.";
+            string payment = $"{contract.Payment} руб. {contract.Carrier.Vat.GetDescription()}";
 
             if (contract.Prepayment > 0) 
             {
                 payment += $"\nПредоплата: {contract.Prepayment.ToString()} руб.";
             }
 
-            replacements.Add("{{Payment}}", payment);
-            replacements.Add("{{PayConditions}}", $"{contract.PaymentCondition.GetDescription()}, {contract.PayPriority.GetDescription()}" );
+            replacements.Add(BookMarksList.GetValue("Оплата"), payment);
+            replacements.Add(BookMarksList.GetValue("Условия оплаты"), $"{contract.PaymentCondition.GetDescription()}, {contract.PayPriority.GetDescription()}" );
 
             string driver = $"ФИО: {contract.Driver.Name}\n" +
                             $"Паспорт: {contract.Driver.PassportSerial}," +
                             $"выдан {contract.Driver.PassportIssuer}, {contract.Driver.PassportDateOfIssue.ToString("dd.MM.yyyy")}\n" +
                             $"Тел.: {string.Join(";", contract.Driver.Phones)}";
 
-            replacements.Add("{{Driver}}", driver);
+            replacements.Add(BookMarksList.GetValue("Водитель"), driver);
 
-            replacements.Add("{{Vehicle}}", $"{contract.Vehicle.TruckModel} {contract.Vehicle.TruckNumber}, {contract.Vehicle.TrailerNumber}");
+            replacements.Add(BookMarksList.GetValue("ТС"), $"{contract.Vehicle.TruckModel} {contract.Vehicle.TruckNumber}, {contract.Vehicle.TrailerNumber}");
 
             string carrier = $"Перевозчик: {contract.Carrier.Name}\n" +
                              $"Адрес: {contract.Carrier.Address}\n" +
@@ -128,7 +131,7 @@ namespace Exam.FileManager
                              $"Тел.: {string.Join(";", contract.Carrier.Phones)}\n" +
                              $"E-mail: {string.Join(";", contract.Carrier.Emails)}";
 
-            replacements.Add("{{Carrier}}", carrier);
+            replacements.Add(BookMarksList.GetValue("Перевозчик"), carrier);
 
             foreach (var replacement in replacements)
             {
@@ -137,6 +140,8 @@ namespace Exam.FileManager
 
             string cntractPath = Path.Combine(nameof(Contract), contract.CreationDate.Year.ToString(), $"{contract.Number}.docx");
             string fullSavePath = _fileManager.GetFullPath(cntractPath);
+
+            Directory.CreateDirectory(Path.GetDirectoryName(fullSavePath));
 
             doc.Save(fullSavePath);
 

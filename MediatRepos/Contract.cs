@@ -50,7 +50,11 @@ namespace MediatorServices
                     { 
                         Id = constract.Carrier.Id,
                         Name = constract.Carrier.Name,
-                        Vat = (VAT)constract.Carrier.Vat
+                        Vat = (VAT)constract.Carrier.Vat,
+                        Address = constract.Carrier.Address,
+                        Phones = constract.Carrier.Phones.Split(";").ToList(),
+                        Emails = constract.Carrier.Emails.Split(";").ToList(),
+                        InnKpp = constract.Carrier.InnKpp
                     },
                     Client = new ClientDto() 
                     { 

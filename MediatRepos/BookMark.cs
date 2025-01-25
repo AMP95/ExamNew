@@ -4,27 +4,34 @@ using MediatRepos;
 using Microsoft.Extensions.Logging;
 using Models;
 using Models.Sub;
+using System.Diagnostics.Metrics;
 using System.Linq.Expressions;
 
 namespace MediatorServices
 {
-    internal static class BookMarksList
+    public static class BookMarksList
     {
         public static List<BookMarkDto> List = new List<BookMarkDto>()
         {
-            new BookMarkDto(){ Name = "Номер", InsertView = "{{ContractNumber}}" },
-            new BookMarkDto(){ Name = "Дата", InsertView = "{{ConractDate}}" },
-            new BookMarkDto(){ Name = "Маршрут", InsertView = "{{Route}}" },
-            new BookMarkDto(){ Name = "Вес", InsertView = "{{Weight}}" },
-            new BookMarkDto(){ Name = "Объем", InsertView = "{{Volume}}" },
-            new BookMarkDto(){ Name = "Погрузка", InsertView = "{{LoadingPoint}}" },
-            new BookMarkDto(){ Name = "Выгрузка", InsertView = "{{UnloadingPoint}}" },
-            new BookMarkDto(){ Name = "Оплата", InsertView = "{{Payment}}" },
-            new BookMarkDto(){ Name = "Условия оплаты", InsertView = "{{PayConditions}}" },
-            new BookMarkDto(){ Name = "Перевозчик", InsertView = "{{Carrier}}" },
-            new BookMarkDto(){ Name = "Водитель", InsertView = "{{Driver}}" },
-            new BookMarkDto(){ Name = "ТС", InsertView = "{{Vehicle}}" },
+            new BookMarkDto(){ Name = "Номер", InsertView = "Number" },
+            new BookMarkDto(){ Name = "Дата", InsertView = "Date" },
+            new BookMarkDto(){ Name = "Маршрут", InsertView = "Route" },
+            new BookMarkDto(){ Name = "Вес", InsertView = "Weight" },
+            new BookMarkDto(){ Name = "Объем", InsertView = "Volume" },
+            new BookMarkDto(){ Name = "Погрузка", InsertView = "Loading" },
+            new BookMarkDto(){ Name = "Выгрузка", InsertView = "Unloading" },
+            new BookMarkDto(){ Name = "Оплата", InsertView = "Payment" },
+            new BookMarkDto(){ Name = "Условия оплаты", InsertView = "Conditions" },
+            new BookMarkDto(){ Name = "Перевозчик", InsertView = "Carrier" },
+            new BookMarkDto(){ Name = "Водитель", InsertView = "Driver" },
+            new BookMarkDto(){ Name = "ТС", InsertView = "Vehicle" },
         };
+
+        public static string GetValue(string key) 
+        {
+            BookMarkDto dto = List.FirstOrDefault(b => b.Name == key);
+            return dto?.InsertView;
+        }
     }
 
     public class GetFilterBookMarkService : IRequestHandler<GetFilter<BookMarkDto>, object>
