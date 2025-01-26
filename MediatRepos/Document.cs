@@ -7,7 +7,7 @@ using System.Linq.Expressions;
 
 namespace MediatorServices
 {
-    public static class DocumentConverter
+    internal static class DocumentConverter
     {
         public static DocumentDto Convert(Document document)
         {
@@ -40,6 +40,65 @@ namespace MediatorServices
             };
         }
     }
+
+
+    internal static class StatusUpdater 
+    {
+        public async static Task<bool> UpdateContractStatus(Guid contractId, IRepository repository) 
+        {
+            IEnumerable<Contract> contracts = await repository.Get<Contract>(contract => contract.Id == contractId, null, "Documents,Payments");
+
+            Contract contract = contracts.FirstOrDefault();
+
+            if (contract.Status == (short)ContractStatus.Failed) 
+            { 
+                return false;
+            }
+
+            contract.Status = (short)ContractStatus.Created;
+
+
+            IEnumerable<Document> incomeDoc = contract.Documents.Where(d => d.DocumentDirection == (short)DocumentDirection.Income);
+            IEnumerable<Document> outcomeDoc = contract.Documents.Where(d => d.DocumentDirection == (short)DocumentDirection.Outcome);
+
+            IEnumerable<Payment> incomePay = contract.Payments.Where(d => d.DocumentDirection == (short)DocumentDirection.Outcome);
+
+            if (incomeDoc.All(d => d.DocumentType == (short)DocumentType.Bill ||
+                                   d.DocumentType == (short)DocumentType.UDT ||
+                                   d.DocumentType == (short)DocumentType.TTN) || incomeDoc.All(d => d.DocumentType == (short)DocumentType.Bill ||
+                                                                                                    d.DocumentType == (short)DocumentType.Act ||
+                                                                                                    d.DocumentType == (short)DocumentType.Invoice ||
+                                                                                                    d.DocumentType == (short)DocumentType.TTN))
+            {
+                var bills = incomeDoc.Where(d => d.DocumentType == (short)DocumentType.Bill);
+
+                double summ = bills.Sum(b => b.Summ);
+
+                if (summ >= contract.CarrierPayment)
+                {
+                    contract.Status = (short)ContractStatus.DocumentsRecieved;
+                }
+            }
+
+            if (outcomeDoc.All(d => d.DocumentType == (short)DocumentType.Bill ||
+                                    d.DocumentType == (short)DocumentType.UDT ||
+                                    d.DocumentType == (short)DocumentType.TTN) || outcomeDoc.All(d => d.DocumentType == (short)DocumentType.Bill ||
+                                                                                                      d.DocumentType == (short)DocumentType.Act ||
+                                                                                                      d.DocumentType == (short)DocumentType.Invoice ||
+                                                                                                      d.DocumentType == (short)DocumentType.TTN))
+            {
+                contract.Status = (short)ContractStatus.DocumentSended;
+            }
+
+            if (incomePay.Sum(p => p.Summ) >= contract.ClientPayment) 
+            {
+                contract.Status = (short)ContractStatus.Closed;
+            }
+
+            return await repository.Update(contract);
+        }
+    }
+
 
     public class GetIdDocumentService : GetIdModelService<DocumentDto>
     {
@@ -137,7 +196,21 @@ namespace MediatorServices
 
         public async Task<bool> Handle(Delete<DocumentDto> request, CancellationToken cancellationToken)
         {
-            return await _repository.Remove<Document>(request.Id);
+            bool result = false;
+
+            try
+            {
+                Document document = await _repository.GetById<Document>(request.Id);
+
+                result = await _repository.Remove<Document>(document.Id);
+
+                await StatusUpdater.UpdateContractStatus(document.ContractId, _repository);
+            }
+            catch (Exception ex) 
+            {
+            
+            }
+            return result;
         }
     }
 
@@ -149,7 +222,21 @@ namespace MediatorServices
 
         protected override async Task<Guid> Add(DocumentDto dto)
         {
-            return await _repository.Add(DocumentConverter.Convert(dto));
+            Guid docId = Guid.Empty;
+
+            try
+            {
+                docId = await _repository.Add(DocumentConverter.Convert(dto));
+
+                await StatusUpdater.UpdateContractStatus(dto.ContractId, _repository);
+                
+            }
+            catch (Exception ex) 
+            { 
+                
+            }
+
+            return docId;
         }
     }
 
@@ -161,18 +248,31 @@ namespace MediatorServices
 
         protected override async Task<bool> Update(DocumentDto dto)
         {
-            Document document = await _repository.GetById<Document>(dto.Id);
+            bool result = false;
 
-            document.Id = dto.Id;
-            document.CreationDate = dto.CreationDate;
-            document.DocumentDirection = (short)dto.Direction;
-            document.Number = dto.Number;
-            document.RecieveType = (short)dto.RecieveType;
-            document.RecievingDate = dto.RecievingDate;
-            document.Summ = dto.Summ;
-            document.DocumentType = (short)dto.Type;
+            try
+            {
+                Document document = await _repository.GetById<Document>(dto.Id);
 
-            return await _repository.Update(document);
+                document.Id = dto.Id;
+                document.CreationDate = dto.CreationDate;
+                document.DocumentDirection = (short)dto.Direction;
+                document.Number = dto.Number;
+                document.RecieveType = (short)dto.RecieveType;
+                document.RecievingDate = dto.RecievingDate;
+                document.Summ = dto.Summ;
+                document.DocumentType = (short)dto.Type;
+
+                result = await _repository.Update(document);
+
+                await StatusUpdater.UpdateContractStatus(dto.ContractId, _repository);
+            }
+            catch (Exception ex) 
+            {
+                
+            }
+
+            return result;
         }
     }
 }

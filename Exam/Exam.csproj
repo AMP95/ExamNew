@@ -33,7 +33,6 @@
   <ItemGroup>
     <Folder Include="wwwroot\Files\" />
     <Folder Include="wwwroot\Temp\" />
-    <Folder Include="wwwroot\Temp\" />
   </ItemGroup>
 
 </Project>

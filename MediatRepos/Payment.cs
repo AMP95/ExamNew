@@ -111,7 +111,21 @@ namespace MediatorServices
 
         public async Task<bool> Handle(Delete<PaymentDto> request, CancellationToken cancellationToken)
         {
-            return await _repository.Remove<Payment>(request.Id);
+            bool result = false;
+
+            try
+            {
+                Payment payment = await _repository.GetById<Payment>(request.Id);
+
+                result = await _repository.Remove<Payment>(payment.Id);
+
+                await StatusUpdater.UpdateContractStatus(payment.ContractId, _repository);
+            }
+            catch (Exception ex)
+            {
+
+            }
+            return result;
         }
     }
 
@@ -123,16 +137,30 @@ namespace MediatorServices
 
         protected override async Task<Guid> Add(PaymentDto dto)
         {
-            Payment document = new Payment()
-            {
-                CreationDate = dto.CreationDate,
-                ContractId = dto.ContractId,
-                Summ = dto.Summ,
-                DocumentDirection = (short)dto.Direction,
-                Number = dto.Number,
-            };
+            Guid payId = Guid.Empty;
 
-            return await _repository.Add(document);
+            try
+            {
+                Payment payment = new Payment()
+                {
+                    CreationDate = dto.CreationDate,
+                    ContractId = dto.ContractId,
+                    Summ = dto.Summ,
+                    DocumentDirection = (short)dto.Direction,
+                    Number = dto.Number,
+                };
+
+                payId = await _repository.Add(payment);
+
+                await StatusUpdater.UpdateContractStatus(dto.ContractId, _repository);
+
+            }
+            catch (Exception ex)
+            {
+
+            }
+
+            return payId;
         }
     }
 
@@ -144,15 +172,28 @@ namespace MediatorServices
 
         protected override async Task<bool> Update(PaymentDto dto)
         {
-            Payment document = await _repository.GetById<Payment>(dto.Id);
+            bool result = false;
 
-            document.Id = dto.Id;
-            document.CreationDate = dto.CreationDate;
-            document.DocumentDirection = (short)dto.Direction;
-            document.Number = dto.Number;
-            document.Summ = dto.Summ;
+            try
+            {
+                Payment payment = await _repository.GetById<Payment>(dto.Id);
 
-            return await _repository.Update(document);
+                payment.Id = dto.Id;
+                payment.CreationDate = dto.CreationDate;
+                payment.DocumentDirection = (short)dto.Direction;
+                payment.Number = dto.Number;
+                payment.Summ = dto.Summ;
+
+                result = await _repository.Update(payment);
+
+                await StatusUpdater.UpdateContractStatus(dto.ContractId, _repository);
+            }
+            catch (Exception ex)
+            {
+
+            }
+
+            return result;
         }
     }
 }
