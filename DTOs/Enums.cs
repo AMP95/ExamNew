@@ -81,4 +81,12 @@ namespace DTOs
         [Description("С НДС")]
         With
     }
+
+    public enum PayType
+    {
+        [Description("Оплата")]
+        Payment,
+        [Description("Предоплата")]
+        Prepayment
+    }
 }

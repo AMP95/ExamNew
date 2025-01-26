@@ -1,6 +1,5 @@
 ﻿using DTOs.Dtos;
 using MediatR;
-using Microsoft.AspNetCore.Http;
 
 namespace MediatRepos
 {
@@ -89,6 +88,11 @@ namespace MediatRepos
         {
             Id = id;
         }
+    }
+
+    public class GetRequiredToPay : IRequest<object>
+    { 
+        
     }
 
 }

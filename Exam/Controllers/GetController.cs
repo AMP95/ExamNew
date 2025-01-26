@@ -3,7 +3,6 @@ using DTOs.Dtos;
 using Exam.Interfaces;
 using MediatRepos;
 using Microsoft.AspNetCore.Mvc;
-using System.Net.Http.Headers;
 
 namespace Exam.Controllers
 {
@@ -61,6 +60,7 @@ namespace Exam.Controllers
             return Ok(await _getService.Add(new GetId<ContractDto>(id)));
         }
 
+
         [HttpGet("template/id/{id}")]
         public virtual async Task<ActionResult> GetTemplate(Guid id)
         {
@@ -88,6 +88,12 @@ namespace Exam.Controllers
         public virtual async Task<ActionResult> GetContractFilter(string property, [FromQuery] string[] param)
         {
             return Ok(await _getService.Add(new GetFilter<ContractDto>(property, param)));
+        }
+
+        [HttpGet("contract/payment")]
+        public virtual async Task<ActionResult> GetContractPayment()
+        {
+            return Ok(await _getService.Add(new GetRequiredToPay()));
         }
 
         [HttpGet("vehicle/filter/{property}")]

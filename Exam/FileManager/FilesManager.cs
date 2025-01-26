@@ -51,6 +51,8 @@ namespace Exam.FileManager
 
             try
             {
+                Directory.CreateDirectory(Path.Combine(_environment.WebRootPath, "Temp"));
+
                 using (FileStream fileStream = new FileStream(fullPath, FileMode.Create))
                 {
                     await file.CopyToAsync(fileStream);

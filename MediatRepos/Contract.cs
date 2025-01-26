@@ -1,10 +1,10 @@
 ﻿using DTOs;
+using DTOs.Dtos;
 using MediatorServices.Abstract;
 using MediatR;
 using MediatRepos;
 using Microsoft.Extensions.Logging;
 using Models;
-using Models.Main;
 using Models.Sub;
 using System.Linq.Expressions;
 
@@ -106,7 +106,6 @@ namespace MediatorServices
             return dto;
         }
     }
-
 
     public class GetFilteredContractService : IRequestHandler<GetFilter<ContractDto>, object>
     {
@@ -234,6 +233,97 @@ namespace MediatorServices
                 _logger.LogError(ex, ex.Message);
             }
             return filter;
+        }
+    }
+
+
+    public class GetRequiredToPayService : IRequestHandler<GetRequiredToPay, object>
+    {
+        private IRepository _repository;
+        public GetRequiredToPayService(IRepository repository)
+        {
+            _repository = repository;
+        }
+
+        public async Task<object> Handle(GetRequiredToPay request, CancellationToken cancellationToken)
+        {
+            DateTime start = DateTime.Now.Subtract(TimeSpan.FromDays(30));
+
+            List<RequiredToPayContractDto> required = new List<RequiredToPayContractDto>();
+
+            List<Contract> contracts = (await _repository.Get<Contract>(c => c.CreationDate >= start &&
+                                                                             c.CreationDate <= DateTime.Now &&
+                                                                             c.Status == (short)ContractStatus.Closed, null, "Carrier,Driver,Vehicle,LoadingPoint,Documents,Payments")).ToList();
+
+            foreach (Contract contract in contracts) 
+            {
+                if (contract.CarrierPrepayment != 0) 
+                {
+                    if (!contract.Payments.Any(p => p.Summ == contract.CarrierPrepayment)) 
+                    {
+                        var bils = contract.Documents.Where(d => d.DocumentType == (short)DocumentType.Bill);
+
+                        if (bils.Any(b => b.Summ >= contract.CarrierPrepayment)) 
+                        {
+                            RequiredToPayContractDto dto = new RequiredToPayContractDto()
+                            {
+                                Id = contract.Id,
+                                Carrier = contract.Carrier.Name,
+                                Driver = $"{contract.Driver.FamilyName} {contract.Driver.Name} {contract.Driver.FatherName}",
+                                Vehicle = $"{contract.Vehicle.TruckModel} {contract.Vehicle.TruckNumber},{contract.Vehicle.TrailerNumber}",
+                                CreationDate = contract.CreationDate,
+                                Number = contract.Number,
+                                Type = PayType.Prepayment,
+                                Balance = contract.CarrierPrepayment
+                            };
+
+                            DateTime today = DateTime.Now;
+
+                            DateTime loading = contract.LoadingPoint.DateAndTime;
+
+                            int days = (int)(loading - today).TotalDays;
+
+                            if (loading.Hour > 12) 
+                            { 
+                                days++;
+                            }
+
+                            dto.DaysToExpiration = days;
+
+                            required.Add(dto);
+                        }
+                    }
+                }
+
+                double paymentSumm = contract.Payments.Where(p => p.DocumentDirection == (short)DocumentDirection.Outcome).Sum(d => d.Summ);
+
+                if (contract.CarrierPayment > paymentSumm)
+                {
+                    IEnumerable<Document> income = contract.Documents.Where(d => d.DocumentDirection == (short)DocumentDirection.Income);
+
+                    if (income.Where(i => i.DocumentType == (short)DocumentType.Bill && i.RecieveType == contract.CarrierPaymentCondition).Count() >= 1 &&
+                       (income.Where(i => i.DocumentType == (short)DocumentType.UDT && i.RecieveType == contract.CarrierPaymentCondition).Count() >= 1 ||
+                        income.Where(i => i.DocumentType == (short)DocumentType.Act && i.RecieveType == contract.CarrierPaymentCondition).Count() >= 1 &&
+                        income.Where(i => i.DocumentType == (short)DocumentType.Invoice && i.RecieveType == contract.CarrierPaymentCondition).Count() >= 1) &&
+                        income.Where(i => i.DocumentType == (short)DocumentType.TTN && i.RecieveType == contract.CarrierPaymentCondition).Count() >= 1)
+                    {
+                        RequiredToPayContractDto dto = new RequiredToPayContractDto()
+                        {
+                            Id = contract.Id,
+                            Carrier = contract.Carrier.Name,
+                            Driver = $"{contract.Driver.FamilyName} {contract.Driver.Name} {contract.Driver.FatherName}",
+                            Vehicle = $"{contract.Vehicle.TruckModel} {contract.Vehicle.TruckNumber},{contract.Vehicle.TrailerNumber}",
+                            CreationDate = contract.CreationDate,
+                            Number = contract.Number,
+                            Type = PayType.Payment,
+                            Balance = contract.CarrierPayment - paymentSumm,
+                            DaysToExpiration = (int)(income.OrderBy(d => d.RecievingDate).Last().RecievingDate - DateTime.Now).TotalDays
+                        };
+                    }
+                }
+            }
+
+            return required;
         }
     }
 

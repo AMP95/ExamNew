@@ -2,6 +2,19 @@
 
 namespace DTOs
 {
+    public class RequiredToPayContractDto : IDto
+    {
+        public Guid Id { get; set; }
+        public short Number { get; set; }
+        public DateTime CreationDate { get; set; }
+        public string Carrier { get; set; }
+        public string Driver { get; set; }
+        public string Vehicle { get; set; }
+        public double Balance { get; set; }
+        public PayType Type { get; set; }
+        public int DaysToExpiration { get; set; }
+    }
+
     public class ContractDto : IDto
     {
         public Guid Id { get; set; }
