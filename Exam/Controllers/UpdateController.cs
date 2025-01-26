@@ -179,6 +179,26 @@ namespace Exam.Controllers
 
         }
 
+        [HttpPut("logist")]
+        public virtual async Task<ActionResult> PutLogist([FromBody] JObject jobj)
+        {
+            try
+            {
+                if (jobj != null)
+                {
+                    return Ok(await _updateService.Add(new Update<LogistDto>(jobj.ToObject<LogistDto>())));
+                }
+                _logger.LogWarning($"LOGIST: Recieved null object");
+                return BadRequest("Передан пустой параметр");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return BadRequest("Неверный тип данных");
+            }
+
+        }
+
 
         [HttpPut("file")]
         public virtual async Task<ActionResult> PutFile([FromBody] JObject jobj)

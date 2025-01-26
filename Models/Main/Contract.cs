@@ -45,6 +45,11 @@ namespace Models
         public Guid VehicleId { get; set; }
         public Vehicle Vehicle { get; set; }
 
+
+        [ForeignKey(nameof(Logist))]
+        public Guid LogistId { get; set; }
+        public Logist Logist { get; set; }
+
         public float CarrierPayment { get; set; }
         public float CarrierPrepayment { get; set; }
         public short CarrierPayPriority { get; set; }

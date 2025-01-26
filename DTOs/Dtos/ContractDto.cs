@@ -1,5 +1,6 @@
 ﻿using DTOs.Dtos;
 
+
 namespace DTOs
 {
     public class RequiredToPayContractDto : IDto
@@ -14,6 +15,8 @@ namespace DTOs
         public PayType Type { get; set; }
         public int DaysToExpiration { get; set; }
     }
+
+    
 
     public class ContractDto : IDto
     {
@@ -32,6 +35,7 @@ namespace DTOs
         public ClientDto Client { get; set; }
         public DriverDto Driver { get; set; }
         public VehicleDto Vehicle { get; set; }
+        public LogistDto Logist { get; set; }
         public ContractTemplateDto Template { get; set; }
 
         public float Payment { get; set; }

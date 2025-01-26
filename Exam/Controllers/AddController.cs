@@ -5,7 +5,6 @@ using MediatorServices.Abstract;
 using MediatRepos;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
-using System.IO;
 
 namespace Exam.Controllers
 {
@@ -188,6 +187,25 @@ namespace Exam.Controllers
                     }
                 }
                 _logger.LogWarning($"FILE: Recieved null object");
+                return BadRequest("Передан пустой параметр");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return BadRequest("Неверный тип данных");
+            }
+        }
+
+        [HttpPost("logist")]
+        public virtual async Task<ActionResult> PostLogist([FromBody] JObject jobj)
+        {
+            try
+            {
+                if (jobj != null)
+                {
+                    return Ok(await _addService.Add(new Add<LogistDto>(jobj.ToObject<LogistDto>())));
+                }
+                _logger.LogWarning($"LOGIST: Recieved null object");
                 return BadRequest("Передан пустой параметр");
             }
             catch (Exception ex)

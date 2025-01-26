@@ -1,12 +1,15 @@
 using DAL;
 using DTOs;
+using Exam.Authentication;
 using Exam.BackgroundServices;
 using Exam.FileManager;
 using Exam.Interfaces;
 using Exam.ResultServices;
 using MediatorServices.Abstract;
 using MediatRepos;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Models;
 
 namespace Exam
@@ -29,6 +32,10 @@ namespace Exam
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            TokenSettings tokenSettings = new TokenSettings();
+            builder.Configuration.GetSection("TokenSettings").Bind(tokenSettings);
+            JwtTokenService.LoadSettings(tokenSettings);
+
             builder.Logging.AddProvider(new Log4NetProvider("log4net.config"));
 
             builder.Services.AddControllers().AddNewtonsoftJson();
@@ -38,12 +45,14 @@ namespace Exam
             builder.Services.AddTransient<IRepository, ContextRepository>();
             builder.Services.AddTransient<IFileManager, FilesManager>();
             builder.Services.AddTransient<IContractCreator, IronContractCreator>();
+            builder.Services.AddTransient<ITokenService, JwtTokenService>();
 
             builder.Services.AddSingleton<IResultService, ResultService>();
             builder.Services.AddSingleton<IRequestStatusService, RequestStatusService>();
             builder.Services.AddSingleton<IGetService, GetService>();
             builder.Services.AddSingleton<IAddService, AddService>();
             builder.Services.AddSingleton<IUpdateService, UpdateService>();
+            
 
             builder.Services.AddCors(options =>
             {
@@ -52,6 +61,24 @@ namespace Exam
                     policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
                 });
             });
+
+            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                           .AddJwtBearer(options =>
+                           {
+                               options.RequireHttpsMetadata = false;
+                               options.TokenValidationParameters = new TokenValidationParameters
+                               {
+                                   ValidateIssuer = true,
+                                   ValidIssuer = JwtTokenService.ISSUER,
+
+                                   ValidateAudience = true,
+                                   ValidAudience = JwtTokenService.AUDIENCE,
+                                   ValidateLifetime = true,
+
+                                   IssuerSigningKey = JwtTokenService.GetSymmetricSecurityKey(),
+                                   ValidateIssuerSigningKey = true,
+                               };
+                           });
 
 
             builder.Services.AddSwaggerGen();
@@ -77,6 +104,7 @@ namespace Exam
 
             app.UseHttpsRedirection();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseCors("default");

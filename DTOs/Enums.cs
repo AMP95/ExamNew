@@ -89,4 +89,18 @@ namespace DTOs
         [Description("Предоплата")]
         Prepayment
     }
+
+    public enum LogistRole 
+    {
+        [Description("Администратор")]
+        Admin,
+        [Description("Пользователь")]
+        User
+    }
+
+    public enum PasswordState
+    {
+        OnReset,
+        Active
+    }
 }

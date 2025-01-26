@@ -1,8 +1,10 @@
 ﻿using DTOs;
 using DTOs.Dtos;
+using Exam.BackgroundServices;
 using Exam.Interfaces;
 using MediatRepos;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json.Linq;
 
 namespace Exam.Controllers
 {
@@ -65,6 +67,12 @@ namespace Exam.Controllers
         public virtual async Task<ActionResult> GetTemplate(Guid id)
         {
             return Ok(await _getService.Add(new GetId<ContractTemplateDto>(id)));
+        }
+
+        [HttpGet("logist/id/{id}")]
+        public virtual async Task<ActionResult> GetLogist(Guid id)
+        {
+            return Ok(await _getService.Add(new GetId<LogistDto>(id)));
         }
 
         [HttpGet("file/id/{id}")] // only DTO
@@ -150,6 +158,30 @@ namespace Exam.Controllers
             return Ok(await _getService.Add(new GetFilter<BookMarkDto>(property, param)));
         }
 
+        [HttpGet("logist/filter/{property}")]
+        public virtual async Task<ActionResult> GetLogistFilter(string property, [FromQuery] string[] param)
+        {
+            return Ok(await _getService.Add(new GetFilter<LogistDto>(property, param)));
+        }
+
+
+        [HttpPost("validate")]
+        public virtual async Task<ActionResult> ValidateLogist([FromBody] JObject jobj)
+        {
+            try
+            {
+                if (jobj != null)
+                {
+                    return Ok(await _getService.Add(new Validate(jobj.ToObject<LogistDto>())));
+                }
+                return BadRequest("Передан пустой параметр");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest("Неверный тип данных");
+            }
+        }
+
         #endregion Filter
 
         #region Range
@@ -160,11 +192,13 @@ namespace Exam.Controllers
             return Ok(await _getService.Add(new GetRange<VehicleDto>(start, end)));
         }
 
+
         [HttpGet("driver/range/{start}/{end}")]
         public virtual async Task<ActionResult> GetDriverRange(int start, int end)
         {
             return Ok(await _getService.Add(new GetRange<DriverDto>(start, end)));
         }
+
 
         [HttpGet("carrier/range/{start}/{end}")]
         public virtual async Task<ActionResult> GetCarrierRange(int start, int end)
@@ -183,6 +217,12 @@ namespace Exam.Controllers
         public virtual async Task<ActionResult> GetTemplateRange(int start, int end)
         {
             return Ok(await _getService.Add(new GetRange<ContractTemplateDto>(start, end)));
+        }
+
+        [HttpGet("logist/range/{start}/{end}")]
+        public virtual async Task<ActionResult> GetLogistRange(int start, int end)
+        {
+            return Ok(await _getService.Add(new GetRange<LogistDto>(start, end)));
         }
 
         #endregion Range

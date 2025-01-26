@@ -95,4 +95,14 @@ namespace MediatRepos
         
     }
 
+    public class Validate : IRequest<object> 
+    { 
+        public LogistDto Logist { get; set; }
+
+        public Validate(LogistDto logist)
+        {   
+            Logist = logist;
+        }
+    }
+
 }
