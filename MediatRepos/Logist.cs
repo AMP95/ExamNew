@@ -1,6 +1,7 @@
 ﻿using DTOs;
 using DTOs.Dtos;
 using MediatorServices.Abstract;
+using MediatorServices.Interfaces;
 using MediatR;
 using MediatRepos;
 using Microsoft.Extensions.Logging;
@@ -177,16 +178,34 @@ namespace MediatorServices
     {
         private ITokenService _tokenService;
         private IRepository _repository;
+        private IHashService _hashService;
 
         public ValidateLogistService(ITokenService tokenService, 
-                                     IRepository repository)
+                                     IRepository repository,
+                                     IHashService hashService)
         {
             _repository = repository;
             _tokenService = tokenService;
+            _hashService = hashService;
         }
 
         public async Task<object> Handle(Validate request, CancellationToken cancellationToken)
         {
+            IEnumerable<Logist> admins = await _repository.Get<Logist>(l => l.Role == LogistRole.Admin.ToString());
+            if (!admins.Any()) 
+            {
+                Logist logist = new Logist()
+                {
+                    Login = "admin",
+                    Name = "Админ",
+                    Password = _hashService.GetHash("admin"),
+                    PasswordState= (short)PasswordState.OnReset,
+                    Role = LogistRole.Admin.ToString(),
+                }; 
+
+                await _repository.Add(logist);
+            }
+
             IEnumerable<Logist> logists = await _repository.Get<Logist>(l => l.Login ==  request.Logist.Login && l.Password == request.Logist.Password && !l.IsExpired);
 
             if (logists.Any()) 

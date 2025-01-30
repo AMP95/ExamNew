@@ -6,6 +6,7 @@ using Exam.FileManager;
 using Exam.Interfaces;
 using Exam.ResultServices;
 using MediatorServices.Abstract;
+using MediatorServices.Interfaces;
 using MediatRepos;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -46,6 +47,7 @@ namespace Exam
             builder.Services.AddTransient<IFileManager, FilesManager>();
             builder.Services.AddTransient<IContractCreator, IronContractCreator>();
             builder.Services.AddTransient<ITokenService, JwtTokenService>();
+            builder.Services.AddTransient<IHashService, HashService>();
 
             builder.Services.AddSingleton<IResultService, ResultService>();
             builder.Services.AddSingleton<IRequestStatusService, RequestStatusService>();
