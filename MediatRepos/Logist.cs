@@ -174,6 +174,44 @@ namespace MediatorServices
         }
     }
 
+    public class UpdateLogistPropertyService : IRequestHandler<Patch<LogistDto>, bool>
+    {
+        protected IRepository _repository;
+        protected ILogger<UpdateLogistPropertyService> _logger;
+
+        public UpdateLogistPropertyService(IRepository repository, ILogger<UpdateLogistPropertyService> logger)
+        {
+            _repository = repository;
+            _logger = logger;
+        }
+
+        public async Task<bool> Handle(Patch<LogistDto> request, CancellationToken cancellationToken)
+        {
+            try
+            {
+                Logist logist = await _repository.GetById<Logist>(request.Id);
+
+                foreach (var pair in request.Updates)
+                {
+                    switch (pair.Key)
+                    {
+                        case nameof(LogistDto.IsExpired):
+                            bool expiration = (bool)pair.Value;
+                            logist.IsExpired = expiration;
+                            break;
+                    }
+                }
+
+                return await _repository.Update(logist);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+            }
+            return false;
+        }
+    }
+
     public class ValidateLogistService : IRequestHandler<Validate, object>
     {
         private ITokenService _tokenService;
