@@ -119,6 +119,10 @@ namespace MediatorServices
                         string carname = parameters[0].ToString().ToLower();
                         filter = d => d.Name.ToLower().Contains(carname);
                         break;
+                    case nameof(LogistDto.Login):
+                        string login = parameters[0].ToString().ToLower();
+                        filter = d => d.Login.ToLower().Contains(login);
+                        break;
                 }
             }
             catch (Exception ex)
