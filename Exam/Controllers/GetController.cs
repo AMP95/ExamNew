@@ -152,12 +152,6 @@ namespace Exam.Controllers
             return Ok(await _getService.Add(new GetFilter<TemplateDto>(property, param)));
         }
 
-        [HttpGet("bookmark/filter/{property}")]
-        public virtual async Task<ActionResult> GetBookmarkFilter(string property, [FromQuery] string[] param)
-        {
-            return Ok(await _getService.Add(new GetFilter<BookMarkDto>(property, param)));
-        }
-
         [HttpGet("logist/filter/{property}")]
         public virtual async Task<ActionResult> GetLogistFilter(string property, [FromQuery] string[] param)
         {
