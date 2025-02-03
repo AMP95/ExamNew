@@ -12,7 +12,7 @@ namespace DAL
         public DbSet<Driver> Drivers { get; set; }
         public DbSet<Vehicle> Vehicles { get; set; }
         public DbSet<Contract> Contracts { get; set; }
-        public DbSet<ContractTemplate> Templates { get; set; }
+        public DbSet<Template> Templates { get; set; }
         public DbSet<Models.Sub.File> Files { get; set; }
         public DbSet<BookMark> BookMarks { get; set; }
         public DbSet<Logist> Logists { get; set; }
@@ -25,7 +25,7 @@ namespace DAL
         {
             modelBuilder.Entity<Vehicle>().HasIndex(u => new { u.TruckModel, u.TruckNumber, u.TrailerModel, u.TrailerNumber }).IsUnique(true);
             modelBuilder.Entity<Contract>().HasIndex(u => new { u.Number, u.CreationDate }).IsUnique(true);
-            modelBuilder.Entity<ContractTemplate>().HasIndex(u => u.Name).IsUnique(true);
+            modelBuilder.Entity<Template>().HasIndex(u => u.Name).IsUnique(true);
 
             base.OnModelCreating(modelBuilder);
         }

@@ -87,7 +87,7 @@ namespace MediatorServices
                     },
                     UnloadPoints = new List<RoutePointDto>(),
                     Documents = new List<DocumentDto>(),
-                    Template = new DTOs.Dtos.ContractTemplateDto() 
+                    Template = new DTOs.Dtos.TemplateDto() 
                     { 
                         Id = constract.Template.Id,
                         Name = constract.Template.Name,

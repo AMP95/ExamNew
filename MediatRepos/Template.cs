@@ -10,23 +10,23 @@ using System.Linq.Expressions;
 
 namespace MediatorServices
 {
-    public class GetIdTemplateService : GetIdModelService<ContractTemplateDto>
+    public class GetIdTemplateService : GetIdModelService<TemplateDto>
     {
-        public GetIdTemplateService(IRepository repository, ILogger<GetIdModelService<ContractTemplateDto>> logger) : base(repository, logger)
+        public GetIdTemplateService(IRepository repository, ILogger<GetIdModelService<TemplateDto>> logger) : base(repository, logger)
         {
         }
 
         protected override async Task<object> Get(Guid id)
         {
-            IEnumerable<ContractTemplate> templates = await _repository.Get<ContractTemplate>(t => t.Id == id);
+            IEnumerable<Template> templates = await _repository.Get<Template>(t => t.Id == id);
 
-            ContractTemplateDto dto = null;
+            TemplateDto dto = null;
             if (templates.Any())
             {
-                ContractTemplate template = templates.First();
-                IEnumerable<Models.Sub.File> files = await _repository.Get<Models.Sub.File>(f => f.EntityType == nameof(ContractTemplate) && f.EntityId == template.Id);
+                Template template = templates.First();
+                IEnumerable<Models.Sub.File> files = await _repository.Get<Models.Sub.File>(f => f.EntityType == nameof(Template) && f.EntityId == template.Id);
 
-                dto = new ContractTemplateDto()
+                dto = new TemplateDto()
                 {
                     Id = template.Id,
                     Name = template.Name,
@@ -50,20 +50,20 @@ namespace MediatorServices
         }
     }
 
-    public class GetRangeTemplateService : GetRangeModelService<ContractTemplateDto>
+    public class GetRangeTemplateService : GetRangeModelService<TemplateDto>
     {
-        public GetRangeTemplateService(IRepository repository, ILogger<GetRangeModelService<ContractTemplateDto>> logger) : base(repository, logger)
+        public GetRangeTemplateService(IRepository repository, ILogger<GetRangeModelService<TemplateDto>> logger) : base(repository, logger)
         {
         }
 
         protected override async Task<object> Get(int start, int end)
         {
-            IEnumerable<ContractTemplate> templates = await _repository.Get<ContractTemplate>();
-            List<ContractTemplateDto> dtos = new List<ContractTemplateDto>();
+            IEnumerable<Template> templates = await _repository.Get<Template>();
+            List<TemplateDto> dtos = new List<TemplateDto>();
 
             foreach (var template in templates)
             {
-                ContractTemplateDto dto = new ContractTemplateDto()
+                TemplateDto dto = new TemplateDto()
                 {
                     Id = template.Id,
                     Name = template.Name,
@@ -76,7 +76,7 @@ namespace MediatorServices
         }
     }
 
-    public class GetFilterTemplateService : IRequestHandler<GetFilter<ContractTemplateDto>, object>
+    public class GetFilterTemplateService : IRequestHandler<GetFilter<TemplateDto>, object>
     {
         protected IRepository _repository;
         protected ILogger<GetFilterTemplateService> _logger;
@@ -87,20 +87,20 @@ namespace MediatorServices
             _logger = logger;
         }
 
-        public async Task<object> Handle(GetFilter<ContractTemplateDto> request, CancellationToken cancellationToken)
+        public async Task<object> Handle(GetFilter<TemplateDto> request, CancellationToken cancellationToken)
         {
-            Expression<Func<ContractTemplate, bool>> filter = GetFilter(request.PropertyName, request.Params);
+            Expression<Func<Template, bool>> filter = GetFilter(request.PropertyName, request.Params);
             return await Get(filter);
         }
 
-        protected async Task<object> Get(Expression<Func<ContractTemplate, bool>> filter)
+        protected async Task<object> Get(Expression<Func<Template, bool>> filter)
         {
-            IEnumerable<ContractTemplate> templates = await _repository.Get<ContractTemplate>(filter);
-            List<ContractTemplateDto> dtos = new List<ContractTemplateDto>();
+            IEnumerable<Template> templates = await _repository.Get<Template>(filter);
+            List<TemplateDto> dtos = new List<TemplateDto>();
 
             foreach (var template in templates)
             {
-                ContractTemplateDto dto = new ContractTemplateDto()
+                TemplateDto dto = new TemplateDto()
                 {
                     Id = template.Id,
                     Name = template.Name,
@@ -112,15 +112,15 @@ namespace MediatorServices
             return dtos;
         }
 
-        protected Expression<Func<ContractTemplate, bool>> GetFilter(string property, params object[] parameters)
+        protected Expression<Func<Template, bool>> GetFilter(string property, params object[] parameters)
         {
-            Expression<Func<ContractTemplate, bool>> filter = null;
+            Expression<Func<Template, bool>> filter = null;
 
             try
             {
                 switch (property)
                 {
-                    case nameof(ContractTemplateDto.Name):
+                    case nameof(TemplateDto.Name):
                         string name = parameters[0].ToString().ToLower();
                         filter = d => d.Name.ToLower().Contains(name);
                         break;
@@ -136,7 +136,7 @@ namespace MediatorServices
         }
     }
 
-    public class DeleteTemplateService : IRequestHandler<Delete<ContractTemplateDto>, bool>
+    public class DeleteTemplateService : IRequestHandler<Delete<TemplateDto>, bool>
     {
         private IRepository _repository;
         private IFileManager _fileManager;
@@ -147,32 +147,32 @@ namespace MediatorServices
             _fileManager = fileManager;
         }
 
-        public async Task<bool> Handle(Delete<ContractTemplateDto> request, CancellationToken cancellationToken)
+        public async Task<bool> Handle(Delete<TemplateDto> request, CancellationToken cancellationToken)
         {
-            bool result = await _repository.Remove<ContractTemplate>(request.Id);
+            bool result = await _repository.Remove<Template>(request.Id);
 
-            IEnumerable<Models.Sub.File> files = await _repository.Get<Models.Sub.File>(f => f.EntityType == nameof(ContractTemplate) && f.EntityId == request.Id);
+            IEnumerable<Models.Sub.File> files = await _repository.Get<Models.Sub.File>(f => f.EntityType == nameof(Template) && f.EntityId == request.Id);
 
             if (files.Any()) 
             {
                 string catalog = Path.GetFileName(Path.GetDirectoryName(files.First().FullFilePath));
 
-                await _fileManager.RemoveAllFiles(nameof(ContractTemplate), catalog);
+                await _fileManager.RemoveAllFiles(nameof(Template), catalog);
             }
 
             return result;
         }
     }
 
-    public class AddTemplateService : AddModelService<ContractTemplateDto>
+    public class AddTemplateService : AddModelService<TemplateDto>
     {
         public AddTemplateService(IRepository repository) : base(repository)
         {
         }
 
-        protected override async Task<Guid> Add(ContractTemplateDto dto)
+        protected override async Task<Guid> Add(TemplateDto dto)
         {
-            ContractTemplate template = new ContractTemplate()
+            Template template = new Template()
             {
                 Name = dto.Name,
             };
@@ -181,15 +181,15 @@ namespace MediatorServices
         }
     }
 
-    public class UpdateTemplateService : UpdateModelService<ContractTemplateDto>
+    public class UpdateTemplateService : UpdateModelService<TemplateDto>
     {
         public UpdateTemplateService(IRepository repository) : base(repository)
         {
         }
 
-        protected override async Task<bool> Update(ContractTemplateDto dto)
+        protected override async Task<bool> Update(TemplateDto dto)
         {
-            ContractTemplate template = await _repository.GetById<ContractTemplate>(dto.Id);
+            Template template = await _repository.GetById<Template>(dto.Id);
 
             template.Name = dto.Name;
 

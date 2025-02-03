@@ -38,7 +38,7 @@ namespace Models
 
         [ForeignKey(nameof(Template))]
         public Guid TemplateId { get; set; }
-        public ContractTemplate Template { get; set; }
+        public Template Template { get; set; }
 
 
         [ForeignKey(nameof(Vehicle))]

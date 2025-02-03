@@ -66,7 +66,7 @@ namespace Exam.Controllers
         [HttpGet("template/id/{id}")]
         public virtual async Task<ActionResult> GetTemplate(Guid id)
         {
-            return Ok(await _getService.Add(new GetId<ContractTemplateDto>(id)));
+            return Ok(await _getService.Add(new GetId<TemplateDto>(id)));
         }
 
         [HttpGet("logist/id/{id}")]
@@ -149,7 +149,7 @@ namespace Exam.Controllers
         [HttpGet("template/filter/{property}")]
         public virtual async Task<ActionResult> GetTemplateFilter(string property, [FromQuery] string[] param)
         {
-            return Ok(await _getService.Add(new GetFilter<ContractTemplateDto>(property, param)));
+            return Ok(await _getService.Add(new GetFilter<TemplateDto>(property, param)));
         }
 
         [HttpGet("bookmark/filter/{property}")]
@@ -216,7 +216,7 @@ namespace Exam.Controllers
         [HttpGet("template/range/{start}/{end}")]
         public virtual async Task<ActionResult> GetTemplateRange(int start, int end)
         {
-            return Ok(await _getService.Add(new GetRange<ContractTemplateDto>(start, end)));
+            return Ok(await _getService.Add(new GetRange<TemplateDto>(start, end)));
         }
 
         [HttpGet("logist/range/{start}/{end}")]

@@ -36,8 +36,8 @@ namespace MediatorServices
                 case nameof(Contract):
                     dto.DtoType = nameof(ContractDto);
                     break;
-                case nameof(ContractTemplate):
-                    dto.DtoType = nameof(ContractTemplateDto);
+                case nameof(Template):
+                    dto.DtoType = nameof(TemplateDto);
                     break;
             }
 
@@ -216,8 +216,8 @@ namespace MediatorServices
                 case nameof(ContractDto):
                     entityCatalog = nameof(Contract);
                     break;
-                case nameof(ContractTemplateDto):
-                    entityCatalog = nameof(ContractTemplate);
+                case nameof(TemplateDto):
+                    entityCatalog = nameof(Template);
                     break;
             }
 

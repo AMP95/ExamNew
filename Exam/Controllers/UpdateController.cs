@@ -166,7 +166,7 @@ namespace Exam.Controllers
             {
                 if (jobj != null)
                 {
-                    return Ok(await _updateService.Add(new Update<ContractTemplateDto>(jobj.ToObject<ContractTemplateDto>())));
+                    return Ok(await _updateService.Add(new Update<TemplateDto>(jobj.ToObject<TemplateDto>())));
                 }
                 _logger.LogWarning($"TEMPLATE: Recieved null object");
                 return BadRequest("Передан пустой параметр");
