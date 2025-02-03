@@ -1,12 +1,12 @@
 ﻿using DTOs;
 using DTOs.Dtos;
-using MediatorServices.Abstract;
 using MediatR;
 using MediatRepos;
 using Microsoft.Extensions.Logging;
 using Models;
 using Models.Main;
 using System.Linq.Expressions;
+using Utilities.Interfaces;
 
 namespace MediatorServices
 {

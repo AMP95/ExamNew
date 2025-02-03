@@ -1,12 +1,12 @@
 ﻿using DTOs;
 using DTOs.Dtos;
-using MediatorServices.Abstract;
 using MediatR;
 using MediatRepos;
 using Microsoft.Extensions.Logging;
 using Models;
 using Models.Sub;
 using System.Linq.Expressions;
+using Utilities.Interfaces;
 
 namespace MediatorServices
 {
@@ -369,10 +369,10 @@ namespace MediatorServices
 
     public class AddContractService : AddModelService<ContractDto>
     {
-        IContractCreator _contractCreator;
+        IContractCreator<ContractDto> _contractCreator;
 
         public AddContractService(IRepository repository, 
-                                  IContractCreator contractCreator) : base(repository)
+                                  IContractCreator<ContractDto> contractCreator) : base(repository)
         {
             _contractCreator = contractCreator;
         }
@@ -437,7 +437,7 @@ namespace MediatorServices
 
                 string filePath = files.FirstOrDefault().FullFilePath;
 
-                string contractFilePath = _contractCreator.CreateContractDocument(dto, filePath);
+                string contractFilePath = _contractCreator.CreateContractDocument(dto);
 
                 string ext = Path.GetExtension(contractFilePath);
 
@@ -459,8 +459,8 @@ namespace MediatorServices
     public class UpdateContractService : UpdateModelService<ContractDto>
     {
         private IFileManager _fileManager;
-        private IContractCreator _contractCreator;
-        public UpdateContractService(IRepository repository, IFileManager fileManager, IContractCreator contractCreator) : base(repository)
+        private IContractCreator<ContractDto> _contractCreator;
+        public UpdateContractService(IRepository repository, IFileManager fileManager, IContractCreator<ContractDto> contractCreator) : base(repository)
         {
             _fileManager = fileManager;
             _contractCreator = contractCreator;
@@ -545,7 +545,7 @@ namespace MediatorServices
 
                         string filePath = files.FirstOrDefault().FullFilePath;
 
-                        string contractFilePath = _contractCreator.CreateContractDocument(dto, filePath);
+                        string contractFilePath = _contractCreator.CreateContractDocument(dto);
 
                         string ext = Path.GetExtension(contractFilePath);
 

@@ -1,8 +1,8 @@
-﻿using MediatorServices.Interfaces;
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 using System.Text;
+using Utilities.Interfaces;
 
-namespace Exam.FileManager
+namespace Services
 {
     public class HashService : IHashService
     {

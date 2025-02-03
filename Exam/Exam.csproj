@@ -7,9 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="IronWord" Version="2025.1.2" />
     <PackageReference Include="log4net" Version="3.0.3" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.12" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="8.0.11" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.11">
       <PrivateAssets>all</PrivateAssets>
@@ -29,6 +27,8 @@
     <ProjectReference Include="..\DAL\DAL.csproj" />
     <ProjectReference Include="..\DTOs\DTOs.csproj" />
     <ProjectReference Include="..\MediatRepos\MediatorServices.csproj" />
+    <ProjectReference Include="..\Services\Services.csproj" />
+    <ProjectReference Include="..\Utilities\Utilities.csproj" />
   </ItemGroup>
 
   <ItemGroup>

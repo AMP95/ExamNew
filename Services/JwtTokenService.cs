@@ -1,9 +1,10 @@
-﻿using MediatorServices.Abstract;
+﻿using DTOs.Dtos;
 using Microsoft.IdentityModel.Tokens;
-using Models.Main;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Utilities;
+using Utilities.Interfaces;
 
 namespace Exam.Authentication
 {
@@ -15,7 +16,7 @@ namespace Exam.Authentication
         public int Lifetime { get; set; }
     }
 
-    public class JwtTokenService : ITokenService
+    public class JwtTokenService : ITokenService<LogistDto>
     {
         public static string ISSUER { get; set; }
         public static string AUDIENCE { get; set; }
@@ -30,12 +31,12 @@ namespace Exam.Authentication
             LIFETIME = settings.Lifetime;
         }
 
-        public string GetToken(Logist logist)
+        public string GetToken(LogistDto logist)
         {
             var claims = new List<Claim>
                 {
                     new Claim(ClaimsIdentity.DefaultNameClaimType, logist.Name),
-                    new Claim(ClaimsIdentity.DefaultRoleClaimType, logist.Role)
+                    new Claim(ClaimsIdentity.DefaultRoleClaimType, logist.Role.GetDescription())
                 };
 
             ClaimsIdentity claimsIdentity =

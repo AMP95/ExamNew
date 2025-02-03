@@ -1,10 +1,10 @@
 ﻿using DTOs;
 using DTOs.Dtos;
 using Exam.Interfaces;
-using MediatorServices.Abstract;
 using MediatRepos;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
+using Utilities.Interfaces;
 
 namespace Exam.Controllers
 {

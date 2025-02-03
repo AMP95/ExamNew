@@ -1,17 +1,19 @@
 using DAL;
 using DTOs;
+using DTOs.Dtos;
 using Exam.Authentication;
 using Exam.BackgroundServices;
 using Exam.FileManager;
 using Exam.Interfaces;
 using Exam.ResultServices;
-using MediatorServices.Abstract;
-using MediatorServices.Interfaces;
+using Exam.Services;
 using MediatRepos;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Models;
+using Services;
+using Utilities.Interfaces;
 
 namespace Exam
 {
@@ -45,9 +47,10 @@ namespace Exam
 
             builder.Services.AddTransient<IRepository, ContextRepository>();
             builder.Services.AddTransient<IFileManager, FilesManager>();
-            builder.Services.AddTransient<IContractCreator, IronContractCreator>();
-            builder.Services.AddTransient<ITokenService, JwtTokenService>();
+            builder.Services.AddTransient<IContractCreator<ContractDto>, SpireContractCreator>();
+            builder.Services.AddTransient<ITokenService<LogistDto>, JwtTokenService>();
             builder.Services.AddTransient<IHashService, HashService>();
+            builder.Services.AddTransient<IAppRootResolver, RootResolver>();
 
             builder.Services.AddSingleton<IResultService, ResultService>();
             builder.Services.AddSingleton<IRequestStatusService, RequestStatusService>();

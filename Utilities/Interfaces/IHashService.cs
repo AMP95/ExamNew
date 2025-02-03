@@ -1,4 +1,4 @@
-﻿namespace MediatorServices.Interfaces
+﻿namespace Utilities.Interfaces
 {
     public interface IHashService
     {

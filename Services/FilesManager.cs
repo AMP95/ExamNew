@@ -1,22 +1,24 @@
-﻿using MediatorServices.Abstract;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
+using Utilities.Interfaces;
 
-namespace Exam.FileManager
+namespace Services
 {
     public class FilesManager : IFileManager
     {
-        private IWebHostEnvironment _environment;
+        private IAppRootResolver _rootResolver;
         private ILogger<FilesManager> _logger;
 
-        public FilesManager(IWebHostEnvironment webHostEnvironment,
+        public FilesManager(IAppRootResolver webHostEnvironment,
                             ILogger<FilesManager> logger)
         {
-            _environment = webHostEnvironment;
+            _rootResolver = webHostEnvironment;
             _logger = logger;
         }
 
         public Task<bool> RemoveAllFiles(string entityCatalog, string catalog)
         {
-            string directory = Path.Combine(_environment.WebRootPath, "Files", entityCatalog, catalog);
+            string directory = Path.Combine(_rootResolver.GetRootPath(), "Files", entityCatalog, catalog);
             try
             {
                 DirectoryInfo directoryInfo = new DirectoryInfo(directory);
@@ -32,7 +34,7 @@ namespace Exam.FileManager
 
         public Task<bool> RemoveFile(string filePathWithoutRoot)
         {
-            string fullPath = Path.Combine(_environment.WebRootPath, "Files", filePathWithoutRoot);
+            string fullPath = Path.Combine(_rootResolver.GetRootPath(), "Files", filePathWithoutRoot);
             try 
             { 
                 File.Delete(fullPath);
@@ -47,11 +49,11 @@ namespace Exam.FileManager
 
         public async Task<bool> TempSave(string fileNameOnlyWithExtencion, IFormFile file)
         {
-            string fullPath = Path.Combine(_environment.WebRootPath, "Temp" , fileNameOnlyWithExtencion);
+            string fullPath = Path.Combine(_rootResolver.GetRootPath(), "Temp" , fileNameOnlyWithExtencion);
 
             try
             {
-                Directory.CreateDirectory(Path.Combine(_environment.WebRootPath, "Temp"));
+                Directory.CreateDirectory(Path.Combine(_rootResolver.GetRootPath(), "Temp"));
 
                 using (FileStream fileStream = new FileStream(fullPath, FileMode.Create))
                 {
@@ -68,8 +70,8 @@ namespace Exam.FileManager
 
         public async Task<bool> SaveFile(string filePathWithoutRoot, string fileNameInTempRoot)
         {
-            string fullPath = Path.Combine(_environment.WebRootPath, "Files", filePathWithoutRoot);
-            string tempFullPath = Path.Combine(_environment.WebRootPath, "Temp", fileNameInTempRoot);
+            string fullPath = Path.Combine(_rootResolver.GetRootPath(), "Files", filePathWithoutRoot);
+            string tempFullPath = Path.Combine(_rootResolver.GetRootPath(), "Temp", fileNameInTempRoot);
 
             try
             {
@@ -96,7 +98,7 @@ namespace Exam.FileManager
 
         public async Task<byte[]> GetFile(string filePathWithoutRoot, string viewNameVithExtencion)
         {
-            string fullPath = Path.Combine(_environment.WebRootPath, "Files", filePathWithoutRoot);
+            string fullPath = Path.Combine(_rootResolver.GetRootPath(), "Files", filePathWithoutRoot);
             try
             {
                 return await File.ReadAllBytesAsync(fullPath);
@@ -111,7 +113,7 @@ namespace Exam.FileManager
 
         public string GetFullPath(string pathWithOutRoot)
         {
-           return Path.Combine(_environment.WebRootPath, "Files", pathWithOutRoot);
+           return Path.Combine(_rootResolver.GetRootPath(), "Files", pathWithOutRoot);
         }
     }
 }

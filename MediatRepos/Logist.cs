@@ -1,13 +1,12 @@
 ﻿using DTOs;
 using DTOs.Dtos;
-using MediatorServices.Abstract;
-using MediatorServices.Interfaces;
 using MediatR;
 using MediatRepos;
 using Microsoft.Extensions.Logging;
 using Models;
 using Models.Main;
 using System.Linq.Expressions;
+using Utilities.Interfaces;
 
 namespace MediatorServices
 {
@@ -218,11 +217,11 @@ namespace MediatorServices
 
     public class ValidateLogistService : IRequestHandler<Validate, object>
     {
-        private ITokenService _tokenService;
+        private ITokenService<LogistDto> _tokenService;
         private IRepository _repository;
         private IHashService _hashService;
 
-        public ValidateLogistService(ITokenService tokenService, 
+        public ValidateLogistService(ITokenService<LogistDto> tokenService, 
                                      IRepository repository,
                                      IHashService hashService)
         {
@@ -254,8 +253,6 @@ namespace MediatorServices
             { 
                 Logist logist = logists.FirstOrDefault();
 
-                string token = _tokenService.GetToken(logist);
-
                 LogistDto dto = new LogistDto()
                 {
                     Id = logist.Id,
@@ -265,6 +262,8 @@ namespace MediatorServices
                     PasswordState = (PasswordState)logist.PasswordState,
                     Role = (LogistRole)Enum.Parse(typeof(LogistRole), logist.Role),
                 };
+
+                string token = _tokenService.GetToken(dto);
 
                 return new object[] { token, dto };
             }

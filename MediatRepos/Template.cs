@@ -1,12 +1,11 @@
-﻿using DTOs;
-using DTOs.Dtos;
-using MediatorServices.Abstract;
+﻿using DTOs.Dtos;
 using MediatR;
 using MediatRepos;
 using Microsoft.Extensions.Logging;
 using Models;
 using Models.Main;
 using System.Linq.Expressions;
+using Utilities.Interfaces;
 
 namespace MediatorServices
 {
@@ -18,7 +17,7 @@ namespace MediatorServices
 
         protected override async Task<object> Get(Guid id)
         {
-            IEnumerable<Template> templates = await _repository.Get<Template>(t => t.Id == id);
+            IEnumerable<Template> templates = await _repository.Get<Template>(t => t.Id == id, null, "Additionals");
 
             TemplateDto dto = null;
             if (templates.Any())
@@ -30,21 +29,8 @@ namespace MediatorServices
                 {
                     Id = template.Id,
                     Name = template.Name,
+                    Additionals = template.Additionals.Select(x => new AdditionalDto() { Id = x.Id, Name = x.Name, Description = x.Description }).ToList(),
                 };
-
-                if (files.Any()) 
-                {
-                    Models.Sub.File file = files.First();
-
-                    dto.File = new FileDto()
-                    {
-                        Id = file.Id,
-                        FileNameWithExtencion = file.ViewNameWithExtencion,
-                        Catalog = Path.GetFileName(Path.GetDirectoryName(file.FullFilePath)),
-                        DtoId = file.EntityId,
-                        DtoType = file.EntityType
-                    };
-                }
             }
             return dto;
         }
@@ -175,6 +161,7 @@ namespace MediatorServices
             Template template = new Template()
             {
                 Name = dto.Name,
+                Additionals = dto.Additionals.Select(ad => new Models.Sub.AdditionalCondition() { Name = ad.Name, Description = ad.Description }).ToList()
             };
 
             return await _repository.Add(template);
@@ -192,6 +179,8 @@ namespace MediatorServices
             Template template = await _repository.GetById<Template>(dto.Id);
 
             template.Name = dto.Name;
+            template.Additionals.Clear();
+            template.Additionals = dto.Additionals.Select(ad => new Models.Sub.AdditionalCondition() { Name = ad.Name, Description = ad.Description }).ToList();
 
             return await _repository.Update(template);
         }

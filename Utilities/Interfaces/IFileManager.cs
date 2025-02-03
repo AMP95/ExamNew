@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 
-namespace MediatorServices.Abstract
+namespace Utilities.Interfaces
 {
     public interface IFileManager
     {
