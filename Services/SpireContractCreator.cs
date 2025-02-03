@@ -8,7 +8,7 @@ using Utilities.Interfaces;
 
 namespace Exam.FileManager
 {
-    public class SpireContractCreator : IContractCreator<ContractDto, CompanyDto>
+    public class SpireContractCreator : IContractCreator<ContractDto, CompanyBaseDto>
     {
         private IFileManager _fileManager;
 
@@ -17,7 +17,7 @@ namespace Exam.FileManager
             _fileManager = fileManager;
         }
 
-        public string CreateContractDocument(ContractDto contract, CompanyDto company)
+        public string CreateContractDocument(ContractDto contract, CompanyBaseDto company)
         {
             Document doc = new Document();
             Section s = doc.AddSection();
@@ -103,14 +103,14 @@ namespace Exam.FileManager
                 }
             }
 
-            string fullPath = _fileManager.GetFullPath($"Contracts/{DateTime.Now.Year}/{contract.Number}.docx");
+            string fullPath = _fileManager.GetFullPath($"Contracts/{contract.CreationDate.Year}/{contract.Number}.docx");
 
             doc.SaveToFile( fullPath, FileFormat.Docx2010);
 
             return string.Empty;
         }
 
-        private List<string[]> GetTableData(ContractDto contract, CompanyDto company) 
+        private List<string[]> GetTableData(ContractDto contract, CompanyBaseDto company) 
         {
             string route = $"{contract.LoadPoint.Route} - {contract.UnloadPoints.Last().Route}";
 
@@ -167,7 +167,7 @@ namespace Exam.FileManager
             return tableData;
         }
 
-        private List<string[]> GetBottomTableData(CarrierDto carrier, CompanyDto company) 
+        private List<string[]> GetBottomTableData(CarrierDto carrier, CompanyBaseDto company) 
         {
             List<string[]> tableData = new List<string[]>()
             {

@@ -2,7 +2,7 @@
 
 namespace DTOs
 {
-    public class CompanyDto : IDto
+    public class CompanyBaseDto : IDto
     {
         public Guid Id { get; set; }
         public string Name { get; set; }
@@ -12,14 +12,15 @@ namespace DTOs
         public List<string> Emails { get; set; }
     }
 
-    public class CarrierDto : CompanyDto
+    public class CarrierDto : CompanyBaseDto
     {
         public VAT Vat { get; set; }
         public List<VehicleDto> Vehicles { get; set; }
     }
 
-    public class ClientDto : CompanyDto 
+    public class CompanyDto : CompanyBaseDto 
     {
-        public bool IsPriority { get; set; }
+        public CompanyType Type { get; set; }
     }
+
 }

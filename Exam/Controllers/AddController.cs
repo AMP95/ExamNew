@@ -86,7 +86,7 @@ namespace Exam.Controllers
             {
                 if (jobj != null)
                 {
-                    return Ok(await _addService.Add(new Add<ClientDto>(jobj.ToObject<ClientDto>())));
+                    return Ok(await _addService.Add(new Add<CompanyDto>(jobj.ToObject<CompanyDto>())));
                 }
                 _logger.LogWarning($"CLIENT: Recieved null object");
                 return BadRequest("Передан пустой параметр");

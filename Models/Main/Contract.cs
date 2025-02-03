@@ -28,7 +28,7 @@ namespace Models
 
         [ForeignKey(nameof(Client))]
         public Guid ClientId { get; set; }
-        public Client Client { get; set; }
+        public Company Client { get; set; }
 
 
         [ForeignKey(nameof(Driver))]

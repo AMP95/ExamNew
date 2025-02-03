@@ -32,7 +32,7 @@ namespace DTOs
         public float Volume { get; set; }
 
         public CarrierDto Carrier { get; set; }
-        public ClientDto Client { get; set; }
+        public CompanyDto Client { get; set; }
         public DriverDto Driver { get; set; }
         public VehicleDto Vehicle { get; set; }
         public LogistDto Logist { get; set; }

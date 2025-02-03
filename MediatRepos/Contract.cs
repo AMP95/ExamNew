@@ -62,7 +62,7 @@ namespace MediatorServices
                         Emails = constract.Carrier.Emails.Split(";").ToList(),
                         InnKpp = constract.Carrier.InnKpp
                     },
-                    Client = new ClientDto() 
+                    Client = new CompanyDto() 
                     { 
                         Id = constract.Client.Id,
                         Name = constract.Client.Name,
@@ -165,7 +165,7 @@ namespace MediatorServices
                         Name = contract.Carrier.Name,
                         Vat = (VAT)contract.Carrier.Vat,
                     },
-                    Client = new ClientDto()
+                    Client = new CompanyDto()
                     {
                         Id = contract.Carrier.Id,
                         Name = contract.Client.Name,
@@ -369,50 +369,50 @@ namespace MediatorServices
 
     public class AddContractService : AddModelService<ContractDto>
     {
-        IContractCreator<ContractDto> _contractCreator;
+        IContractCreator<ContractDto, CompanyBaseDto> _contractCreator;
 
         public AddContractService(IRepository repository, 
-                                  IContractCreator<ContractDto> contractCreator) : base(repository)
+                                  IContractCreator<ContractDto, CompanyBaseDto> contractCreator) : base(repository)
         {
             _contractCreator = contractCreator;
         }
 
-        protected override async Task<Guid> Add(ContractDto dto)
+        protected override async Task<Guid> Add(ContractDto contractDto)
         {
             Contract contract = new Contract()
             {
-                Number = dto.Number,
-                CreationDate = dto.CreationDate,
-                CarrierPayment = dto.Payment,
-                CarrierPrepayment = dto.Prepayment,
-                ClientPayment = dto.ClientPayment,
-                CarrierPaymentCondition = (short)dto.PaymentCondition,
-                CarrierPayPriority = (short)dto.PayPriority,
+                Number = contractDto.Number,
+                CreationDate = contractDto.CreationDate,
+                CarrierPayment = contractDto.Payment,
+                CarrierPrepayment = contractDto.Prepayment,
+                ClientPayment = contractDto.ClientPayment,
+                CarrierPaymentCondition = (short)contractDto.PaymentCondition,
+                CarrierPayPriority = (short)contractDto.PayPriority,
                 Status = (short)ContractStatus.Created,
-                Weight = dto.Weight,
-                Volume = dto.Volume,
+                Weight = contractDto.Weight,
+                Volume = contractDto.Volume,
                 LoadingPoint = new RoutePoint()
                 {
-                    Address = dto.LoadPoint.Address,
-                    Company = dto.LoadPoint.Company,
-                    DateAndTime = dto.LoadPoint.DateAndTime,
-                    Route = dto.LoadPoint.Route,
-                    Phones = string.Join(";", dto.LoadPoint.Phones),
+                    Address = contractDto.LoadPoint.Address,
+                    Company = contractDto.LoadPoint.Company,
+                    DateAndTime = contractDto.LoadPoint.DateAndTime,
+                    Route = contractDto.LoadPoint.Route,
+                    Phones = string.Join(";", contractDto.LoadPoint.Phones),
                     Type = (short)LoadPointType.Upload,
-                    Side = (short)dto.LoadPoint.Side
+                    Side = (short)contractDto.LoadPoint.Side
                 },
                 UnloadingPoints = new List<RoutePoint>(),
-                CarrierId = dto.Carrier.Id,
-                ClientId = dto.Client.Id,
-                DriverId = dto.Driver.Id,
-                VehicleId = dto.Vehicle.Id,
-                TemplateId = dto.Template.Id,
-                LogistId = dto.Logist.Id,
+                CarrierId = contractDto.Carrier.Id,
+                ClientId = contractDto.Client.Id,
+                DriverId = contractDto.Driver.Id,
+                VehicleId = contractDto.Vehicle.Id,
+                TemplateId = contractDto.Template.Id,
+                LogistId = contractDto.Logist.Id,
             };
 
          
 
-            foreach (RoutePointDto pointDto in dto.UnloadPoints) 
+            foreach (RoutePointDto pointDto in contractDto.UnloadPoints) 
             {
                 contract.UnloadingPoints.Add(new RoutePoint() 
                 { 
@@ -431,13 +431,23 @@ namespace MediatorServices
 
             if (id != Guid.Empty)
             {
-                dto.Id = id;
+                contractDto.Id = id;
+
+                IEnumerable<Company> currents = await _repository.Get<Company>(c => c.Type == (short)CompanyType.Current);
+                Company current = currents.FirstOrDefault();
+                CompanyDto companyDto = new CompanyDto()
+                {
+                    Id = current.Id,
+                    Name = current.Name,
+                    Address = current.Address,
+                    InnKpp = current.InnKpp,
+                    Phones = current.Phones.Split(';').ToList(),
+                    Emails = current.Emails.Split(";").ToList(),
+                };
 
                 var files = await _repository.Get<Models.Sub.File>(f => f.EntityId == contract.TemplateId);
 
-                string filePath = files.FirstOrDefault().FullFilePath;
-
-                string contractFilePath = _contractCreator.CreateContractDocument(dto);
+                string contractFilePath = _contractCreator.CreateContractDocument(contractDto, companyDto);
 
                 string ext = Path.GetExtension(contractFilePath);
 
@@ -459,8 +469,8 @@ namespace MediatorServices
     public class UpdateContractService : UpdateModelService<ContractDto>
     {
         private IFileManager _fileManager;
-        private IContractCreator<ContractDto> _contractCreator;
-        public UpdateContractService(IRepository repository, IFileManager fileManager, IContractCreator<ContractDto> contractCreator) : base(repository)
+        private IContractCreator<ContractDto, CompanyBaseDto> _contractCreator;
+        public UpdateContractService(IRepository repository, IFileManager fileManager, IContractCreator<ContractDto, CompanyBaseDto> contractCreator) : base(repository)
         {
             _fileManager = fileManager;
             _contractCreator = contractCreator;
@@ -538,27 +548,31 @@ namespace MediatorServices
                         }
                     }
 
-                    files = await _repository.Get<Models.Sub.File>(f => f.EntityId == contract.TemplateId);
-
-                    if (files.Any())
+                    IEnumerable<Company> currents = await _repository.Get<Company>(c => c.Type == (short)CompanyType.Current);
+                    Company current = currents.FirstOrDefault();
+                    CompanyDto companyDto = new CompanyDto()
                     {
+                        Id = current.Id,
+                        Name = current.Name,
+                        Address = current.Address,
+                        InnKpp = current.InnKpp,
+                        Phones = current.Phones.Split(';').ToList(),
+                        Emails = current.Emails.Split(";").ToList(),
+                    };
 
-                        string filePath = files.FirstOrDefault().FullFilePath;
+                    string contractFilePath = _contractCreator.CreateContractDocument(dto, companyDto);
 
-                        string contractFilePath = _contractCreator.CreateContractDocument(dto);
+                    string ext = Path.GetExtension(contractFilePath);
 
-                        string ext = Path.GetExtension(contractFilePath);
+                    Models.Sub.File contractFile = new Models.Sub.File()
+                    {
+                        ViewNameWithExtencion = $"{contract.Number}{ext}",
+                        EntityType = nameof(Contract),
+                        EntityId = contract.Id,
+                        FullFilePath = contractFilePath,
+                    };
 
-                        Models.Sub.File contractFile = new Models.Sub.File()
-                        {
-                            ViewNameWithExtencion = $"{contract.Number}{ext}",
-                            EntityType = nameof(Contract),
-                            EntityId = contract.Id,
-                            FullFilePath = contractFilePath,
-                        };
-
-                        await _repository.Add(contractFile);
-                    }
+                    await _repository.Add(contractFile);
                 }
 
                 return result;

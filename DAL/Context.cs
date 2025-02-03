@@ -7,7 +7,7 @@ namespace DAL
 {
     public class Context : DbContext
     {
-        public DbSet<Client> Clients { get; set; }
+        public DbSet<Company> Clients { get; set; }
         public DbSet<Carrier> Carriers { get; set; }
         public DbSet<Driver> Drivers { get; set; }
         public DbSet<Vehicle> Vehicles { get; set; }

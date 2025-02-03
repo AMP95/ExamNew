@@ -9,9 +9,9 @@ namespace MediatorServices
 {
     public static class ClientConverter
     {
-        public static ClientDto Convert(Client client) 
+        public static CompanyDto Convert(Company client) 
         {
-            return new ClientDto()
+            return new CompanyDto()
             {
                 Id = client.Id,
                 Name = client.Name,
@@ -19,34 +19,34 @@ namespace MediatorServices
                 Emails = client.Emails.Split(';').ToList(),
                 Phones = client.Phones.Split(';').ToList(),
                 InnKpp = client.InnKpp,
-                IsPriority = client.IsPriority,
+                Type = (CompanyType)client.Type,
             };
         }
 
-        public static Client Convert(ClientDto dto)
+        public static Company Convert(CompanyDto dto)
         {
-            return new Client()
+            return new Company()
             {
                 Name = dto.Name,
                 Address = dto.Address,
                 InnKpp = dto.InnKpp,
                 Phones = string.Join(";", dto.Phones),
                 Emails = string.Join(";", dto.Emails),
-                IsPriority = dto.IsPriority,
+                Type = (short)dto.Type,
             };
         }
     }
 
-    public class GetIdClientService : GetIdModelService<ClientDto>
+    public class GetIdClientService : GetIdModelService<CompanyDto>
     {
-        public GetIdClientService(IRepository repository, ILogger<GetIdModelService<ClientDto>> logger) : base(repository, logger)
+        public GetIdClientService(IRepository repository, ILogger<GetIdModelService<CompanyDto>> logger) : base(repository, logger)
         {
         }
 
         protected override async Task<object> Get(Guid id)
         {
-            Client company = await _repository.GetById<Client>(id);
-            ClientDto dto = null;
+            Company company = await _repository.GetById<Company>(id);
+            CompanyDto dto = null;
 
             if (company != null)
             {
@@ -56,27 +56,30 @@ namespace MediatorServices
         }
     }
 
-    public class GetRangeClientService : GetRangeModelService<ClientDto>
+    public class GetRangeClientService : GetRangeModelService<CompanyDto>
     {
-        public GetRangeClientService(IRepository repository, ILogger<GetRangeModelService<ClientDto>> logger) : base(repository, logger)
+        public GetRangeClientService(IRepository repository, ILogger<GetRangeModelService<CompanyDto>> logger) : base(repository, logger)
         {
         }
 
         protected override async Task<object> Get(int start, int end)
         {
-            IEnumerable<Client> clients = await _repository.GetRange<Client>(start, end, q => q.OrderBy(c => c.Name));
-            List<ClientDto> dtos = new List<ClientDto>();
+            IEnumerable<Company> clients = await _repository.GetRange<Company>(start, end, q => q.OrderBy(c => c.Name));
+            List<CompanyDto> dtos = new List<CompanyDto>();
 
             foreach (var client in clients)
             {
-                dtos.Add(ClientConverter.Convert(client));
+                if (client.Type == (short)CompanyType.Client)
+                {
+                    dtos.Add(ClientConverter.Convert(client));
+                }
             }
 
             return dtos;
         }
     }
 
-    public class GetFilterClientService : IRequestHandler<GetFilter<ClientDto>, object>
+    public class GetFilterClientService : IRequestHandler<GetFilter<CompanyDto>, object>
     {
         protected IRepository _repository;
         protected ILogger<GetFilterClientService> _logger;
@@ -87,16 +90,16 @@ namespace MediatorServices
             _logger = logger;
         }
 
-        public async Task<object> Handle(GetFilter<ClientDto> request, CancellationToken cancellationToken)
+        public async Task<object> Handle(GetFilter<CompanyDto> request, CancellationToken cancellationToken)
         {
-            Expression<Func<Client, bool>> filter = GetFilter(request.PropertyName, request.Params);
+            Expression<Func<Company, bool>> filter = GetFilter(request.PropertyName, request.Params);
             return await Get(filter);
         }
 
-        protected async Task<object> Get(Expression<Func<Client, bool>> filter)
+        protected async Task<object> Get(Expression<Func<Company, bool>> filter)
         {
-            IEnumerable<Client> carriers = await _repository.Get<Client>(filter);
-            List<ClientDto> dtos = new List<ClientDto>();
+            IEnumerable<Company> carriers = await _repository.Get<Company>(filter);
+            List<CompanyDto> dtos = new List<CompanyDto>();
 
             foreach (var carrier in carriers)
             {
@@ -106,25 +109,27 @@ namespace MediatorServices
             return dtos;
         }
 
-        protected Expression<Func<Client, bool>> GetFilter(string property, params object[] parameters)
+        protected Expression<Func<Company, bool>> GetFilter(string property, params object[] parameters)
         {
-            Expression<Func<Client, bool>> filter = null;
+            Expression<Func<Company, bool>> filter = null;
 
             try
             {
                 switch (property)
                 {
-                    case nameof(ClientDto.Name):
+                    case nameof(CompanyDto.Name):
                         string name = (string)parameters[0];
                         filter = c => c.Name.ToLower().Contains(name.ToLower());
                         break;
-                    case nameof(ClientDto.InnKpp):
+                    case nameof(CompanyDto.InnKpp):
                         string innKpp = (string)parameters[0];
                         filter = c => c.InnKpp.ToLower().Contains(innKpp.ToLower());
                         break;
-                    case nameof(ClientDto.IsPriority):
-                        bool isPriority = (bool)parameters[0];
-                        filter = c => c.IsPriority == isPriority;
+                    case nameof(CompanyDto.Type):
+                        if (Enum.TryParse<CompanyType>((string)parameters[0], out CompanyType type)) 
+                        {
+                            filter = c => c.Type == (short)type;
+                        }
                         break;
                 }
             }
@@ -140,7 +145,7 @@ namespace MediatorServices
     }
 
 
-    public class DeleteClientService : IRequestHandler<Delete<ClientDto>, bool>
+    public class DeleteClientService : IRequestHandler<Delete<CompanyDto>, bool>
     {
         private IRepository _repository;
 
@@ -149,40 +154,40 @@ namespace MediatorServices
             _repository = repository;
         }
 
-        public async Task<bool> Handle(Delete<ClientDto> request, CancellationToken cancellationToken)
+        public async Task<bool> Handle(Delete<CompanyDto> request, CancellationToken cancellationToken)
         {
-            return await _repository.Remove<Client>(request.Id);
+            return await _repository.Remove<Company>(request.Id);
         }
     }
 
-    public class AddClientService : AddModelService<ClientDto>
+    public class AddClientService : AddModelService<CompanyDto>
     {
         public AddClientService(IRepository repository) : base(repository)
         {
         }
 
-        protected override async Task<Guid> Add(ClientDto dto)
+        protected override async Task<Guid> Add(CompanyDto dto)
         {
             return await _repository.Add(ClientConverter.Convert(dto));
         }
     }
 
-    public class UpdateClientService : UpdateModelService<ClientDto>
+    public class UpdateClientService : UpdateModelService<CompanyDto>
     {
         public UpdateClientService(IRepository repository) : base(repository)
         {
         }
 
-        protected override async Task<bool> Update(ClientDto dto)
+        protected override async Task<bool> Update(CompanyDto dto)
         {
-            Client company = await _repository.GetById<Client>(dto.Id);
+            Company company = await _repository.GetById<Company>(dto.Id);
 
             company.Name = dto.Name;
             company.Address = dto.Address;
             company.InnKpp = dto.InnKpp;
             company.Phones = string.Join(";", dto.Phones);
             company.Emails = string.Join(";", dto.Emails);
-            company.IsPriority = dto.IsPriority;
+            company.Type = (short)dto.Type;
 
             return await _repository.Update(company);
         }

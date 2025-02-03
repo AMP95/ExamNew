@@ -49,7 +49,7 @@ namespace Exam.Controllers
         [HttpDelete("client/{id}")]
         public virtual async Task<ActionResult> DeleteClient(Guid id)
         {
-            return Ok(await _updateService.Add(new Delete<ClientDto>(id)));
+            return Ok(await _updateService.Add(new Delete<CompanyDto>(id)));
         }
 
         [HttpDelete("file/{id}")]

@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Models
 {
-    public class Company : BaseEntity
+    public class CompanyBase : BaseEntity
     {
         [MaxLength(100)]
         public string Name { get; set; }
@@ -18,7 +18,7 @@ namespace Models
     }
 
     [Table(nameof(Carrier))]
-    public class Carrier : Company
+    public class Carrier : CompanyBase
     {
         public short Vat { get; set; }
 
@@ -27,9 +27,10 @@ namespace Models
         public virtual ICollection<Contract> Contracts { get; set; }
     }
 
-    [Table(nameof(Client))]
-    public class Client : Company
+    [Table(nameof(Company))]
+    public class Company : CompanyBase
     {
-        public bool IsPriority { get; set; }
+        public short Type { get; set; }
     }
+
 }

@@ -41,7 +41,7 @@ namespace Exam.Controllers
         [HttpGet("client/id/{id}")]
         public virtual async Task<ActionResult> GetClient(Guid id)
         {
-            return Ok(await _getService.Add(new GetId<ClientDto>(id)));
+            return Ok(await _getService.Add(new GetId<CompanyDto>(id)));
         }
 
         [HttpGet("document/id/{id}")]
@@ -137,7 +137,7 @@ namespace Exam.Controllers
         [HttpGet("client/filter/{property}")]
         public virtual async Task<ActionResult> GetClientFilter(string property, [FromQuery] string[] param)
         {
-            return Ok(await _getService.Add(new GetFilter<ClientDto>(property, param)));
+            return Ok(await _getService.Add(new GetFilter<CompanyDto>(property, param)));
         }
 
         [HttpGet("file/filter/{property}")]
@@ -210,7 +210,7 @@ namespace Exam.Controllers
         [HttpGet("client/range/{start}/{end}")]
         public virtual async Task<ActionResult> GetClientRange(int start, int end)
         {
-            return Ok(await _getService.Add(new GetRange<ClientDto>(start, end)));
+            return Ok(await _getService.Add(new GetRange<CompanyDto>(start, end)));
         }
 
         [HttpGet("template/range/{start}/{end}")]

@@ -2,6 +2,11 @@
 
 namespace DTOs
 {
+    public enum CompanyType 
+    {
+        Client,
+        Current
+    }
     public enum DocumentType
     {
         [Description("Счет")]
