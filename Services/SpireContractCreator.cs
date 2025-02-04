@@ -20,6 +20,7 @@ namespace Exam.FileManager
         public string CreateContractDocument(ContractDto contract, CompanyBaseDto company)
         {
             Document doc = new Document();
+
             Section s = doc.AddSection();
 
             Paragraph headerP = s.AddParagraph();
@@ -27,9 +28,11 @@ namespace Exam.FileManager
             headerP.Format.TextAlignment = TextAlignment.Center;
 
             TextRange headerText = headerP.AppendText($"ДОГОВОР-ЗАЯВКА №{contract.Number} от {contract.CreationDate.ToString("dd.MM.yyyy")}");
+            headerText.CharacterFormat.FontSize = 14f;
             headerText.CharacterFormat.Bold = true;
-            headerText.CharacterFormat.FontSize = 14;
             headerText.CharacterFormat.FontName = "TimesNewRoman";
+
+            Paragraph spase1 = s.AddParagraph();
 
             Table table = s.AddTable(true);
 
@@ -43,11 +46,12 @@ namespace Exam.FileManager
             {
                 TableRow row = table.Rows[i];
 
+                row.Cells[0].SetCellWidth(25, CellWidthType.Percentage);
                 Paragraph rowHeader = row.Cells[0].AddParagraph();
+                rowHeader.Format.LineSpacing = 13.5f;
                 TextRange rowHaderText = rowHeader.AppendText(tableData[i][0]);
-                headerText.CharacterFormat.FontName = "TimesNewRoman";
-                headerText.CharacterFormat.FontSize = 11;
-                headerText.CharacterFormat.Bold = true;
+                rowHaderText.CharacterFormat.Bold = true;
+                rowHaderText.CharacterFormat.FontSize = 12f;
 
                 if (tableData[i][1] == string.Empty)
                 {
@@ -56,12 +60,12 @@ namespace Exam.FileManager
                 else 
                 {
                     Paragraph cellParagraph = row.Cells[1].AddParagraph();
-                    headerP.Format.HorizontalAlignment = HorizontalAlignment.Center;
-                    headerP.Format.TextAlignment = TextAlignment.Center;
-
+                    cellParagraph.Format.HorizontalAlignment = HorizontalAlignment.Justify;
+                    cellParagraph.Format.LineSpacing = 11.15f;
+                    cellParagraph.Format.BeforeSpacingLines = 0.1f;
+                    cellParagraph.Format.AfterSpacingLines = 0.1f;
                     TextRange cellText = cellParagraph.AppendText(tableData[i][1]);
-                    headerText.CharacterFormat.FontName = "TimesNewRoman";
-                    headerText.CharacterFormat.FontSize = 11;
+                    cellText.CharacterFormat.FontSize = 11f;
                 }
             }
 
@@ -69,24 +73,20 @@ namespace Exam.FileManager
 
             Table bottomTable = s.AddTable(true);
 
-            table.ResetCells(6, 4);
-            table.ApplyHorizontalMerge(0, 0, 1);
-            table.ApplyHorizontalMerge(0, 2, 3);
+            bottomTable.ResetCells(7, 4);
+            bottomTable.ApplyHorizontalMerge(0, 0, 1);
+            bottomTable.ApplyHorizontalMerge(0, 2, 3);
 
             TableRow bottomHeader = bottomTable.Rows[0];
             bottomHeader.IsHeader = true;
 
             Paragraph first = bottomHeader.Cells[0].AddParagraph();
             TextRange firstText = first.AppendText("Исполнитель");
-            headerText.CharacterFormat.FontName = "TimesNewRoman";
-            headerText.CharacterFormat.FontSize = 11;
-            headerText.CharacterFormat.Bold = true;
+            firstText.CharacterFormat.Bold = true;
 
-            Paragraph second = bottomHeader.Cells[1].AddParagraph();
+            Paragraph second = bottomHeader.Cells[2].AddParagraph();
             TextRange secondText = second.AppendText("Заказчик");
-            headerText.CharacterFormat.FontName = "TimesNewRoman";
-            headerText.CharacterFormat.FontSize = 11;
-            headerText.CharacterFormat.Bold = true;
+            secondText.CharacterFormat.Bold = true;
 
             List<string[]> bottomData = GetBottomTableData(contract.Carrier, company);
 
@@ -94,20 +94,23 @@ namespace Exam.FileManager
             {
                 TableRow row = bottomTable.Rows[i + 1];
 
-                for (int j = 0; j < bottomData[i].Count(); j++) 
+                for (int j = 0; j < bottomData[i].Length; j++) 
                 {
                     Paragraph par = row.Cells[j].AddParagraph();
-                    TextRange txt = first.AppendText(bottomData[i][j]);
-                    headerText.CharacterFormat.FontName = "TimesNewRoman";
-                    headerText.CharacterFormat.FontSize = 11;
+                    par.Format.LineSpacing = 9.15f;
+                    par.Format.BeforeSpacingLines = 0.1f;
+                    par.Format.AfterSpacingLines = 0.1f;
+                    TextRange txt = par.AppendText(bottomData[i][j]);
+                    txt.CharacterFormat.FontSize = 9f;
                 }
             }
 
-            string fullPath = _fileManager.GetFullPath($"Contracts/{contract.CreationDate.Year}/{contract.Number}.docx");
+            string filePathWithoutRoot = Path.Combine("Contracts", contract.CreationDate.Year.ToString(), $"{contract.Number}.docx");
+            string fullPath = _fileManager.GetFullPath(filePathWithoutRoot);
 
             doc.SaveToFile( fullPath, FileFormat.Docx2010);
 
-            return string.Empty;
+            return filePathWithoutRoot;
         }
 
         private List<string[]> GetTableData(ContractDto contract, CompanyBaseDto company) 

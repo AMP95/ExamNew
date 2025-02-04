@@ -23,7 +23,6 @@ namespace MediatorServices
             if (templates.Any())
             {
                 Template template = templates.First();
-                IEnumerable<Models.Sub.File> files = await _repository.Get<Models.Sub.File>(f => f.EntityType == nameof(Template) && f.EntityId == template.Id);
 
                 dto = new TemplateDto()
                 {
@@ -44,7 +43,7 @@ namespace MediatorServices
 
         protected override async Task<object> Get(int start, int end)
         {
-            IEnumerable<Template> templates = await _repository.Get<Template>();
+            IEnumerable<Template> templates = await _repository.Get<Template>(null, null, "Additionals");
             List<TemplateDto> dtos = new List<TemplateDto>();
 
             foreach (var template in templates)

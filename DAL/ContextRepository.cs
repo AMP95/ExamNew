@@ -148,7 +148,7 @@ namespace DAL
                 {
                     try
                     {
-                        _context.Set<T>().Update(entity);
+                        _context.Set<T>().Add(entity);
                         await _context.SaveChangesAsync();
                         await transaction.CommitAsync();
                         return entity.Id;

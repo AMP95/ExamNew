@@ -4,6 +4,7 @@ using MediatR;
 using MediatRepos;
 using Microsoft.Extensions.Logging;
 using Models;
+using Models.Main;
 using Models.Sub;
 using System.Linq.Expressions;
 using Utilities.Interfaces;
@@ -237,6 +238,10 @@ namespace MediatorServices
                         short number = (short)parameters[0];
                         filter = c => c.Number == number;
                         break;
+                    case nameof(ContractDto.Logist):
+                        string logist = parameters[0].ToString().ToLower();
+                        filter = c => c.Logist.Login.Contains(logist);
+                        break;
                 }
             }
             catch (Exception ex)
@@ -263,9 +268,8 @@ namespace MediatorServices
 
             List<RequiredToPayContractDto> required = new List<RequiredToPayContractDto>();
 
-            List<Contract> contracts = (await _repository.Get<Contract>(c => c.CreationDate >= start &&
-                                                                             c.CreationDate <= DateTime.Now &&
-                                                                             c.Status == (short)ContractStatus.Closed, null, "Carrier,Driver,Vehicle,LoadingPoint,Documents,Payments")).ToList();
+            List<Contract> contracts = (await _repository.Get<Contract>(c => c.CreationDate.Date >= start.Date &&
+                                                                             c.Status != (short)ContractStatus.Closed, null, "Carrier,Driver,Vehicle,LoadingPoint,Documents,Payments")).ToList();
 
             foreach (Contract contract in contracts) 
             {
@@ -532,6 +536,8 @@ namespace MediatorServices
                     });
                 }
 
+                
+
                 bool result = await _repository.Update(contract);
 
                 if (result) 
@@ -546,6 +552,15 @@ namespace MediatorServices
                         {
                             _fileManager.RemoveFile(file.FullFilePath);
                         }
+                    }
+
+
+                    IEnumerable<Template> templates = await _repository.Get<Template>(t => t.Id == dto.Template.Id, null, "Additionals");
+
+                    if (templates.Any()) 
+                    {
+                        Template template = templates.FirstOrDefault();
+                        dto.Template.Additionals = new List<AdditionalDto>(template.Additionals.Select(a => new AdditionalDto() { Id = a.Id, Name = a.Name, Description = a.Description }));
                     }
 
                     IEnumerable<Company> currents = await _repository.Get<Company>(c => c.Type == (short)CompanyType.Current);
