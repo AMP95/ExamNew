@@ -38,7 +38,7 @@ namespace Exam.Controllers
             return Ok(await _getService.Add(new GetId<CarrierDto>(id)));
         }
 
-        [HttpGet("client/id/{id}")]
+        [HttpGet("company/id/{id}")]
         public virtual async Task<ActionResult> GetClient(Guid id)
         {
             return Ok(await _getService.Add(new GetId<CompanyDto>(id)));
@@ -134,7 +134,7 @@ namespace Exam.Controllers
             return Ok(await _getService.Add(new GetFilter<CarrierDto>(property, param)));
         }
 
-        [HttpGet("client/filter/{property}")]
+        [HttpGet("company/filter/{property}")]
         public virtual async Task<ActionResult> GetClientFilter(string property, [FromQuery] string[] param)
         {
             return Ok(await _getService.Add(new GetFilter<CompanyDto>(property, param)));
@@ -201,7 +201,7 @@ namespace Exam.Controllers
         }
         
 
-        [HttpGet("client/range/{start}/{end}")]
+        [HttpGet("company/range/{start}/{end}")]
         public virtual async Task<ActionResult> GetClientRange(int start, int end)
         {
             return Ok(await _getService.Add(new GetRange<CompanyDto>(start, end)));

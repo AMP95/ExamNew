@@ -78,7 +78,7 @@ namespace Exam.Controllers
             
         }
 
-        [HttpPut("client")]
+        [HttpPut("company")]
         public virtual async Task<ActionResult> PutClient([FromBody] JObject jobj)
         {
             try

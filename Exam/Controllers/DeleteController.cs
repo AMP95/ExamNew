@@ -46,7 +46,7 @@ namespace Exam.Controllers
             return Ok(await _updateService.Add(new Delete<CarrierDto>(id)));
         }
 
-        [HttpDelete("client/{id}")]
+        [HttpDelete("company/{id}")]
         public virtual async Task<ActionResult> DeleteClient(Guid id)
         {
             return Ok(await _updateService.Add(new Delete<CompanyDto>(id)));

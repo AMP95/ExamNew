@@ -79,7 +79,7 @@ namespace Exam.Controllers
             }
         }
 
-        [HttpPost("client")]
+        [HttpPost("company")]
         public virtual async Task<ActionResult> PostClient([FromBody] JObject jobj)
         {
             try
