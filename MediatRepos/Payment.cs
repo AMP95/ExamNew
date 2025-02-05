@@ -81,8 +81,10 @@ namespace MediatorServices
                 switch (property)
                 {
                     case nameof(PaymentDto.ContractId):
-                        Guid guid = (Guid)parameters[0];
-                        filter = d => d.ContractId == guid;
+                        if (Guid.TryParse(parameters[0].ToString(), out Guid id))
+                        {
+                            filter = d => d.ContractId == id;
+                        }
                         break;
                     case nameof(PaymentDto.Direction):
                         DocumentDirection direction = (DocumentDirection)parameters[0];

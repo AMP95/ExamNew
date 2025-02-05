@@ -58,17 +58,17 @@ namespace MediatorServices
             contract.Status = (short)ContractStatus.Created;
 
 
-            IEnumerable<Document> incomeDoc = contract.Documents.Where(d => d.DocumentDirection == (short)DocumentDirection.Income);
-            IEnumerable<Document> outcomeDoc = contract.Documents.Where(d => d.DocumentDirection == (short)DocumentDirection.Outcome);
+            IEnumerable<Document> incomeDoc = contract.Documents.Where(d => d.DocumentDirection == (short)DocumentDirection.Income).ToList();
+            IEnumerable<Document> outcomeDoc = contract.Documents.Where(d => d.DocumentDirection == (short)DocumentDirection.Outcome).ToList();
 
             IEnumerable<Payment> incomePay = contract.Payments.Where(d => d.DocumentDirection == (short)DocumentDirection.Outcome);
 
-            if (incomeDoc.All(d => d.DocumentType == (short)DocumentType.Bill ||
+            if (incomeDoc.Any() && (incomeDoc.All(d => d.DocumentType == (short)DocumentType.Bill ||
                                    d.DocumentType == (short)DocumentType.UDT ||
                                    d.DocumentType == (short)DocumentType.TTN) || incomeDoc.All(d => d.DocumentType == (short)DocumentType.Bill ||
                                                                                                     d.DocumentType == (short)DocumentType.Act ||
                                                                                                     d.DocumentType == (short)DocumentType.Invoice ||
-                                                                                                    d.DocumentType == (short)DocumentType.TTN))
+                                                                                                    d.DocumentType == (short)DocumentType.TTN)))
             {
                 var bills = incomeDoc.Where(d => d.DocumentType == (short)DocumentType.Bill);
 
@@ -80,12 +80,12 @@ namespace MediatorServices
                 }
             }
 
-            if (outcomeDoc.All(d => d.DocumentType == (short)DocumentType.Bill ||
-                                    d.DocumentType == (short)DocumentType.UDT ||
-                                    d.DocumentType == (short)DocumentType.TTN) || outcomeDoc.All(d => d.DocumentType == (short)DocumentType.Bill ||
-                                                                                                      d.DocumentType == (short)DocumentType.Act ||
-                                                                                                      d.DocumentType == (short)DocumentType.Invoice ||
-                                                                                                      d.DocumentType == (short)DocumentType.TTN))
+            if (outcomeDoc.Any() && (outcomeDoc.All(d => d.DocumentType == (short)DocumentType.Bill ||
+                                                        d.DocumentType == (short)DocumentType.UDT ||
+                                                        d.DocumentType == (short)DocumentType.TTN) || outcomeDoc.All(d => d.DocumentType == (short)DocumentType.Bill ||
+                                                                                                                          d.DocumentType == (short)DocumentType.Act ||
+                                                                                                                          d.DocumentType == (short)DocumentType.Invoice ||
+                                                                                                                          d.DocumentType == (short)DocumentType.TTN)))
             {
                 contract.Status = (short)ContractStatus.DocumentSended;
             }
@@ -158,8 +158,10 @@ namespace MediatorServices
                 switch (property)
                 {
                     case nameof(DocumentDto.ContractId):
-                        Guid guid = (Guid)parameters[0];
-                        filter = d => d.ContractId == guid;
+                        if (Guid.TryParse(parameters[0].ToString(), out Guid id)) 
+                        {
+                            filter = d => d.ContractId == id;
+                        }
                         break;
                     case nameof(DocumentDto.Type):
                         DocumentType documentType = (DocumentType)parameters[0];
