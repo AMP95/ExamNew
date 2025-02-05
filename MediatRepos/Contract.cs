@@ -335,6 +335,8 @@ namespace MediatorServices
                             Balance = contract.CarrierPayment - paymentSumm,
                             DaysToExpiration = (int)(income.OrderBy(d => d.RecievingDate).Last().RecievingDate - DateTime.Now).TotalDays
                         };
+
+                        required.Add(dto);
                     }
                 }
             }
