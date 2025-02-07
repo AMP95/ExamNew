@@ -1,6 +1,6 @@
-﻿using Exam.Interfaces;
-using MediatorServices;
+﻿using MediatorServices;
 using Microsoft.AspNetCore.Mvc;
+using Utilities.Interfaces;
 
 namespace Exam.Controllers
 {
@@ -8,10 +8,10 @@ namespace Exam.Controllers
     [ApiController]
     public class ResultController : ControllerBase
     {
-        private IRequestStatusService _statusService;
+        private IStatusService _statusService;
         private IResultService _resultService;
 
-        public ResultController(IRequestStatusService statusService, IResultService resultService)
+        public ResultController(IStatusService statusService, IResultService resultService)
         {
             _statusService = statusService;
             _resultService = resultService;
@@ -26,17 +26,10 @@ namespace Exam.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult> GetResult(Guid id)
         {
-            ServiceResult result = await _resultService.GetResult(id);
+            IServiceResult<object> result = await _resultService.GetResult(id);
             if (result != null)
             {
-                if (result.Result == null)
-                {
-                    return StatusCode(result.ResultStatusCode, result.ResultErrorMessage);
-                }
-                else 
-                {
-                    return StatusCode(result.ResultStatusCode, result.Result);
-                }
+                return Ok(result);
             }
             return NotFound("Результат не найден");
         }
@@ -44,18 +37,19 @@ namespace Exam.Controllers
         [HttpGet("file/{id}")]
         public async Task<ActionResult> GetFileResult(Guid id)
         {
-            ServiceResult result = await _resultService.GetResult(id);
+            IServiceResult<object> result = await _resultService.GetResult(id);
+
             if (result != null)
             {
-                if (result.Result == null)
-                {
-                    return StatusCode(result.ResultStatusCode, result.ResultErrorMessage);
-                }
-                else
+                if (result.IsSuccess)
                 {
                     var fileRusult = result.Result as FileSendResult;
 
                     return File(fileRusult.Data, fileRusult.ContentType, fileRusult.FileName);
+                }
+                else 
+                { 
+                    Ok(result);
                 }
             }
             return NotFound("Результат не найден");

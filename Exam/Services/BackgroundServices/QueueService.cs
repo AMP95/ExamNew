@@ -30,7 +30,7 @@ namespace Exam.Services.BackgroundServices
         }
 
 
-        public Guid Enqueue(IRequest<IServiceResult<object>> request)
+        public async Task<Guid> Enqueue(IRequest<IServiceResult<object>> request)
         {
             Guid id = Guid.NewGuid();
 

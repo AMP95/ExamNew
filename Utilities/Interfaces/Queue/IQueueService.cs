@@ -2,6 +2,6 @@
 {
     public interface IQueueService<T>
     {
-        Guid Enqueue(T request);
+        Task<Guid> Enqueue(T request);
     }
 }

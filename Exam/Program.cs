@@ -2,11 +2,11 @@ using DAL;
 using DTOs;
 using DTOs.Dtos;
 using Exam.Authentication;
-using Exam.BackgroundServices;
 using Exam.FileManager;
-using Exam.Interfaces;
 using Exam.ResultServices;
 using Exam.Services;
+using Exam.Services.BackgroundServices;
+using MediatR;
 using MediatRepos;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -52,11 +52,9 @@ namespace Exam
             builder.Services.AddTransient<IHashService, HashService>();
             builder.Services.AddTransient<IAppRootResolver, RootResolver>();
 
+            builder.Services.AddSingleton<IQueueService<IRequest<IServiceResult<object>>>, QueueService>();
             builder.Services.AddSingleton<IResultService, ResultService>();
             builder.Services.AddSingleton<IStatusService, StatusService>();
-            builder.Services.AddSingleton<IGetService, GetService>();
-            builder.Services.AddSingleton<IAddService, AddService>();
-            builder.Services.AddSingleton<IUpdateService, UpdateService>();
             
 
             builder.Services.AddCors(options =>
@@ -88,9 +86,7 @@ namespace Exam
 
             builder.Services.AddSwaggerGen();
 
-            builder.Services.AddHostedService(sp => sp.GetService<IGetService>() as GetService);
-            builder.Services.AddHostedService(sp => sp.GetService<IAddService>() as AddService);
-            builder.Services.AddHostedService(sp => sp.GetService<IUpdateService>() as UpdateService);
+            builder.Services.AddHostedService(sp => sp.GetService<IQueueService<IRequest<IServiceResult<object>>>>() as QueueService);
 
             builder.Services.AddMediatR(cfg =>
             {
