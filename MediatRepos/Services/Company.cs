@@ -4,6 +4,7 @@ using MediatRepos;
 using Microsoft.Extensions.Logging;
 using Models;
 using System.Linq.Expressions;
+using Utilities.Interfaces;
 
 namespace MediatorServices
 {
@@ -37,34 +38,51 @@ namespace MediatorServices
         }
     }
 
-    public class GetIdClientService : GetIdModelService<CompanyDto>
+    public class GetIdClientService : IRequestHandler<GetId<CompanyDto>, IServiceResult<object>>
     {
-        public GetIdClientService(IRepository repository, ILogger<GetIdModelService<CompanyDto>> logger) : base(repository, logger)
+        private IRepository _repository;
+
+        public GetIdClientService(IRepository repository)
         {
+            _repository = repository;
         }
 
-        protected override async Task<object> Get(Guid id)
+        public async Task<IServiceResult<object>> Handle(GetId<CompanyDto> request, CancellationToken cancellationToken)
         {
-            Company company = await _repository.GetById<Company>(id);
-            CompanyDto dto = null;
+            Company company = await _repository.GetById<Company>(request.Id);
 
-            if (company != null)
+            if (company == null)
             {
-                dto = ClientConverter.Convert(company);
+                return new MediatorServiceResult()
+                {
+                    IsSuccess = false,
+                    ErrorMessage = "Организация не найдена"
+                };
             }
-            return dto;
+            else 
+            {
+                return new MediatorServiceResult()
+                {
+                    IsSuccess = true,
+                    Result = ClientConverter.Convert(company)
+                };
+            }
         }
     }
 
-    public class GetRangeClientService : GetRangeModelService<CompanyDto>
+    public class GetRangeClientService : IRequestHandler<GetRange<CompanyDto>, IServiceResult<object>>
     {
-        public GetRangeClientService(IRepository repository, ILogger<GetRangeModelService<CompanyDto>> logger) : base(repository, logger)
+        private IRepository _repository;
+
+        public GetRangeClientService(IRepository repository)
         {
+            _repository = repository;
         }
 
-        protected override async Task<object> Get(int start, int end)
+        public async Task<IServiceResult<object>> Handle(GetRange<CompanyDto> request, CancellationToken cancellationToken)
         {
-            IEnumerable<Company> clients = await _repository.GetRange<Company>(start, end, q => q.OrderBy(c => c.Name));
+            IEnumerable<Company> clients = await _repository.GetRange<Company>(request.Start, request.End, q => q.OrderBy(c => c.Name));
+
             List<CompanyDto> dtos = new List<CompanyDto>();
 
             foreach (var client in clients)
@@ -75,11 +93,15 @@ namespace MediatorServices
                 }
             }
 
-            return dtos;
+            return new MediatorServiceResult()
+            {
+                IsSuccess = true,
+                Result = dtos
+            };
         }
     }
 
-    public class GetFilterClientService : IRequestHandler<GetFilter<CompanyDto>, object>
+    public class GetFilterClientService : IRequestHandler<GetFilter<CompanyDto>, IServiceResult<object>>
     {
         protected IRepository _repository;
         protected ILogger<GetFilterClientService> _logger;
@@ -90,14 +112,10 @@ namespace MediatorServices
             _logger = logger;
         }
 
-        public async Task<object> Handle(GetFilter<CompanyDto> request, CancellationToken cancellationToken)
+        public async Task<IServiceResult<object>> Handle(GetFilter<CompanyDto> request, CancellationToken cancellationToken)
         {
             Expression<Func<Company, bool>> filter = GetFilter(request.PropertyName, request.Params);
-            return await Get(filter);
-        }
 
-        protected async Task<object> Get(Expression<Func<Company, bool>> filter)
-        {
             IEnumerable<Company> carriers = await _repository.Get<Company>(filter);
             List<CompanyDto> dtos = new List<CompanyDto>();
 
@@ -106,7 +124,11 @@ namespace MediatorServices
                 dtos.Add(ClientConverter.Convert(carrier));
             }
 
-            return dtos;
+            return new MediatorServiceResult()
+            {
+                IsSuccess = true,
+                Result = dtos
+            };
         }
 
         protected Expression<Func<Company, bool>> GetFilter(string property, params object[] parameters)
@@ -145,7 +167,7 @@ namespace MediatorServices
     }
 
 
-    public class DeleteClientService : IRequestHandler<Delete<CompanyDto>, bool>
+    public class DeleteClientService : IRequestHandler<Delete<CompanyDto>, IServiceResult<object>>
     {
         private IRepository _repository;
 
@@ -154,33 +176,82 @@ namespace MediatorServices
             _repository = repository;
         }
 
-        public async Task<bool> Handle(Delete<CompanyDto> request, CancellationToken cancellationToken)
+        public async Task<IServiceResult<object>> Handle(Delete<CompanyDto> request, CancellationToken cancellationToken)
         {
-            return await _repository.Remove<Company>(request.Id);
+            if (await _repository.Remove<Company>(request.Id))
+            {
+                return new MediatorServiceResult()
+                {
+                    IsSuccess = true,
+                    Result = true
+                };
+            }
+            else 
+            {
+                return new MediatorServiceResult()
+                {
+                    IsSuccess = false,
+                    ErrorMessage = "Не удалось удалить компанию"
+                };
+            }
         }
     }
 
-    public class AddClientService : AddModelService<CompanyDto>
+    public class AddClientService : IRequestHandler<Add<CompanyDto>, IServiceResult<object>>
     {
-        public AddClientService(IRepository repository) : base(repository)
+        private IRepository _repository;
+
+        public AddClientService(IRepository repository)
         {
+            _repository = repository;
         }
 
-        protected override async Task<Guid> Add(CompanyDto dto)
+        public async Task<IServiceResult<object>> Handle(Add<CompanyDto> request, CancellationToken cancellationToken)
         {
-            return await _repository.Add(ClientConverter.Convert(dto));
+            Guid id = await _repository.Add(ClientConverter.Convert(request.Value));
+
+            if (id == Guid.Empty)
+            {
+                return new MediatorServiceResult()
+                {
+                    IsSuccess = false,
+                    ErrorMessage = "Не удалось добавить компанию"
+                };
+            }
+            else 
+            {
+                return new MediatorServiceResult()
+                {
+                    IsSuccess = true,
+                    Result = id
+                };
+            }
         }
     }
 
-    public class UpdateClientService : UpdateModelService<CompanyDto>
+    public class UpdateClientService : IRequestHandler<Update<CompanyDto>, IServiceResult<object>>
     {
-        public UpdateClientService(IRepository repository) : base(repository)
+        private IRepository _repository;
+
+        public UpdateClientService(IRepository repository)
         {
+            _repository = repository;
         }
 
-        protected override async Task<bool> Update(CompanyDto dto)
+        public async Task<IServiceResult<object>> Handle(Update<CompanyDto> request, CancellationToken cancellationToken)
         {
+            CompanyDto dto = request.Value;
+
             Company company = await _repository.GetById<Company>(dto.Id);
+
+            if (dto == null) 
+            {
+                return new MediatorServiceResult()
+                {
+                    IsSuccess = false,
+                    ErrorMessage = "Не удалось найти компанию"
+                };
+            }
 
             company.Name = dto.Name;
             company.Address = dto.Address;
@@ -189,7 +260,22 @@ namespace MediatorServices
             company.Emails = string.Join(";", dto.Emails);
             company.Type = (short)dto.Type;
 
-            return await _repository.Update(company);
+            if (await _repository.Update(company))
+            {
+                return new MediatorServiceResult()
+                {
+                    IsSuccess = true,
+                    Result = true,
+                };
+            }
+            else 
+            {
+                return new MediatorServiceResult()
+                {
+                    IsSuccess = false,
+                    ErrorMessage = "Не удалось обновить компанию"
+                };
+            }
         }
     }
 }
