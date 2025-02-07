@@ -5,6 +5,13 @@ using Utilities.Interfaces;
 
 namespace Exam.Services.BackgroundServices
 {
+    public class QueueServiceResult : IServiceResult<Guid>
+    {
+        public bool IsSuccess { get; set; }
+        public string ErrorMessage { get; set; }
+        public Guid Result { get; set; }
+    }
+
     public class QueueService : BackgroundService, IQueueService<IRequest<IServiceResult<object>>>
     {
         #region Private
@@ -30,7 +37,7 @@ namespace Exam.Services.BackgroundServices
         }
 
 
-        public async Task<Guid> Enqueue(IRequest<IServiceResult<object>> request)
+        public async Task<IServiceResult<Guid>> Enqueue(IRequest<IServiceResult<object>> request)
         {
             Guid id = Guid.NewGuid();
 
@@ -41,14 +48,24 @@ namespace Exam.Services.BackgroundServices
                     Id = id,
                     Request = request
                 });
+
                 _statusService.UpdateStatus(id, Status.Created);
 
+                return new QueueServiceResult()
+                {
+                    IsSuccess = true,
+                    Result = id
+                };
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, ex.Message);
+                return new QueueServiceResult()
+                {
+                    IsSuccess = false,
+                    ErrorMessage = ex.Message
+                };
             }
-            return id;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
