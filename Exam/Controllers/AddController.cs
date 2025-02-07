@@ -29,7 +29,7 @@ namespace Exam.Controllers
             {
                 if (jobj != null)
                 {
-                    return Ok(await _addService.Add(new Add<VehicleDto>(jobj.ToObject<VehicleDto>())));
+                    return Ok(await _addService.Add(new Update<VehicleDto>(jobj.ToObject<VehicleDto>())));
                 }
                 _logger.LogWarning($"VEHICLE: Recieved null object");
                 return BadRequest("Передан пустой параметр");
@@ -48,7 +48,7 @@ namespace Exam.Controllers
             {
                 if (jobj != null)
                 {
-                    return Ok(await _addService.Add(new Add<DriverDto>(jobj.ToObject<DriverDto>())));
+                    return Ok(await _addService.Add(new Update<DriverDto>(jobj.ToObject<DriverDto>())));
                 }
                 _logger.LogWarning($"DRIVER: Recieved null object");
                 return BadRequest("Передан пустой параметр");
@@ -67,7 +67,7 @@ namespace Exam.Controllers
             {
                 if (jobj != null)
                 {
-                    return Ok(await _addService.Add(new Add<CarrierDto>(jobj.ToObject<CarrierDto>())));
+                    return Ok(await _addService.Add(new Update<CarrierDto>(jobj.ToObject<CarrierDto>())));
                 }
                 _logger.LogWarning($"CARRIER: Recieved null object");
                 return BadRequest("Передан пустой параметр");
@@ -86,7 +86,7 @@ namespace Exam.Controllers
             {
                 if (jobj != null)
                 {
-                    return Ok(await _addService.Add(new Add<CompanyDto>(jobj.ToObject<CompanyDto>())));
+                    return Ok(await _addService.Add(new Update<CompanyDto>(jobj.ToObject<CompanyDto>())));
                 }
                 _logger.LogWarning($"CLIENT: Recieved null object");
                 return BadRequest("Передан пустой параметр");
@@ -105,7 +105,7 @@ namespace Exam.Controllers
             {
                 if (jobj != null)
                 {
-                    return Ok(await _addService.Add(new Add<ContractDto>(jobj.ToObject<ContractDto>())));
+                    return Ok(await _addService.Add(new Update<ContractDto>(jobj.ToObject<ContractDto>())));
                 }
                 _logger.LogWarning($"CONTRACT: Recieved null object");
                 return BadRequest("Передан пустой параметр");
@@ -124,7 +124,7 @@ namespace Exam.Controllers
             {
                 if (jobj != null)
                 {
-                    return Ok(await _addService.Add(new Add<DocumentDto>(jobj.ToObject<DocumentDto>())));
+                    return Ok(await _addService.Add(new Update<DocumentDto>(jobj.ToObject<DocumentDto>())));
                 }
                 _logger.LogWarning($"DOCUMENT: Recieved null object");
                 return BadRequest("Передан пустой параметр");
@@ -143,7 +143,7 @@ namespace Exam.Controllers
             {
                 if (jobj != null)
                 {
-                    return Ok(await _addService.Add(new Add<PaymentDto>(jobj.ToObject<PaymentDto>())));
+                    return Ok(await _addService.Add(new Update<PaymentDto>(jobj.ToObject<PaymentDto>())));
                 }
                 _logger.LogWarning($"PAYMENT: Recieved null object");
                 return BadRequest("Передан пустой параметр");
@@ -162,7 +162,7 @@ namespace Exam.Controllers
             {
                 if (jobj != null)
                 {
-                    return Ok(await _addService.Add(new Add<TemplateDto>(jobj.ToObject<TemplateDto>())));
+                    return Ok(await _addService.Add(new Update<TemplateDto>(jobj.ToObject<TemplateDto>())));
                 }
                 _logger.LogWarning($"PAYMENT: Recieved null object");
                 return BadRequest("Передан пустой параметр");
@@ -183,7 +183,7 @@ namespace Exam.Controllers
                 {
                     if (await _fileManager.TempSave(data.FileDto.FileNameWithExtencion, data.File)) 
                     {
-                        return Ok(await _addService.Add(new Add<FileDto>(data.FileDto)));
+                        return Ok(await _addService.Add(new Update<FileDto>(data.FileDto)));
                     }
                 }
                 _logger.LogWarning($"FILE: Recieved null object");
@@ -203,7 +203,7 @@ namespace Exam.Controllers
             {
                 if (jobj != null)
                 {
-                    return Ok(await _addService.Add(new Add<LogistDto>(jobj.ToObject<LogistDto>())));
+                    return Ok(await _addService.Add(new Update<LogistDto>(jobj.ToObject<LogistDto>())));
                 }
                 _logger.LogWarning($"LOGIST: Recieved null object");
                 return BadRequest("Передан пустой параметр");

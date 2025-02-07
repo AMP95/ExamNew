@@ -200,7 +200,7 @@ namespace MediatorServices
         }
     }
 
-    public class AddCarrierService : IRequestHandler<Add<CarrierDto>, IServiceResult<object>>
+    public class AddCarrierService : IRequestHandler<Update<CarrierDto>, IServiceResult<object>>
     {
         private IRepository _repository;
 
@@ -209,7 +209,7 @@ namespace MediatorServices
             _repository = repository;
         }
 
-        public async Task<IServiceResult<object>> Handle(Add<CarrierDto> request, CancellationToken cancellationToken)
+        public async Task<IServiceResult<object>> Handle(Update<CarrierDto> request, CancellationToken cancellationToken)
         {
             CarrierDto dto = request.Value;
             Guid id = await _repository.Add(CarrierConverter.Convert(dto));

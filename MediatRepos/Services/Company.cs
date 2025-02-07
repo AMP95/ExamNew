@@ -197,7 +197,7 @@ namespace MediatorServices
         }
     }
 
-    public class AddClientService : IRequestHandler<Add<CompanyDto>, IServiceResult<object>>
+    public class AddClientService : IRequestHandler<Update<CompanyDto>, IServiceResult<object>>
     {
         private IRepository _repository;
 
@@ -206,7 +206,7 @@ namespace MediatorServices
             _repository = repository;
         }
 
-        public async Task<IServiceResult<object>> Handle(Add<CompanyDto> request, CancellationToken cancellationToken)
+        public async Task<IServiceResult<object>> Handle(Update<CompanyDto> request, CancellationToken cancellationToken)
         {
             Guid id = await _repository.Add(ClientConverter.Convert(request.Value));
 

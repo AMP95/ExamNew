@@ -224,7 +224,7 @@ namespace MediatorServices
         }
     }
 
-    public class AddFileService : IRequestHandler<Add<FileDto>, IServiceResult<object>>
+    public class AddFileService : IRequestHandler<Update<FileDto>, IServiceResult<object>>
     {
         private IFileManager _fileManager;
         private IRepository _repository;
@@ -235,7 +235,7 @@ namespace MediatorServices
             _fileManager = fileManager;
         }
 
-        public async Task<IServiceResult<object>> Handle(Add<FileDto> request, CancellationToken cancellationToken)
+        public async Task<IServiceResult<object>> Handle(Update<FileDto> request, CancellationToken cancellationToken)
         {
             FileDto dto = request.Value;
 

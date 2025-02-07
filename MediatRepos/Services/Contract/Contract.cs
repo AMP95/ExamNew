@@ -11,27 +11,30 @@ using Utilities.Interfaces;
 
 namespace MediatorServices
 {
-    public class GetIdContractService : GetIdModelService<ContractDto>
+    public class GetIdContractService : IRequestHandler<GetId<ContractDto>, IServiceResult<object>>
     {
-        public GetIdContractService(IRepository repository, ILogger<GetIdModelService<ContractDto>> logger) : base(repository, logger)
+        private IRepository _repository;
+        public GetIdContractService(IRepository repository)
         {
+            _repository = repository;
         }
 
-        protected override async Task<object> Get(Guid id)
+        public async Task<IServiceResult<object>> Handle(GetId<ContractDto> request, CancellationToken cancellationToken)
         {
-            IEnumerable<Contract> contracts = await _repository.Get<Contract>(t => t.Id == id, null, "Logist,Carrier,Client,Driver,Vehicle,LoadingPoint,UnloadingPoints,Documents,Template");
-            ContractDto dto = null;
+            IEnumerable<Contract> contracts = await _repository.Get<Contract>(t => t.Id == request.Id, null, 
+                                                                             "Logist,Carrier,Client,Driver,Vehicle,LoadingPoint,UnloadingPoints,Documents,Template");
+
             if (contracts.Any())
             {
                 Contract constract = contracts.First();
-                dto = new ContractDto()
+                ContractDto dto = new ContractDto()
                 {
                     Id = constract.Id,
                     Number = constract.Number,
                     CreationDate = constract.CreationDate,
-                    Status  = (ContractStatus)constract.Status,
-                    LoadPoint = new RoutePointDto() 
-                    { 
+                    Status = (ContractStatus)constract.Status,
+                    LoadPoint = new RoutePointDto()
+                    {
                         Id = constract.LoadingPoint.Id,
                         Company = constract.LoadingPoint.Company,
                         Route = constract.LoadingPoint.Route,
@@ -47,14 +50,14 @@ namespace MediatorServices
                     ClientPayment = constract.ClientPayment,
                     PayPriority = (PaymentPriority)constract.CarrierPayPriority,
                     PaymentCondition = (RecievingType)constract.CarrierPaymentCondition,
-                    Logist = new LogistDto() 
-                    { 
-                        Id=constract.Logist.Id,
+                    Logist = new LogistDto()
+                    {
+                        Id = constract.Logist.Id,
                         Login = constract.Logist.Login,
                         Name = constract.Logist.Name,
                     },
-                    Carrier = new CarrierDto() 
-                    { 
+                    Carrier = new CarrierDto()
+                    {
                         Id = constract.Carrier.Id,
                         Name = constract.Carrier.Name,
                         Vat = (VAT)constract.Carrier.Vat,
@@ -63,14 +66,14 @@ namespace MediatorServices
                         Emails = constract.Carrier.Emails.Split(";").ToList(),
                         InnKpp = constract.Carrier.InnKpp
                     },
-                    Client = new CompanyDto() 
-                    { 
+                    Client = new CompanyDto()
+                    {
                         Id = constract.Client.Id,
                         Name = constract.Client.Name,
                     },
-                    Driver = new DriverDto() 
-                    { 
-                        Id=constract.Driver.Id,
+                    Driver = new DriverDto()
+                    {
+                        Id = constract.Driver.Id,
                         Name = $"{constract.Driver.FamilyName} {constract.Driver.Name} {constract.Driver.FatherName}",
                         Phones = constract.Driver.Phones.Split(';').ToList(),
                         PassportSerial = constract.Driver.PassportSerial,
@@ -78,8 +81,8 @@ namespace MediatorServices
                         PassportDateOfIssue = constract.Driver.PassportDateOfIssue,
                         BirthDate = constract.Driver.DateOfBirth
                     },
-                    Vehicle = new VehicleDto() 
-                    { 
+                    Vehicle = new VehicleDto()
+                    {
                         Id = constract.Vehicle.Id,
                         TruckModel = constract.Vehicle.TruckModel,
                         TruckNumber = constract.Vehicle.TruckNumber,
@@ -88,14 +91,14 @@ namespace MediatorServices
                     },
                     UnloadPoints = new List<RoutePointDto>(),
                     Documents = new List<DocumentDto>(),
-                    Template = new DTOs.Dtos.TemplateDto() 
-                    { 
+                    Template = new DTOs.Dtos.TemplateDto()
+                    {
                         Id = constract.Template.Id,
                         Name = constract.Template.Name,
                     }
                 };
 
-                foreach (RoutePoint point in constract.UnloadingPoints) 
+                foreach (RoutePoint point in constract.UnloadingPoints)
                 {
                     dto.UnloadPoints.Add(new RoutePointDto()
                     {
@@ -109,12 +112,25 @@ namespace MediatorServices
                         Phones = point.Phones.Split(';').ToList(),
                     });
                 }
+
+                return new MediatorServiceResult()
+                {
+                    IsSuccess = true,
+                    Result = dto
+                };
             }
-            return dto;
+            else 
+            {
+                return new MediatorServiceResult()
+                {
+                    IsSuccess = false,
+                    ErrorMessage = "Заявка не найдена"
+                };
+            }
         }
     }
 
-    public class GetFilteredContractService : IRequestHandler<GetFilter<ContractDto>, object>
+    public class GetFilteredContractService : IRequestHandler<GetFilter<ContractDto>, IServiceResult<object>>
     {
         protected IRepository _repository;
         protected ILogger<GetFilteredContractService> _logger;
@@ -125,14 +141,10 @@ namespace MediatorServices
             _logger = logger;
         }
 
-        public async Task<object> Handle(GetFilter<ContractDto> request, CancellationToken cancellationToken)
+        public async Task<IServiceResult<object>> Handle(GetFilter<ContractDto> request, CancellationToken cancellationToken)
         {
             Expression<Func<Contract, bool>> filter = GetFilter(request.PropertyName, request.Params);
-            return await Get(filter);
-        }
 
-        protected async Task<object> Get(Expression<Func<Contract, bool>> filter)
-        {
             IEnumerable<Contract> contracts = await _repository.Get(filter,
                                                                     q => q.OrderBy(c => c.CreationDate).ThenBy(c => c.Number),
                                                                     "Logist,Carrier,Client,Driver,Vehicle,LoadingPoint,UnloadingPoints");
@@ -154,7 +166,7 @@ namespace MediatorServices
                     Payment = contract.CarrierPayment,
                     Prepayment = contract.CarrierPrepayment,
                     ClientPayment = contract.ClientPayment,
-                    Logist = new LogistDto() 
+                    Logist = new LogistDto()
                     {
                         Id = contract.Logist.Id,
                         Login = contract.Logist.Login,
@@ -191,8 +203,13 @@ namespace MediatorServices
                 dtos.Add(dto);
             }
 
-            return dtos;
+            return new MediatorServiceResult()
+            {
+                IsSuccess = true,
+                Result = dtos
+            };
         }
+
         protected Expression<Func<Contract, bool>> GetFilter(string property, params object[] parameters)
         {
             Expression<Func<Contract, bool>> filter = null;
@@ -254,7 +271,7 @@ namespace MediatorServices
     }
 
 
-    public class GetRequiredToPayService : IRequestHandler<GetRequiredToPay, object>
+    public class GetRequiredToPayService : IRequestHandler<GetRequiredToPay, IServiceResult<object>>
     {
         private IRepository _repository;
         public GetRequiredToPayService(IRepository repository)
@@ -262,7 +279,7 @@ namespace MediatorServices
             _repository = repository;
         }
 
-        public async Task<object> Handle(GetRequiredToPay request, CancellationToken cancellationToken)
+        public async Task<IServiceResult<object>> Handle(GetRequiredToPay request, CancellationToken cancellationToken)
         {
             DateTime start = DateTime.Now.Subtract(TimeSpan.FromDays(30));
 
@@ -341,11 +358,15 @@ namespace MediatorServices
                 }
             }
 
-            return required;
+            return new MediatorServiceResult()
+            {
+                IsSuccess = true,
+                Result = required
+            };
         }
     }
 
-    public class DeleteContractService : IRequestHandler<Delete<ContractDto>, bool>
+    public class DeleteContractService : IRequestHandler<Delete<ContractDto>, IServiceResult<object>>
     {
         private IRepository _repository;
         private IFileManager _fileManager;
@@ -356,35 +377,54 @@ namespace MediatorServices
             _fileManager = fileManager;
         }
 
-        public async Task<bool> Handle(Delete<ContractDto> request, CancellationToken cancellationToken)
+        public async Task<IServiceResult<object>> Handle(Delete<ContractDto> request, CancellationToken cancellationToken)
         {
             bool result = await _repository.Remove<Contract>(request.Id);
 
-            IEnumerable<Models.Sub.File> files = await _repository.Get<Models.Sub.File>(f => f.EntityType == nameof(Contract) && f.EntityId == request.Id);
-
-            if (files.Any())
+            if (await _repository.Remove<Contract>(request.Id))
             {
-                string catalog = Path.GetFileName(Path.GetDirectoryName(files.First().FullFilePath));
+                IEnumerable<Models.Sub.File> files = await _repository.Get<Models.Sub.File>(f => f.EntityType == nameof(Contract) && f.EntityId == request.Id);
 
-                await _fileManager.RemoveAllFiles(nameof(Contract), catalog);
+                if (files.Any())
+                {
+                    string catalog = Path.GetFileName(Path.GetDirectoryName(files.First().FullFilePath));
+
+                    await _fileManager.RemoveAllFiles(nameof(Contract), catalog);
+                }
+
+                return new MediatorServiceResult()
+                {
+                    IsSuccess = true,
+                    Result = true,
+                };
             }
-
-            return result;
+            else
+            {
+                return new MediatorServiceResult()
+                {
+                    IsSuccess = false,
+                    ErrorMessage = "Не удалось удалить заявку"
+                };
+            }
         }
     }
 
-    public class AddContractService : AddModelService<ContractDto>
+    public class AddContractService : IRequestHandler<Update<ContractDto>, IServiceResult<object>>
     {
-        IContractCreator<ContractDto, CompanyBaseDto> _contractCreator;
+        private IRepository _repository;
+        private IContractCreator<ContractDto, CompanyBaseDto> _contractCreator;
 
         public AddContractService(IRepository repository, 
-                                  IContractCreator<ContractDto, CompanyBaseDto> contractCreator) : base(repository)
+                                  IContractCreator<ContractDto, CompanyBaseDto> contractCreator)
         {
+            _repository = repository;
             _contractCreator = contractCreator;
         }
 
-        protected override async Task<Guid> Add(ContractDto contractDto)
+        public async Task<IServiceResult<object>> Handle(Update<ContractDto> request, CancellationToken cancellationToken)
         {
+            ContractDto contractDto = request.Value;
+
             Contract contract = new Contract()
             {
                 Number = contractDto.Number,
@@ -416,12 +456,10 @@ namespace MediatorServices
                 LogistId = contractDto.Logist.Id,
             };
 
-         
-
-            foreach (RoutePointDto pointDto in contractDto.UnloadPoints) 
+            foreach (RoutePointDto pointDto in contractDto.UnloadPoints)
             {
-                contract.UnloadingPoints.Add(new RoutePoint() 
-                { 
+                contract.UnloadingPoints.Add(new RoutePoint()
+                {
                     Address = pointDto.Address,
                     Company = pointDto.Company,
                     DateAndTime = pointDto.DateAndTime,
@@ -433,61 +471,75 @@ namespace MediatorServices
             }
 
 
-            Guid id =  await _repository.Add(contract);
+            Guid id = await _repository.Add(contract);
 
-            if (id != Guid.Empty)
+            if (id == Guid.Empty) 
             {
-                contractDto.Id = id;
-
-                IEnumerable<Company> currents = await _repository.Get<Company>(c => c.Type == (short)CompanyType.Current);
-                Company current = currents.FirstOrDefault();
-                CompanyDto companyDto = new CompanyDto()
+                return new MediatorServiceResult()
                 {
-                    Id = current.Id,
-                    Name = current.Name,
-                    Address = current.Address,
-                    InnKpp = current.InnKpp,
-                    Phones = current.Phones.Split(';').ToList(),
-                    Emails = current.Emails.Split(";").ToList(),
+                    IsSuccess = false,
+                    ErrorMessage = "Не удалось добавить заявку"
                 };
-
-                var files = await _repository.Get<Models.Sub.File>(f => f.EntityId == contract.TemplateId);
-
-                string contractFilePath = _contractCreator.CreateContractDocument(contractDto, companyDto);
-
-                string ext = Path.GetExtension(contractFilePath);
-
-                Models.Sub.File contractFile = new Models.Sub.File()
-                {
-                    ViewNameWithExtencion = $"{contract.Number}{ext}",
-                    EntityType = nameof(Contract),
-                    EntityId = contract.Id,
-                    FullFilePath = contractFilePath,
-                };
-
-                await _repository.Add(contractFile);
             }
 
-            return id;
+            contractDto.Id = id;
+
+            IEnumerable<Company> currents = await _repository.Get<Company>(c => c.Type == (short)CompanyType.Current);
+            Company current = currents.FirstOrDefault();
+            CompanyDto companyDto = new CompanyDto()
+            {
+                Id = current.Id,
+                Name = current.Name,
+                Address = current.Address,
+                InnKpp = current.InnKpp,
+                Phones = current.Phones.Split(';').ToList(),
+                Emails = current.Emails.Split(";").ToList(),
+            };
+
+            var files = await _repository.Get<Models.Sub.File>(f => f.EntityId == contract.TemplateId);
+
+            string contractFilePath = _contractCreator.CreateContractDocument(contractDto, companyDto);
+
+            string ext = Path.GetExtension(contractFilePath);
+
+            Models.Sub.File contractFile = new Models.Sub.File()
+            {
+                ViewNameWithExtencion = $"{contract.Number}{ext}",
+                EntityType = nameof(Contract),
+                EntityId = contract.Id,
+                FullFilePath = contractFilePath,
+            };
+
+            await _repository.Add(contractFile);
+
+            return new MediatorServiceResult()
+            {
+                IsSuccess = true,
+                Result = id
+            };
         }
     }
 
-    public class UpdateContractService : UpdateModelService<ContractDto>
+    public class UpdateContractService : IRequestHandler<Update<ContractDto>, IServiceResult<object>>
     {
+        private IRepository _repository;
         private IFileManager _fileManager;
         private IContractCreator<ContractDto, CompanyBaseDto> _contractCreator;
-        public UpdateContractService(IRepository repository, IFileManager fileManager, IContractCreator<ContractDto, CompanyBaseDto> contractCreator) : base(repository)
+        public UpdateContractService(IRepository repository, IFileManager fileManager, IContractCreator<ContractDto, CompanyBaseDto> contractCreator)
         {
+            _repository = repository;
             _fileManager = fileManager;
             _contractCreator = contractCreator;
         }
 
-        protected override async Task<bool> Update(ContractDto dto)
+        public async Task<IServiceResult<object>> Handle(Update<ContractDto> request, CancellationToken cancellationToken)
         {
-            IEnumerable<Contract> contracts = await _repository.Get<Contract>(c=>c.Id == dto.Id, null, "UnloadingPoints");
+            IEnumerable<Contract> contracts = await _repository.Get<Contract>(c => c.Id == request.Value.Id, null, "UnloadingPoints");
 
-            if (contracts.Any()) 
+            if (contracts.Any())
             {
+                ContractDto dto = request.Value;
+
                 Contract contract = contracts.First();
                 contract.CarrierPayment = dto.Payment;
                 contract.CarrierPrepayment = dto.Prepayment;
@@ -538,11 +590,7 @@ namespace MediatorServices
                     });
                 }
 
-                
-
-                bool result = await _repository.Update(contract);
-
-                if (result) 
+                if (await _repository.Update(contract))
                 {
                     var files = await _repository.Get<Models.Sub.File>(f => f.EntityId == contract.Id);
 
@@ -559,7 +607,7 @@ namespace MediatorServices
 
                     IEnumerable<Template> templates = await _repository.Get<Template>(t => t.Id == dto.Template.Id, null, "Additionals");
 
-                    if (templates.Any()) 
+                    if (templates.Any())
                     {
                         Template template = templates.FirstOrDefault();
                         dto.Template.Additionals = new List<AdditionalDto>(template.Additionals.Select(a => new AdditionalDto() { Id = a.Id, Name = a.Name, Description = a.Description }));
@@ -590,51 +638,72 @@ namespace MediatorServices
                     };
 
                     await _repository.Add(contractFile);
-                }
 
-                return result;
+                    return new MediatorServiceResult()
+                    {
+                        IsSuccess = true,
+                        Result = true,
+                    };
+                }
             }
-            return false;
+
+            return new MediatorServiceResult()
+            {
+                IsSuccess = false,
+                ErrorMessage = "Не удалось обновить заявку"
+            };
         }
     }
 
-    public class UpdateContractPropertyService : IRequestHandler<Patch<ContractDto>, bool>
+    public class UpdateContractPropertyService : IRequestHandler<Patch<ContractDto>, IServiceResult<object>>
     {
         protected IRepository _repository;
-        protected ILogger<UpdateContractPropertyService> _logger;
 
-        public UpdateContractPropertyService(IRepository repository, ILogger<UpdateContractPropertyService> logger)
+        public UpdateContractPropertyService(IRepository repository)
         {
             _repository = repository;
-            _logger = logger;
         }
 
-        public async Task<bool> Handle(Patch<ContractDto> request, CancellationToken cancellationToken)
+        public async Task<IServiceResult<object>> Handle(Patch<ContractDto> request, CancellationToken cancellationToken)
         {
-            try
-            {
-                Contract contract = await _repository.GetById<Contract>(request.Id);
+            Contract contract = await _repository.GetById<Contract>(request.Id);
 
-                foreach (var pair in request.Updates) 
+            if (contract == null) 
+            {
+                return new MediatorServiceResult()
                 {
-                    switch (pair.Key)
-                    {
-                        case nameof(ContractDto.Status):
-                            if (Enum.TryParse<ContractStatus>(pair.Value.ToString(), out ContractStatus newStatus))
-                            {
-                                contract.Status = (short)newStatus;
-                            }
-                            break;
-                    }
-                }
+                    IsSuccess = false,
+                    ErrorMessage = "Заявка не найдена"
+                };
+            }
 
-                return await _repository.Update(contract);
-            }
-            catch (Exception ex) 
+            foreach (var pair in request.Updates) 
             {
-                _logger.LogError(ex,ex.Message);
+                switch (pair.Key)
+                {
+                    case nameof(ContractDto.Status):
+                        if (Enum.TryParse<ContractStatus>(pair.Value.ToString(), out ContractStatus newStatus))
+                        {
+                            contract.Status = (short)newStatus;
+                        }
+                        break;
+                }
             }
-            return false;
+
+            if (await _repository.Update(contract)) 
+            {
+                return new MediatorServiceResult()
+                {
+                    IsSuccess = true,
+                    Result = true
+                };
+            }
+
+            return new MediatorServiceResult()
+            {
+                IsSuccess = false,
+                ErrorMessage = "Не удалось обновить заявку"
+            };
         }
     }
 }

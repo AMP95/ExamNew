@@ -182,7 +182,7 @@ namespace MediatorServices
         }
     }
 
-    public class AddTemplateService : IRequestHandler<Add<TemplateDto>, IServiceResult<object>>
+    public class AddTemplateService : IRequestHandler<Update<TemplateDto>, IServiceResult<object>>
     {
         private IRepository _repository;
 
@@ -191,7 +191,7 @@ namespace MediatorServices
             _repository = repository;
         }
 
-        public async Task<IServiceResult<object>> Handle(Add<TemplateDto> request, CancellationToken cancellationToken)
+        public async Task<IServiceResult<object>> Handle(Update<TemplateDto> request, CancellationToken cancellationToken)
         {
             Template template = new Template()
             {
@@ -224,7 +224,7 @@ namespace MediatorServices
         }
     }
 
-    public class UpdateTemplateService : IRequestHandler<Add<TemplateDto>, IServiceResult<object>>
+    public class UpdateTemplateService : IRequestHandler<Update<TemplateDto>, IServiceResult<object>>
     {
         private IRepository _repository;
 
@@ -233,7 +233,7 @@ namespace MediatorServices
             _repository = repository;
         }
 
-        public async Task<IServiceResult<object>> Handle(Add<TemplateDto> request, CancellationToken cancellationToken)
+        public async Task<IServiceResult<object>> Handle(Update<TemplateDto> request, CancellationToken cancellationToken)
         {
             TemplateDto dto = request.Value;
 
