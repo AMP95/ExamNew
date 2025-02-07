@@ -53,7 +53,7 @@ namespace Exam
             builder.Services.AddTransient<IAppRootResolver, RootResolver>();
 
             builder.Services.AddSingleton<IResultService, ResultService>();
-            builder.Services.AddSingleton<IRequestStatusService, RequestStatusService>();
+            builder.Services.AddSingleton<IStatusService, StatusService>();
             builder.Services.AddSingleton<IGetService, GetService>();
             builder.Services.AddSingleton<IAddService, AddService>();
             builder.Services.AddSingleton<IUpdateService, UpdateService>();

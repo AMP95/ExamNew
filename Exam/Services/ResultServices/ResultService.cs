@@ -1,27 +1,26 @@
-﻿using Exam.BackgroundServices;
-using Exam.Interfaces;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
+using Utilities.Interfaces;
 
 namespace Exam.ResultServices
 {
     public class ResultService: IResultService
     {
-        private ConcurrentDictionary<Guid, ServiceResult> _results;
-        private IRequestStatusService _statusService;
+        private ConcurrentDictionary<Guid, Tuple<DateTime, IServiceResult<object>>> _results;
+        private IStatusService _statusService;
 
-        public ResultService(IRequestStatusService status)
+        public ResultService(IStatusService statusService)
         {
-            _statusService = status;
-            _results = new ConcurrentDictionary<Guid, ServiceResult>();
+            _statusService = statusService;
+            _results = new ConcurrentDictionary<Guid, Tuple<DateTime, IServiceResult<object>>>();
         }
 
-        public Task AddResult(Guid id, ServiceResult result)
+        public Task AddResult(Guid id, IServiceResult<object> result)
         {
             return Task.Run(() =>
             {
-                if (_results.TryAdd(id, result))
+                if (_results.TryAdd(id, Tuple.Create(DateTime.Now, result)))
                 {
-                    _statusService.UpdateStatus(id, RequestStatus.Done);
+                    _statusService.UpdateStatus(id, Status.Done);
                 }
 
                 if (_results.Count > 1000) 
@@ -33,25 +32,24 @@ namespace Exam.ResultServices
 
         private void ClearResults() 
         {
-            var old = _results.Where(r => (DateTime.Now - r.Value.CreateTime).TotalHours > 1).ToList();
+            var old = _results.Where(r => (DateTime.Now - r.Value.Item1).TotalHours > 1).ToList();
             foreach (var r in old) 
             {
-                if (_results.TryRemove(r.Key, out ServiceResult result)) 
+                if (_results.TryRemove(r.Key, out Tuple<DateTime,IServiceResult<object>> result)) 
                 {
                     _statusService.RemoveStatus(r.Key);
                 }
             }
         }
 
-        public async Task<ServiceResult> GetResult(Guid id)
+        public async Task<IServiceResult<object>> GetResult(Guid id)
         {
-            if (_results.TryRemove(id, out ServiceResult result))
+            if (_results.TryRemove(id, out Tuple<DateTime, IServiceResult<object>> result))
             {
                 _statusService.RemoveStatus(id);
-                return result;
+                return result.Item2;
             }
             return null;
         }
-
     }
 }

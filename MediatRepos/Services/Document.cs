@@ -4,9 +4,12 @@ using MediatRepos;
 using Microsoft.Extensions.Logging;
 using Models;
 using System.Linq.Expressions;
+using Utilities.Interfaces;
 
 namespace MediatorServices
 {
+    #region Statics
+
     internal static class DocumentConverter
     {
         public static DocumentDto Convert(Document document)
@@ -40,8 +43,6 @@ namespace MediatorServices
             };
         }
     }
-
-
     internal static class StatusUpdater 
     {
         public async static Task<bool> UpdateContractStatus(Guid contractId, IRepository repository) 
@@ -99,30 +100,42 @@ namespace MediatorServices
         }
     }
 
+    #endregion Statics
 
-    public class GetIdDocumentService : GetIdModelService<DocumentDto>
+    public class GetIdDocumentService : IRequestHandler<GetId<DocumentDto>, IServiceResult<object>>
     {
-        public GetIdDocumentService(IRepository repository, ILogger<GetIdModelService<DocumentDto>> logger) : base(repository, logger)
+        private IRepository _repository;
+
+        public GetIdDocumentService(IRepository repository)
         {
+            _repository = repository;
         }
 
-        protected override async Task<object> Get(Guid id)
+        public async Task<IServiceResult<object>> Handle(GetId<DocumentDto> request, CancellationToken cancellationToken)
         {
-            Document document = await _repository.GetById<Document>(id);
-            DocumentDto dto = null;
+            Document document = await _repository.GetById<Document>(request.Id);
 
             if (document != null)
             {
-                dto = DocumentConverter.Convert(document);
+                return new MediatorServiceResult()
+                {
+                    IsSuccess = true,
+                    Result = DocumentConverter.Convert(document)
+                };
             }
-            return dto;
+
+            return new MediatorServiceResult()
+            {
+                IsSuccess = false,
+                ErrorMessage = "Объект не найден"
+            };
         }
     }
 
-    public class GetFilterDocumentService : IRequestHandler<GetFilter<DocumentDto>, object>
+    public class GetFilterDocumentService : IRequestHandler<GetFilter<DocumentDto>, IServiceResult<object>>
     {
-        protected IRepository _repository;
-        protected ILogger<GetFilterDocumentService> _logger;
+        private IRepository _repository;
+        private ILogger<GetFilterDocumentService> _logger;
 
         public GetFilterDocumentService(IRepository repository, ILogger<GetFilterDocumentService> logger)
         {
@@ -130,15 +143,11 @@ namespace MediatorServices
             _logger = logger;
         }
 
-        public async Task<object> Handle(GetFilter<DocumentDto> request, CancellationToken cancellationToken)
+        public async Task<IServiceResult<object>> Handle(GetFilter<DocumentDto> request, CancellationToken cancellationToken)
         {
             Expression<Func<Document, bool>> filter = GetFilter(request.PropertyName, request.Params);
-            return await Get(filter);
-        }
 
-        protected async Task<object> Get(Expression<Func<Document, bool>> filter)
-        {
-            IEnumerable<Document> documents = await _repository.Get<Document>(filter);
+            IEnumerable<Document> documents = await _repository.Get(filter);
             List<DocumentDto> dtos = new List<DocumentDto>();
 
             foreach (var document in documents)
@@ -146,7 +155,11 @@ namespace MediatorServices
                 dtos.Add(DocumentConverter.Convert(document));
             }
 
-            return dtos;
+            return new MediatorServiceResult()
+            {
+                IsSuccess = true,
+                Result = dtos
+            };
         }
 
         protected Expression<Func<Document, bool>> GetFilter(string property, params object[] parameters)
@@ -187,7 +200,7 @@ namespace MediatorServices
         }
     }
 
-    public class DeleteDocumentService : IRequestHandler<Delete<DocumentDto>, bool>
+    public class DeleteDocumentService : IRequestHandler<Delete<DocumentDto>, IServiceResult<object>>
     {
         private IRepository _repository;
 
@@ -196,85 +209,123 @@ namespace MediatorServices
             _repository = repository;
         }
 
-        public async Task<bool> Handle(Delete<DocumentDto> request, CancellationToken cancellationToken)
+        public async Task<IServiceResult<object>> Handle(Delete<DocumentDto> request, CancellationToken cancellationToken)
         {
-            bool result = false;
+            Document document = await _repository.GetById<Document>(request.Id);
 
-            try
+            if (document == null) 
             {
-                Document document = await _repository.GetById<Document>(request.Id);
-
-                result = await _repository.Remove<Document>(document.Id);
-
-                await StatusUpdater.UpdateContractStatus(document.ContractId, _repository);
+                return new MediatorServiceResult()
+                {
+                    IsSuccess = false,
+                    ErrorMessage = "Документ не найден"
+                };
             }
-            catch (Exception ex) 
-            {
-            
-            }
-            return result;
-        }
-    }
 
-    public class AddDocumentService : AddModelService<DocumentDto>
-    {
-        public AddDocumentService(IRepository repository) : base(repository)
-        {
-        }
-
-        protected override async Task<Guid> Add(DocumentDto dto)
-        {
-            Guid docId = Guid.Empty;
-
-            try
-            {
-                docId = await _repository.Add(DocumentConverter.Convert(dto));
-
-                await StatusUpdater.UpdateContractStatus(dto.ContractId, _repository);
-                
-            }
-            catch (Exception ex) 
+            if (await _repository.Remove<Document>(document.Id)) 
             { 
-                
+                await StatusUpdater.UpdateContractStatus(document.ContractId, _repository);
+
+                return new MediatorServiceResult()
+                {
+                    IsSuccess = true,
+                    Result = true
+                };
             }
 
-            return docId;
+            return new MediatorServiceResult()
+            {
+                IsSuccess = false,
+                ErrorMessage = "Не удалось удалить документ"
+            };
+
         }
     }
 
-    public class UpdateDocumentService : UpdateModelService<DocumentDto>
+    public class AddDocumentService : IRequestHandler<Add<DocumentDto>, IServiceResult<object>>
     {
-        public UpdateDocumentService(IRepository repository) : base(repository)
+        private IRepository _repository;
+
+        public AddDocumentService(IRepository repository)
         {
+            _repository = repository;
         }
 
-        protected override async Task<bool> Update(DocumentDto dto)
+        public async Task<IServiceResult<object>> Handle(Add<DocumentDto> request, CancellationToken cancellationToken)
         {
-            bool result = false;
+            Guid docId = await _repository.Add(DocumentConverter.Convert(request.Value));
 
-            try
+            if (docId == Guid.Empty)
             {
-                Document document = await _repository.GetById<Document>(dto.Id);
+                return new MediatorServiceResult()
+                {
+                    IsSuccess = false,
+                    ErrorMessage = "Не удалось сохранить документ"
+                };
+            }
+            else 
+            { 
+                await StatusUpdater.UpdateContractStatus(request.Value.ContractId, _repository);
 
-                document.Id = dto.Id;
-                document.CreationDate = dto.CreationDate;
-                document.DocumentDirection = (short)dto.Direction;
-                document.Number = dto.Number;
-                document.RecieveType = (short)dto.RecieveType;
-                document.RecievingDate = dto.RecievingDate;
-                document.Summ = dto.Summ;
-                document.DocumentType = (short)dto.Type;
+                return new MediatorServiceResult()
+                {
+                    IsSuccess = true,
+                    Result = docId
+                };
+            }
+        }
+    }
 
-                result = await _repository.Update(document);
+    public class UpdateDocumentService : IRequestHandler<Update<DocumentDto>, IServiceResult<object>>
+    {
+        private IRepository _repository;
+        public UpdateDocumentService(IRepository repository)
+        {
+            _repository = repository;
+        }
 
+        public async Task<IServiceResult<object>> Handle(Update<DocumentDto> request, CancellationToken cancellationToken)
+        {
+            DocumentDto dto = request.Value;
+
+            Document document = await _repository.GetById<Document>(dto.Id);
+
+            if (document == null) 
+            {
+                return new MediatorServiceResult()
+                {
+                    IsSuccess = false,
+                    ErrorMessage = "Документ не найден"
+                };
+            }
+
+            document.Id = dto.Id;
+            document.CreationDate = dto.CreationDate;
+            document.DocumentDirection = (short)dto.Direction;
+            document.Number = dto.Number;
+            document.RecieveType = (short)dto.RecieveType;
+            document.RecievingDate = dto.RecievingDate;
+            document.Summ = dto.Summ;
+            document.DocumentType = (short)dto.Type;
+
+            if (await _repository.Update(document))
+            {
                 await StatusUpdater.UpdateContractStatus(dto.ContractId, _repository);
-            }
-            catch (Exception ex) 
-            {
-                
-            }
 
-            return result;
+                return new MediatorServiceResult()
+                {
+                    IsSuccess = true,
+                    Result = true
+                };
+            }
+            else 
+            {
+                return new MediatorServiceResult()
+                {
+                    IsSuccess = false,
+                    ErrorMessage = "Не удалось обновить документ"
+                };
+            }
         }
     }
 }

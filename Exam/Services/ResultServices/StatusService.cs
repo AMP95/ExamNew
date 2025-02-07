@@ -1,18 +1,18 @@
-﻿using Exam.Interfaces;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
+using Utilities.Interfaces;
 
 namespace Exam.ResultServices
 {
-    public class RequestStatusService : IRequestStatusService
+    public class StatusService : IStatusService
     {
-        private ConcurrentDictionary<Guid, RequestStatus> _statuses;
+        private ConcurrentDictionary<Guid, Status> _statuses;
 
-        public RequestStatusService()
+        public StatusService()
         {
-            _statuses = new ConcurrentDictionary<Guid, RequestStatus>();
+            _statuses = new ConcurrentDictionary<Guid, Status>();
         }
 
-        public Task UpdateStatus(Guid id, RequestStatus status)
+        public Task UpdateStatus(Guid id, Status status)
         {
             return Task.Run(() =>
             {
@@ -31,13 +31,13 @@ namespace Exam.ResultServices
             return Task.Run(() => { _statuses.TryRemove(id, out var status); });
         }
 
-        public async Task<RequestStatus> GetStatus(Guid id)
+        public async Task<Status> GetStatus(Guid id)
         {
             if (_statuses.ContainsKey(id))
             {
                 return _statuses[id];
             }
-            return RequestStatus.Unknown;
+            return Status.Unknown;
         }
     }
 }
