@@ -8,20 +8,24 @@ using Utilities.Interfaces;
 
 namespace MediatRepos
 {
-    public class GetIdVehicleService : GetIdModelService<VehicleDto>
+    public class GetIdVehicleService : IRequestHandler<GetId<VehicleDto>, IServiceResult<object>>
     {
-        public GetIdVehicleService(IRepository repository, ILogger<GetIdModelService<VehicleDto>> logger) : base(repository, logger)
+        private IRepository _repository;
+
+        public GetIdVehicleService(IRepository repository)
         {
+            _repository = repository;
         }
 
-        protected override async Task<object> Get(Guid id)
+        public async Task<IServiceResult<object>> Handle(GetId<VehicleDto> request, CancellationToken cancellationToken)
         {
-            IEnumerable<Vehicle> vehicles = await _repository.Get<Vehicle>(t => t.Id == id, null, "Carrier");
-            VehicleDto dto = null;
-            if (vehicles.Any()) 
+            IEnumerable<Vehicle> vehicles = await _repository.Get<Vehicle>(t => t.Id == request.Id, null, "Carrier");
+
+            if (vehicles.Any())
             {
                 Vehicle vehicle = vehicles.First();
-                dto = new VehicleDto() 
+
+                VehicleDto dto = new VehicleDto()
                 {
                     Id = vehicle.Id,
                     TruckModel = vehicle.TruckModel,
@@ -29,7 +33,8 @@ namespace MediatRepos
                     TrailerModel = vehicle.TrailerModel,
                     TrailerNumber = vehicle.TrailerNumber,
                 };
-                if (vehicle.CarrierId != null) 
+
+                if (vehicle.CarrierId != null)
                 {
                     dto.Carrier = new CarrierDto()
                     {
@@ -37,20 +42,36 @@ namespace MediatRepos
                         Name = vehicle.Carrier.Name,
                     };
                 }
+
+                return new MediatorServiceResult()
+                {
+                    IsSuccess = true,
+                    Result = dto
+                };
             }
-            return dto;
+            else 
+            {
+                return new MediatorServiceResult()
+                {
+                    IsSuccess = false,
+                    ErrorMessage = "ТС не найдено"
+                };
+            }
         }
     }
 
-    public class GetRangeVehicleService : GetRangeModelService<VehicleDto>
+    public class GetRangeVehicleService : IRequestHandler<GetRange<VehicleDto>, IServiceResult<object>>
     {
-        public GetRangeVehicleService(IRepository repository, ILogger<GetRangeModelService<VehicleDto>> logger) : base(repository, logger)
+        private IRepository _repository;
+
+        public GetRangeVehicleService(IRepository repository)
         {
+            _repository = repository;
         }
 
-        protected override async Task<object> Get(int start, int end)
+        public async Task<IServiceResult<object>> Handle(GetRange<VehicleDto> request, CancellationToken cancellationToken)
         {
-            IEnumerable<Vehicle> vehicles = await _repository.GetRange<Vehicle>(start, end, 
+            IEnumerable<Vehicle> vehicles = await _repository.GetRange<Vehicle>(request.Start, request.End,
                                                                                 q => q.OrderBy(t => t.TruckModel).ThenBy(t => t.TruckNumber).ThenBy(t => t.TrailerNumber),
                                                                                 "Carrier");
             List<VehicleDto> dtos = new List<VehicleDto>();
@@ -78,11 +99,15 @@ namespace MediatRepos
                 dtos.Add(dto);
             }
 
-            return dtos;
+            return new MediatorServiceResult()
+            {
+                IsSuccess = true,
+                Result = dtos
+            };
         }
     }
 
-    public class GetFilterVehicleService : IRequestHandler<GetFilter<VehicleDto>, object>
+    public class GetFilterVehicleService : IRequestHandler<GetFilter<VehicleDto>, IServiceResult<object>>
     {
         protected IRepository _repository;
         protected ILogger<GetFilterVehicleService> _logger;
@@ -93,14 +118,10 @@ namespace MediatRepos
             _logger = logger;
         }
 
-        public async Task<object> Handle(GetFilter<VehicleDto> request, CancellationToken cancellationToken)
+        public async Task<IServiceResult<object>> Handle(GetFilter<VehicleDto> request, CancellationToken cancellationToken)
         {
             Expression<Func<Vehicle, bool>> filter = GetFilter(request.PropertyName, request.Params);
-            return await Get(filter);
-        }
 
-        protected async Task<object> Get(Expression<Func<Vehicle, bool>> filter)
-        {
             IEnumerable<Vehicle> vehicles = await _repository.Get<Vehicle>(filter,
                                                                            q => q.OrderBy(t => t.TruckModel).ThenBy(t => t.TruckNumber).ThenBy(t => t.TrailerNumber),
                                                                            "Carrier");
@@ -129,10 +150,14 @@ namespace MediatRepos
                 dtos.Add(dto);
             }
 
-            return dtos;
+            return new MediatorServiceResult()
+            {
+                IsSuccess = true,
+                Result = dtos
+            };
         }
 
-        protected Expression<Func<Vehicle, bool>> GetFilter(string property, params object[] parameters)
+        private Expression<Func<Vehicle, bool>> GetFilter(string property, params object[] parameters)
         {
             Expression<Func<Vehicle, bool>> filter = null;
 
@@ -186,7 +211,7 @@ namespace MediatRepos
         }
     }
 
-    public class DeleteVehicleService : IRequestHandler<Delete<VehicleDto>, bool>
+    public class DeleteVehicleService : IRequestHandler<Delete<VehicleDto>, IServiceResult<object>>
     {
         private IRepository _repository;
         private IFileManager _fileManager;
@@ -197,31 +222,49 @@ namespace MediatRepos
             _fileManager = fileManager;
         }
 
-        public async Task<bool> Handle(Delete<VehicleDto> request, CancellationToken cancellationToken)
+        public async Task<IServiceResult<object>> Handle(Delete<VehicleDto> request, CancellationToken cancellationToken)
         {
-            bool result = await _repository.Remove<Vehicle>(request.Id);
-
-            IEnumerable<Models.Sub.File> files = await _repository.Get<Models.Sub.File>(f => f.EntityType == nameof(Vehicle) && f.EntityId == request.Id);
-
-            if (files.Any())
+            if (await _repository.Remove<Vehicle>(request.Id))
             {
-                string catalog = Path.GetFileName(Path.GetDirectoryName(files.First().FullFilePath));
+                IEnumerable<Models.Sub.File> files = await _repository.Get<Models.Sub.File>(f => f.EntityType == nameof(Vehicle) && f.EntityId == request.Id);
 
-                await _fileManager.RemoveAllFiles(nameof(Vehicle), catalog);
+                if (files.Any())
+                {
+                    string catalog = Path.GetFileName(Path.GetDirectoryName(files.First().FullFilePath));
+
+                    await _fileManager.RemoveAllFiles(nameof(Vehicle), catalog);
+                }
+
+                return new MediatorServiceResult()
+                {
+                    IsSuccess = true,
+                    Result = true
+                };
             }
-
-            return result;
+            else 
+            {
+                return new MediatorServiceResult()
+                {
+                    IsSuccess = false,
+                    ErrorMessage = "ТС не найдено"
+                };
+            }
         }
     }
 
-    public class AddVehicleService : AddModelService<VehicleDto>
+    public class AddVehicleService : IRequestHandler<Add<VehicleDto>, IServiceResult<object>>
     {
-        public AddVehicleService(IRepository repository) : base(repository)
+        private IRepository _repository;
+
+        public AddVehicleService(IRepository repository)
         {
+            _repository = repository;
         }
 
-        protected override async Task<Guid> Add(VehicleDto dto)
+        public async Task<IServiceResult<object>> Handle(Add<VehicleDto> request, CancellationToken cancellationToken)
         {
+            VehicleDto dto = request.Value;
+
             Vehicle truck = new Vehicle()
             {
                 TruckModel = dto.TruckModel,
@@ -230,31 +273,63 @@ namespace MediatRepos
                 TrailerNumber = dto.TrailerNumber
             };
 
-            if (dto.Carrier != null && dto.Carrier.Id != Guid.Empty) 
-            { 
+            if (dto.Carrier != null && dto.Carrier.Id != Guid.Empty)
+            {
                 truck.CarrierId = dto.Carrier.Id;
             }
 
-            return await _repository.Add(truck);
+            Guid id = await _repository.Add(truck);
+
+            if (id == Guid.Empty)
+            {
+                return new MediatorServiceResult()
+                {
+                    IsSuccess = false,
+                    ErrorMessage = "Де удалось добавить ТС"
+                };
+            }
+            else 
+            {
+                return new MediatorServiceResult()
+                {
+                    IsSuccess = true,
+                    Result  = id
+                };
+            }
         }
     }
 
-    public class UpdateVehicleService : UpdateModelService<VehicleDto>
+
+    public class UpdateVehicleService : IRequestHandler<Add<VehicleDto>, IServiceResult<object>>
     {
-        public UpdateVehicleService(IRepository repository) : base(repository)
+        private IRepository _repository;
+
+        public UpdateVehicleService(IRepository repository)
         {
+            _repository = repository;
         }
 
-        protected override async Task<bool> Update(VehicleDto dto)
+        public async Task<IServiceResult<object>> Handle(Add<VehicleDto> request, CancellationToken cancellationToken)
         {
+            VehicleDto dto = request.Value;
+
             Vehicle vehicle = await _repository.GetById<Vehicle>(dto.Id);
+
+            if (vehicle == null) 
+            {
+                return new MediatorServiceResult()
+                {
+                    IsSuccess = false,
+                    ErrorMessage = "ТС не найдено"
+                };
+            }
 
             vehicle.TruckModel = dto.TruckModel;
             vehicle.TruckNumber = dto.TruckNumber;
             vehicle.TrailerModel = dto.TrailerModel;
             vehicle.TrailerNumber = dto.TrailerNumber;
 
-            if (vehicle.CarrierId != dto.Carrier?.Id) 
+            if (vehicle.CarrierId != dto.Carrier?.Id)
             {
                 IEnumerable<Driver> drivers = await _repository.Get<Driver>(d => d.VehicleId == dto.Id);
                 drivers = drivers.ToList();
@@ -271,17 +346,24 @@ namespace MediatRepos
                 }
             }
 
-            if (dto.Carrier != null && dto.Carrier.Id != Guid.Empty)
+            vehicle.CarrierId = dto.Carrier?.Id;
+
+            if (await _repository.Update(vehicle))
             {
-                vehicle.CarrierId = dto.Carrier.Id;
+                return new MediatorServiceResult()
+                {
+                    IsSuccess = true,
+                    Result = true,
+                };
             }
             else 
             {
-                vehicle.CarrierId = null;
+                return new MediatorServiceResult()
+                {
+                    IsSuccess = false,
+                    ErrorMessage = "Не обновить ТС"
+                };
             }
-
-            return await _repository.Update(vehicle);
         }
     }
-
 }

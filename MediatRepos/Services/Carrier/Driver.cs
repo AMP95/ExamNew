@@ -1,4 +1,5 @@
 ﻿using DTOs;
+using DTOs.Dtos;
 using MediatR;
 using MediatRepos;
 using Microsoft.Extensions.Logging;
@@ -8,21 +9,24 @@ using Utilities.Interfaces;
 
 namespace MediatorServices
 {
-    public class GetIdDriverService : GetIdModelService<DriverDto>
+    public class GetIdDriverService : IRequestHandler<GetId<DriverDto>, IServiceResult<object>>
     {
-        public GetIdDriverService(IRepository repository, ILogger<GetIdModelService<DriverDto>> logger) : base(repository, logger)
+        private IRepository _repository;
+
+        public GetIdDriverService(IRepository repository)
         {
+            _repository = repository;
         }
 
-        protected override async Task<object> Get(Guid id)
+        public async Task<IServiceResult<object>> Handle(GetId<DriverDto> request, CancellationToken cancellationToken)
         {
-            IEnumerable<Driver> drivers = await _repository.Get<Driver>(d => d.Id == id, null, "Vehicle");
-            DriverDto dto = null;
+            IEnumerable<Driver> drivers = await _repository.Get<Driver>(d => d.Id == request.Id, null, "Vehicle");
+
             if (drivers.Any())
             {
                 Driver driver = drivers.First();
 
-                dto = new DriverDto()
+                DriverDto dto = new DriverDto()
                 {
                     Id = driver.Id,
                     Name = $"{driver.FamilyName} {driver.Name} {driver.FamilyName}",
@@ -46,10 +50,10 @@ namespace MediatorServices
                         InnKpp = carrier.InnKpp,
                         Emails = carrier.Emails.Split(";").ToList(),
                         Phones = carrier.Phones.Split(";").ToList(),
-                        Vehicles = carrier.Vehicles.Select(t => new VehicleDto() 
-                        { 
-                            Id = t.Id, 
-                            TruckNumber = t.TruckNumber, 
+                        Vehicles = carrier.Vehicles.Select(t => new VehicleDto()
+                        {
+                            Id = t.Id,
+                            TruckNumber = t.TruckNumber,
                             TruckModel = t.TruckModel,
                             TrailerModel = t.TrailerModel,
                             TrailerNumber = t.TrailerNumber,
@@ -57,35 +61,52 @@ namespace MediatorServices
                     };
                 }
 
-                if (driver.VehicleId != null) 
-                { 
-                    dto.Vehicle = new VehicleDto() 
-                    { 
+                if (driver.VehicleId != null)
+                {
+                    dto.Vehicle = new VehicleDto()
+                    {
                         Id = driver.Vehicle.Id,
                         TruckModel = driver.Vehicle.TruckModel,
                         TruckNumber = driver.Vehicle.TruckNumber,
                         TrailerModel = driver.Vehicle.TrailerModel,
                         TrailerNumber = driver.Vehicle.TrailerNumber,
                     };
-                    if (driver.CarrierId != null) 
+                    if (driver.CarrierId != null)
                     {
                         dto.Vehicle.Carrier = new CarrierDto() { Id = driver.CarrierId.Value };
                     }
                 }
+
+                return new MediatorServiceResult()
+                {
+                    IsSuccess = true,
+                    Result = dto
+                };
             }
-            return dto;
+            else 
+            {
+                return new MediatorServiceResult()
+                {
+                    IsSuccess = false,
+                    ErrorMessage = "Водитель не найден"
+                };
+            }
         }
     }
 
-    public class GetRangeDriverService : GetRangeModelService<DriverDto>
+    public class GetRangeDriverService : IRequestHandler<GetRange<DriverDto>, IServiceResult<object>>
     {
-        public GetRangeDriverService(IRepository repository, ILogger<GetRangeModelService<DriverDto>> logger) : base(repository, logger)
+        private IRepository _repository;
+        public GetRangeDriverService(IRepository repository)
         {
+            _repository = repository;
         }
 
-        protected override async Task<object> Get(int start, int end)
+        public async Task<IServiceResult<object>> Handle(GetRange<DriverDto> request, CancellationToken cancellationToken)
         {
-            IEnumerable<Driver> drivers = await _repository.GetRange<Driver>(start, end, q => q.OrderBy(d => d.FamilyName).ThenBy(d => d.Name).ThenBy(d => d.FatherName), "Carrier,Vehicle");
+            IEnumerable<Driver> drivers = await _repository.GetRange<Driver>(request.Start, request.End, 
+                                                                             q => q.OrderBy(d => d.FamilyName).ThenBy(d => d.Name).ThenBy(d => d.FatherName), 
+                                                                             "Carrier,Vehicle");
             List<DriverDto> dtos = new List<DriverDto>();
 
             foreach (var driver in drivers)
@@ -120,11 +141,15 @@ namespace MediatorServices
                 dtos.Add(dto);
             }
 
-            return dtos;
+            return new MediatorServiceResult()
+            {
+                IsSuccess = true,
+                Result = dtos
+            };
         }
     }
 
-    public class GetFilterDriverService : IRequestHandler<GetFilter<DriverDto>, object>
+    public class GetFilterDriverService : IRequestHandler<GetFilter<DriverDto>, IServiceResult<object>>
     {
         protected IRepository _repository;
         protected ILogger<GetFilterDriverService> _logger;
@@ -135,17 +160,13 @@ namespace MediatorServices
             _logger = logger;
         }
 
-        public async Task<object> Handle(GetFilter<DriverDto> request, CancellationToken cancellationToken)
+        public async Task<IServiceResult<object>> Handle(GetFilter<DriverDto> request, CancellationToken cancellationToken)
         {
             Expression<Func<Driver, bool>> filter = GetFilter(request.PropertyName, request.Params);
-            return await Get(filter);
-        }
 
-        protected async Task<object> Get(Expression<Func<Driver, bool>> filter)
-        {
             IEnumerable<Driver> drivers = await _repository.Get<Driver>(filter,
-                                                                         q => q.OrderBy(d => d.FamilyName).ThenBy(d => d.Name).ThenBy(d => d.FatherName),
-                                                                         "Carrier,Vehicle");
+                                                                        q => q.OrderBy(d => d.FamilyName).ThenBy(d => d.Name).ThenBy(d => d.FatherName),
+                                                                        "Carrier,Vehicle");
             List<DriverDto> dtos = new List<DriverDto>();
 
             foreach (var driver in drivers)
@@ -181,7 +202,11 @@ namespace MediatorServices
                 dtos.Add(dto);
             }
 
-            return dtos;
+            return new MediatorServiceResult()
+            {
+                IsSuccess = true,
+                Result = dtos
+            };
         }
 
         protected Expression<Func<Driver, bool>> GetFilter(string property, params object[] parameters)
@@ -238,7 +263,7 @@ namespace MediatorServices
         }
     }
 
-    public class DeleteDriverService : IRequestHandler<Delete<DriverDto>, bool>
+    public class DeleteDriverService : IRequestHandler<Delete<DriverDto>, IServiceResult<object>>
     {
         private IRepository _repository;
         private IFileManager _fileManager;
@@ -249,31 +274,48 @@ namespace MediatorServices
             _fileManager = fileManager;
         }
 
-        public async Task<bool> Handle(Delete<DriverDto> request, CancellationToken cancellationToken)
+        public async Task<IServiceResult<object>> Handle(Delete<DriverDto> request, CancellationToken cancellationToken)
         {
-            bool result = await _repository.Remove<Driver>(request.Id);
-
-            IEnumerable<Models.Sub.File> files = await _repository.Get<Models.Sub.File>(f => f.EntityType == nameof(Driver) && f.EntityId == request.Id);
-
-            if (files.Any())
+            if (await _repository.Remove<Driver>(request.Id))
             {
-                string catalog = Path.GetFileName(Path.GetDirectoryName(files.First().FullFilePath));
+                IEnumerable<Models.Sub.File> files = await _repository.Get<Models.Sub.File>(f => f.EntityType == nameof(Driver) && f.EntityId == request.Id);
 
-                await _fileManager.RemoveAllFiles(nameof(Driver), catalog);
+                if (files.Any())
+                {
+                    string catalog = Path.GetFileName(Path.GetDirectoryName(files.First().FullFilePath));
+
+                    await _fileManager.RemoveAllFiles(nameof(Driver), catalog);
+                }
+
+                return new MediatorServiceResult()
+                {
+                    IsSuccess = true,
+                    Result = true,
+                };
             }
-
-            return result;
+            else 
+            {
+                return new MediatorServiceResult()
+                {
+                    IsSuccess = false,
+                    ErrorMessage = "Не удалось удалить водителя"
+                };
+            }
         }
     }
 
-    public class AddDriverService : AddModelService<DriverDto>
+    public class AddDriverService : IRequestHandler<Add<DriverDto>, IServiceResult<object>>
     {
-        public AddDriverService(IRepository repository) : base(repository)
+        private IRepository _repository;
+        public AddDriverService(IRepository repository)
         {
+            _repository = repository;
         }
 
-        protected override async Task<Guid> Add(DriverDto dto)
+        public async Task<IServiceResult<object>> Handle(Add<DriverDto> request, CancellationToken cancellationToken)
         {
+            DriverDto dto = request.Value;
+
             string[] name = dto.Name.Split(' ');
 
             Driver driver = new Driver()
@@ -286,7 +328,7 @@ namespace MediatorServices
                 PassportDateOfIssue = dto.PassportDateOfIssue,
                 PassportIssuer = dto.PassportIssuer,
                 PassportSerial = dto.PassportSerial,
-                Phones = string.Join(';',dto.Phones)
+                Phones = string.Join(';', dto.Phones)
             };
 
             if (dto.Carrier != null && dto.Carrier.Id != Guid.Empty)
@@ -299,21 +341,52 @@ namespace MediatorServices
                 driver.VehicleId = dto.Vehicle.Id;
             }
 
-            return await _repository.Add(driver);
+            Guid id = await _repository.Add(driver);
+
+            if (id == Guid.Empty)
+            {
+                return new MediatorServiceResult()
+                {
+                    IsSuccess = false,
+                    ErrorMessage = "Не удалось сохранить водителя"
+                };
+            }
+            else 
+            {
+                return new MediatorServiceResult()
+                {
+                    IsSuccess = true,
+                    Result = id
+                };
+            }
         }
     }
 
-    public class UpdateDriverService : UpdateModelService<DriverDto>
+    public class UpdateDriverService : IRequestHandler<Update<DriverDto>, IServiceResult<object>>
     {
-        public UpdateDriverService(IRepository repository) : base(repository)
+        private IRepository _repository;
+
+        public UpdateDriverService(IRepository repository) 
         {
+            _repository = repository;
         }
 
-        protected override async Task<bool> Update(DriverDto dto)
+        public async Task<IServiceResult<object>> Handle(Update<DriverDto> request, CancellationToken cancellationToken)
         {
+            DriverDto dto = request.Value;
+
             string[] name = dto.Name.Split(' ');
 
             Driver driver = await _repository.GetById<Driver>(dto.Id);
+
+            if (driver == null) 
+            {
+                return new MediatorServiceResult()
+                {
+                    IsSuccess = false,
+                    ErrorMessage = "Водитель не найден"
+                };
+            }
 
             driver.FamilyName = name[0];
             driver.Name = name[1];
@@ -340,13 +413,27 @@ namespace MediatorServices
                     driver.VehicleId = dto.Vehicle.Id;
                 }
             }
-            else 
+            else
             {
                 driver.VehicleId = null;
             }
-            
 
-            return await _repository.Update(driver);
+            if (await _repository.Update(driver))
+            {
+                return new MediatorServiceResult()
+                {
+                    IsSuccess = true,
+                    Result = true
+                };
+            }
+            else 
+            {
+                return new MediatorServiceResult()
+                {
+                    IsSuccess = false,
+                    ErrorMessage = "Не удалось обновить водителя"
+                };
+            }
         }
     }
 }
