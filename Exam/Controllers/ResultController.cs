@@ -49,7 +49,7 @@ namespace Exam.Controllers
                 }
                 else 
                 { 
-                    Ok(result);
+                    BadRequest(result);
                 }
             }
             return NotFound("Результат не найден");
