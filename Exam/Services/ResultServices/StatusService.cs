@@ -3,6 +3,13 @@ using Utilities.Interfaces;
 
 namespace Exam.ResultServices
 {
+    public class StatusServiceResult : IServiceResult<Status>
+    {
+        public bool IsSuccess { get; set ; }
+        public string ErrorMessage { get ; set ; }
+        public Status Result { get ; set ; }
+    }
+
     public class StatusService : IStatusService
     {
         private ConcurrentDictionary<Guid, Status> _statuses;
@@ -31,13 +38,24 @@ namespace Exam.ResultServices
             return Task.Run(() => { _statuses.TryRemove(id, out var status); });
         }
 
-        public async Task<Status> GetStatus(Guid id)
+        public async Task<IServiceResult<Status>> GetStatus(Guid id)
         {
             if (_statuses.ContainsKey(id))
             {
-                return _statuses[id];
+                return new StatusServiceResult()
+                {
+                    IsSuccess = true,
+                    Result = _statuses[id]
+                };
             }
-            return Status.Unknown;
+            else 
+            {
+                return new StatusServiceResult()
+                {
+                    IsSuccess = false,
+                    ErrorMessage = "Статус не найден"
+                };
+            }
         }
     }
 }

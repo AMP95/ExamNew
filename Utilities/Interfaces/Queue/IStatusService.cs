@@ -4,13 +4,12 @@
     {
         Created,
         InProgress,
-        Done,
-        Unknown
+        Done
     }
 
     public interface IStatusService
     {
-        Task<Status> GetStatus(Guid id);
+        Task<IServiceResult<Status>> GetStatus(Guid id);
         Task RemoveStatus(Guid id);
         Task UpdateStatus(Guid id, Status status);
     }
