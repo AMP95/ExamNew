@@ -1,22 +1,18 @@
 ﻿
 using log4net;
 using log4net.Config;
-using log4net.Repository;
+using Microsoft.Extensions.Logging;
 
-namespace Exam
+namespace Logger4Net
 {
 
     public class Log4NetLogger : ILogger
     {
-        private string _name;
-        private string _configure;
         private readonly ILog _log;
 
         public Log4NetLogger(string name, string configure)
         {
-            _name = name;
-            _configure = configure;
-            XmlConfigurator.ConfigureAndWatch(new FileInfo(configure));
+            var configurator = XmlConfigurator.ConfigureAndWatch(new FileInfo(configure));
             _log = LogManager.GetLogger(name);
         }
         public IDisposable BeginScope<TState>(TState state)

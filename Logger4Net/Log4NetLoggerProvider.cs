@@ -1,6 +1,7 @@
-﻿using System.Collections.Concurrent;
+﻿using Microsoft.Extensions.Logging;
+using System.Collections.Concurrent;
 
-namespace Exam
+namespace Logger4Net
 {
     public class Log4NetProvider : ILoggerProvider
     {

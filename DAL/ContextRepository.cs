@@ -21,111 +21,67 @@ namespace DAL
                                                  IOrderedQueryable<T>> orderBy = null,
                                                  string includeProperties = "") where T : BaseEntity
         {
-            if (_context != null)
+            IQueryable<T> query = _context.Set<T>();
+            if (filter != null)
             {
-                IQueryable<T> query = _context.Set<T>();
-                if (query.Any())
-                {
-                    if (filter != null)
-                    {
-                        query = query.Where(filter);
-                    }
-
-                    foreach (string includeProperty in includeProperties.Split
-                        (new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
-                    {
-                        query = query.Include(includeProperty);
-                    }
-
-                    if (orderBy != null)
-                    {
-                        return orderBy(query);
-                    }
-                    else
-                    {
-                        return query;
-                    }
-                }
+                query = query.Where(filter);
             }
-            return Enumerable.Empty<T>();
+
+            foreach (string includeProperty in includeProperties.Split
+                (new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+            {
+                query = query.Include(includeProperty);
+            }
+
+            if (orderBy != null)
+            {
+                return orderBy(query);
+            }
+            else
+            {
+                return query;
+            }
         }
 
         public async Task<IEnumerable<T>> GetRange<T>(int start, int end, Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null, string includeProperties = "") where T : BaseEntity
         {
-            if (_context != null)
+            IQueryable<T> query = _context.Set<T>();
+            foreach (string includeProperty in includeProperties.Split
+                (new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
             {
-                IQueryable<T> query = _context.Set<T>();
-                if (query.Any())
-                {
-                    foreach (string includeProperty in includeProperties.Split
-                        (new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
-                    {
-                        query = query.Include(includeProperty);
-                    }
-
-                    if (orderBy != null)
-                    {
-                        query = orderBy(query);
-                    }
-
-                    if (end > start)
-                    {
-                        return query.Skip(start).Take(end);
-                    }
-                    else
-                    {
-                        return query;
-                    }
-                }
+                query = query.Include(includeProperty);
             }
-            return Enumerable.Empty<T>();
+
+            if (orderBy != null)
+            {
+                query = orderBy(query);
+            }
+
+            if (end > start)
+            {
+                return query.Skip(start).Take(end);
+            }
+            else
+            {
+                return query;
+            }
         }
 
         public async Task<T> GetById<T>(Guid id) where T : BaseEntity
         {
-            if (_context != null)
-            {
-                return await _context.Set<T>().FindAsync(id);
-            }
-            return null;
+            return await _context.Set<T>().FindAsync(id);
         }
 
         public async Task<bool> Remove<T>(Guid id) where T : BaseEntity
         {
-            if (_context != null)
+            using (IDbContextTransaction transaction = _context.Database.BeginTransaction())
             {
-                using (IDbContextTransaction transaction = _context.Database.BeginTransaction())
-                {
-                    T entity = await _context.Set<T>().FindAsync(id);
-                    if (entity != null)
-                    {
-                        try
-                        {
-                            _context.Set<T>().Remove(entity);
-                            await _context.SaveChangesAsync();
-                            await transaction.CommitAsync();
-                            return true;
-                        }
-                        catch (Exception ex)
-                        {
-                            _logger.LogError(ex, ex.Message);
-                            await transaction.RollbackAsync();
-                        }
-                    }
-                }
-            }
-            return false;
-        }
-
-        public async Task<bool> Update<T>(T entity) where T : BaseEntity
-        {
-            if (_context != null)
-            {
-                using (IDbContextTransaction transaction = _context.Database.BeginTransaction())
+                T entity = await _context.Set<T>().FindAsync(id);
+                if (entity != null)
                 {
                     try
                     {
-                        _context.Set<T>().Update(entity);
+                        _context.Set<T>().Remove(entity);
                         await _context.SaveChangesAsync();
                         await transaction.CommitAsync();
                         return true;
@@ -140,24 +96,41 @@ namespace DAL
             return false;
         }
 
+        public async Task<bool> Update<T>(T entity) where T : BaseEntity
+        {
+            using (IDbContextTransaction transaction = _context.Database.BeginTransaction())
+            {
+                try
+                {
+                    _context.Set<T>().Update(entity);
+                    await _context.SaveChangesAsync();
+                    await transaction.CommitAsync();
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, ex.Message);
+                    await transaction.RollbackAsync();
+                }
+            }
+            return false;
+        }
+
         public async Task<Guid> Add<T>(T entity) where T : BaseEntity
         {
-            if (_context != null)
+            using (IDbContextTransaction transaction = _context.Database.BeginTransaction())
             {
-                using (IDbContextTransaction transaction = _context.Database.BeginTransaction())
+                try
                 {
-                    try
-                    {
-                        _context.Set<T>().Add(entity);
-                        await _context.SaveChangesAsync();
-                        await transaction.CommitAsync();
-                        return entity.Id;
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError(ex, ex.Message);
-                        await transaction.RollbackAsync();
-                    }
+                    _context.Set<T>().Add(entity);
+                    await _context.SaveChangesAsync();
+                    await transaction.CommitAsync();
+                    return entity.Id;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, ex.Message);
+                    await transaction.RollbackAsync();
                 }
             }
             return Guid.Empty;

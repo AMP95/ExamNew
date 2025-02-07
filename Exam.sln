@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Services", "Services\Servic
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Utilities", "Utilities\Utilities.csproj", "{7354BB62-7C77-4FFB-AEAC-B516E4656671}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Logger4Net", "Logger4Net\Logger4Net.csproj", "{493516B9-324B-4A1B-B7F3-57276DB80346}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,10 @@ Global
 		{7354BB62-7C77-4FFB-AEAC-B516E4656671}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7354BB62-7C77-4FFB-AEAC-B516E4656671}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7354BB62-7C77-4FFB-AEAC-B516E4656671}.Release|Any CPU.Build.0 = Release|Any CPU
+		{493516B9-324B-4A1B-B7F3-57276DB80346}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{493516B9-324B-4A1B-B7F3-57276DB80346}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{493516B9-324B-4A1B-B7F3-57276DB80346}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{493516B9-324B-4A1B-B7F3-57276DB80346}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

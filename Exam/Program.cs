@@ -6,6 +6,7 @@ using Exam.FileManager;
 using Exam.ResultServices;
 using Exam.Services;
 using Exam.Services.BackgroundServices;
+using Logger4Net;
 using MediatR;
 using MediatRepos;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -39,7 +40,7 @@ namespace Exam
             builder.Configuration.GetSection("TokenSettings").Bind(tokenSettings);
             JwtTokenService.LoadSettings(tokenSettings);
 
-            builder.Logging.AddProvider(new Log4NetProvider("log4net.config"));
+            builder.Logging.AddProvider(new Log4NetProvider("logger.config"));
 
             builder.Services.AddControllers().AddNewtonsoftJson();
 

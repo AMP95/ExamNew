@@ -1,4 +1,6 @@
-﻿namespace Exam
+﻿using Microsoft.Extensions.Logging;
+
+namespace Logger4Net
 {
     public static class Log4netExtensions
     {
@@ -10,7 +12,7 @@
 
         public static ILoggerFactory AddLog4Net(this ILoggerFactory factory)
         {
-            factory.AddProvider(new Log4NetProvider("log4net.config"));
+            factory.AddProvider(new Log4NetProvider("logger.config"));
             return factory;
         }
     }
