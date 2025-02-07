@@ -10,15 +10,26 @@ using Utilities.Interfaces;
 
 namespace MediatorServices
 {
-    public class GetIdLogistService : GetIdModelService<LogistDto>
+    public class GetIdLogistService : IRequestHandler<GetId<LogistDto>, IServiceResult<object>>
     {
-        public GetIdLogistService(IRepository repository, ILogger<GetIdModelService<LogistDto>> logger) : base(repository, logger)
+        private IRepository _repository;
+        public GetIdLogistService(IRepository repository)
         {
+            _repository = repository;
         }
 
-        protected override async Task<object> Get(Guid id)
+        public async Task<IServiceResult<object>> Handle(GetId<LogistDto> request, CancellationToken cancellationToken)
         {
-            Logist logist = await _repository.GetById<Logist>(id);
+            Logist logist = await _repository.GetById<Logist>(request.Id);
+
+            if (logist == null) 
+            {
+                return new MediatorServiceResult()
+                {
+                    IsSuccess = false,
+                    ErrorMessage = "Пользователь не найден"
+                };
+            }
 
             LogistDto dto = new LogistDto()
             {
@@ -30,19 +41,25 @@ namespace MediatorServices
                 Role = (LogistRole)Enum.Parse(typeof(LogistRole), logist.Role),
             };
 
-            return dto;
+            return new MediatorServiceResult()
+            {
+                IsSuccess = true,
+                Result = dto
+            };
         }
     }
 
-    public class GetRangeLogistService : GetRangeModelService<LogistDto>
+    public class GetRangeLogistService : IRequestHandler<GetRange<LogistDto>, IServiceResult<object>>
     {
-        public GetRangeLogistService(IRepository repository, ILogger<GetRangeModelService<LogistDto>> logger) : base(repository, logger)
+        private IRepository _repository;
+        public GetRangeLogistService(IRepository repository)
         {
+            _repository = repository;
         }
 
-        protected override async Task<object> Get(int start, int end)
+        public async Task<IServiceResult<object>> Handle(GetRange<LogistDto> request, CancellationToken cancellationToken)
         {
-            IEnumerable<Logist> logists = await _repository.GetRange<Logist>(start, end, q => q.OrderBy(t => t.Name));
+            IEnumerable<Logist> logists = await _repository.GetRange<Logist>(request.Start, request.End, q => q.OrderBy(t => t.Name));
             List<LogistDto> dtos = new List<LogistDto>();
 
             foreach (var logist in logists)
@@ -61,11 +78,15 @@ namespace MediatorServices
                 dtos.Add(dto);
             }
 
-            return dtos;
+            return new MediatorServiceResult()
+            {
+                IsSuccess = true,
+                Result = dtos
+            };
         }
     }
 
-    public class GetFilterLogistService : IRequestHandler<GetFilter<LogistDto>, object>
+    public class GetFilterLogistService : IRequestHandler<GetFilter<LogistDto>, IServiceResult<object>>
     {
         protected IRepository _repository;
         protected ILogger<GetFilterLogistService> _logger;
@@ -76,14 +97,10 @@ namespace MediatorServices
             _logger = logger;
         }
 
-        public async Task<object> Handle(GetFilter<LogistDto> request, CancellationToken cancellationToken)
+        public async Task<IServiceResult<object>> Handle(GetFilter<LogistDto> request, CancellationToken cancellationToken)
         {
             Expression<Func<Logist, bool>> filter = GetFilter(request.PropertyName, request.Params);
-            return await Get(filter);
-        }
 
-        protected async Task<object> Get(Expression<Func<Logist, bool>> filter)
-        {
             IEnumerable<Logist> logists = await _repository.Get<Logist>(filter, q => q.OrderBy(t => t.Name));
             List<LogistDto> dtos = new List<LogistDto>();
 
@@ -103,8 +120,13 @@ namespace MediatorServices
                 dtos.Add(dto);
             }
 
-            return dtos;
+            return new MediatorServiceResult()
+            {
+                IsSuccess = true,
+                Result = dtos
+            };
         }
+
 
         protected Expression<Func<Logist, bool>> GetFilter(string property, params object[] parameters)
         {
@@ -135,14 +157,18 @@ namespace MediatorServices
     }
 
 
-    public class AddLogistService : AddModelService<LogistDto>
+    public class AddLogistService : IRequestHandler<Add<LogistDto>, IServiceResult<object>>
     {
-        public AddLogistService(IRepository repository) : base(repository)
+        protected IRepository _repository;
+        public AddLogistService(IRepository repository) 
         {
+            _repository = repository;
         }
 
-        protected override async Task<Guid> Add(LogistDto dto)
+        public async Task<IServiceResult<object>> Handle(Add<LogistDto> request, CancellationToken cancellationToken)
         {
+            LogistDto dto = request.Value;
+
             Logist truck = new Logist()
             {
                 Name = dto.Name,
@@ -153,31 +179,67 @@ namespace MediatorServices
                 IsExpired = dto.IsExpired,
             };
 
-            return await _repository.Add(truck);
+            Guid id = await _repository.Add(truck);
+
+            if (id == Guid.Empty)
+            {
+                return new MediatorServiceResult()
+                {
+                    IsSuccess = false,
+                    ErrorMessage = "Не удалось сохранить пользователя"
+                };
+            }
+            else 
+            {
+                return new MediatorServiceResult()
+                {
+                    IsSuccess = true,
+                    Result = id,
+                };
+            }
         }
     }
 
-    public class UpdateLogistService : UpdateModelService<LogistDto>
+    public class UpdateLogistService : IRequestHandler<Update<LogistDto>, IServiceResult<object>>
     {
-        public UpdateLogistService(IRepository repository) : base(repository)
+        protected IRepository _repository;
+        public UpdateLogistService(IRepository repository)
         {
+            _repository = repository;
         }
 
-        protected override async Task<bool> Update(LogistDto dto)
+        public async Task<IServiceResult<object>> Handle(Update<LogistDto> request, CancellationToken cancellationToken)
         {
-            Logist vehicle = await _repository.GetById<Logist>(dto.Id);
+            LogistDto dto = request.Value;
 
-            vehicle.Name = dto.Name;
-            vehicle.Password = dto.Password;
-            vehicle.PasswordState = (short)dto.PasswordState;
-            vehicle.Role = dto.Role.ToString();
-            vehicle.IsExpired = dto.IsExpired;
+            Logist logist = await _repository.GetById<Logist>(dto.Id);
 
-            return await _repository.Update(vehicle);
+            logist.Name = dto.Name;
+            logist.Password = dto.Password;
+            logist.PasswordState = (short)dto.PasswordState;
+            logist.Role = dto.Role.ToString();
+            logist.IsExpired = dto.IsExpired;
+
+            if (await _repository.Update(logist))
+            {
+                return new MediatorServiceResult()
+                {
+                    IsSuccess = true,
+                    Result = true,
+                };
+            }
+            else
+            {
+                return new MediatorServiceResult()
+                {
+                    IsSuccess = false,
+                    ErrorMessage = "Не удалось обновить пользователя"
+                };
+            }
         }
     }
 
-    public class UpdateLogistPropertyService : IRequestHandler<Patch<LogistDto>, bool>
+    public class UpdateLogistPropertyService : IRequestHandler<Patch<LogistDto>, IServiceResult<object>>
     {
         protected IRepository _repository;
         protected ILogger<UpdateLogistPropertyService> _logger;
@@ -188,7 +250,7 @@ namespace MediatorServices
             _logger = logger;
         }
 
-        public async Task<bool> Handle(Patch<LogistDto> request, CancellationToken cancellationToken)
+        public async Task<IServiceResult<object>> Handle(Patch<LogistDto> request, CancellationToken cancellationToken)
         {
             try
             {
@@ -205,17 +267,28 @@ namespace MediatorServices
                     }
                 }
 
-                return await _repository.Update(logist);
+                if (await _repository.Update(logist)) 
+                {
+                    return new MediatorServiceResult()
+                    {
+                        IsSuccess = true,
+                        Result = true,
+                    };
+                }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, ex.Message);
             }
-            return false;
+            return new MediatorServiceResult()
+            {
+                IsSuccess = false,
+                ErrorMessage = "Не удалось обновить пользователя"
+            };
         }
     }
 
-    public class ValidateLogistService : IRequestHandler<Validate, object>
+    public class ValidateLogistService : IRequestHandler<Validate, IServiceResult<object>>
     {
         private ITokenService<LogistDto> _tokenService;
         private IRepository _repository;
@@ -230,9 +303,10 @@ namespace MediatorServices
             _hashService = hashService;
         }
 
-        public async Task<object> Handle(Validate request, CancellationToken cancellationToken)
+        public async Task<IServiceResult<object>> Handle(Validate request, CancellationToken cancellationToken)
         {
             IEnumerable<Logist> admins = await _repository.Get<Logist>(l => l.Role == LogistRole.Admin.ToString());
+
             if (!admins.Any()) 
             {
                 Logist logist = new Logist()
@@ -247,11 +321,20 @@ namespace MediatorServices
                 await _repository.Add(logist);
             }
 
-            IEnumerable<Logist> logists = await _repository.Get<Logist>(l => l.Login ==  request.Logist.Login && l.Password == request.Logist.Password && !l.IsExpired);
+            IEnumerable<Logist> logists = await _repository.Get<Logist>(l => l.Login ==  request.Logist.Login && l.Password == request.Logist.Password);
 
-            if (logists.Any()) 
-            { 
+            if (logists.Any())
+            {
                 Logist logist = logists.FirstOrDefault();
+
+                if (logist.IsExpired) 
+                {
+                    return new MediatorServiceResult()
+                    {
+                        IsSuccess = false,
+                        ErrorMessage = "Доступ запрещен"
+                    };
+                }
 
                 LogistDto dto = new LogistDto()
                 {
@@ -265,10 +348,20 @@ namespace MediatorServices
 
                 string token = _tokenService.GetToken(dto);
 
-                return new object[] { token, dto };
+                return new MediatorServiceResult()
+                {
+                    IsSuccess = true,
+                    Result = new object[] { token, dto }
+                };
             }
-
-            return Array.Empty<object>();
+            else 
+            {
+                return new MediatorServiceResult()
+                {
+                    IsSuccess = false,
+                    ErrorMessage = "Неверный логин или пароль"
+                };
+            }
         }
     }
 }
