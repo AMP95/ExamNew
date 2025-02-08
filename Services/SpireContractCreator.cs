@@ -3,6 +3,8 @@ using DTOs.Dtos;
 using Spire.Doc;
 using Spire.Doc.Documents;
 using Spire.Doc.Fields;
+using Spire.Doc.Interface;
+using System.Drawing;
 using Utilities;
 using Utilities.Interfaces;
 
@@ -22,6 +24,10 @@ namespace Exam.FileManager
             Document doc = new Document();
 
             Section s = doc.AddSection();
+
+            s.PageSetup.Margins.Top = 15f;
+            s.PageSetup.Margins.Right = 15f;
+            s.PageSetup.Margins.Bottom = 15f;
 
             Paragraph headerP = s.AddParagraph();
             headerP.Format.HorizontalAlignment = HorizontalAlignment.Center;
@@ -105,12 +111,15 @@ namespace Exam.FileManager
                 }
             }
 
-            string filePathWithoutRoot = Path.Combine("Contracts", contract.CreationDate.Year.ToString(), $"{contract.Number}.docx");
-            string fullPath = _fileManager.GetFullPath(filePathWithoutRoot);
+            string fileDocPathWithoutRoot = Path.Combine("Contracts", contract.CreationDate.Year.ToString(), $"{contract.Number}.docx");
+            string fullDocPath = _fileManager.GetFullPath(fileDocPathWithoutRoot);
 
-            doc.SaveToFile( fullPath, FileFormat.Docx2010);
+            
 
-            return filePathWithoutRoot;
+            doc.SaveToFile(fullDocPath, FileFormat.Docx2010);
+            
+
+            return fileDocPathWithoutRoot;
         }
 
         private List<string[]> GetTableData(ContractDto contract, CompanyBaseDto company) 
@@ -183,6 +192,47 @@ namespace Exam.FileManager
             };
 
             return tableData;
+        }
+
+        public string CreateContractPdf(string docPath, string stampPath)
+        {
+            string fullDocPath = _fileManager.GetFullPath(docPath);
+            Document doc = new Document(fullDocPath);
+
+            string stampFullPath = _fileManager.GetFullPath(stampPath);
+
+            Bitmap p = new Bitmap(Image.FromFile(stampFullPath));
+
+            ITable table = doc.Sections[0].Tables[1];
+
+            TableRow lastRow = table.LastRow;
+
+            TableCell lastCell = lastRow.LastChild as TableCell;
+
+            IParagraph imagPar = lastCell.LastParagraph;
+
+            DocPicture picture = imagPar.AppendPicture(p);
+            picture.Width = 150;
+            picture.Height = 150;
+            picture.VerticalPosition = -75f;
+            picture.HorizontalPosition = -20f;
+            picture.FillTransparency = 0.6;
+            picture.BehindText = true;
+            picture.TextWrappingStyle = TextWrappingStyle.Behind;
+
+            string name = Path.GetFileNameWithoutExtension(docPath);
+            string catalog = Path.GetDirectoryName(docPath);
+
+            string PdfDirectory = Path.Combine(catalog, "PDF");
+
+            Directory.CreateDirectory(PdfDirectory);
+
+            string filePdfPathWithoutRoot = Path.Combine(PdfDirectory, $"{name}.pdf");
+            string fullPdfPath = _fileManager.GetFullPath(filePdfPathWithoutRoot);
+
+            doc.SaveToFile(fullPdfPath, FileFormat.PDF);
+
+            return filePdfPathWithoutRoot;
         }
     }
 }

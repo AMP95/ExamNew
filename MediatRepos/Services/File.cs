@@ -247,6 +247,9 @@ namespace MediatorServices
                 case nameof(CarrierDto):
                     entityCatalog = nameof(Carrier);
                     break;
+                case nameof(CompanyDto):
+                    entityCatalog = nameof(Company);
+                    break;
                 case nameof(DriverDto):
                     entityCatalog = nameof(Driver);
                     break;

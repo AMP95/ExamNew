@@ -177,6 +177,7 @@ namespace MediatorServices
                         Id = contract.Carrier.Id,
                         Name = contract.Carrier.Name,
                         Vat = (VAT)contract.Carrier.Vat,
+                        Emails = contract.Carrier.Emails.Split(';').ToList(),
                     },
                     Client = new CompanyDto()
                     {
@@ -496,21 +497,41 @@ namespace MediatorServices
                 Emails = current.Emails.Split(";").ToList(),
             };
 
-            var files = await _repository.Get<Models.Sub.File>(f => f.EntityId == contract.TemplateId);
+            string contractDocFilePath = _contractCreator.CreateContractDocument(contractDto, companyDto);
 
-            string contractFilePath = _contractCreator.CreateContractDocument(contractDto, companyDto);
+            string extDoc = Path.GetExtension(contractDocFilePath);
 
-            string ext = Path.GetExtension(contractFilePath);
-
-            Models.Sub.File contractFile = new Models.Sub.File()
+            Models.Sub.File docFile = new Models.Sub.File()
             {
-                ViewNameWithExtencion = $"{contract.Number}{ext}",
+                ViewNameWithExtencion = $"{contract.Number}{extDoc}",
                 EntityType = nameof(Contract),
                 EntityId = contract.Id,
-                FullFilePath = contractFilePath,
+                FullFilePath = contractDocFilePath,
             };
 
-            await _repository.Add(contractFile);
+            await _repository.Add(docFile);
+
+            string stampPath = string.Empty;
+            var stampFile = await _repository.Get<Models.Sub.File>(f => f.EntityId == companyDto.Id);
+
+            if (stampFile.Any()) 
+            {
+                stampPath = stampFile.First().FullFilePath;
+            }
+
+            string contractPdfFilePath = _contractCreator.CreateContractPdf(contractDocFilePath, stampPath);
+
+            string extPdf = Path.GetExtension(contractPdfFilePath);
+
+            Models.Sub.File pdfFile = new Models.Sub.File()
+            {
+                ViewNameWithExtencion = $"{contract.Number}{extPdf}",
+                EntityType = nameof(Contract),
+                EntityId = contract.Id,
+                FullFilePath = contractPdfFilePath,
+            };
+
+            await _repository.Add(pdfFile);
 
             return new MediatorServiceResult()
             {
@@ -596,11 +617,13 @@ namespace MediatorServices
 
                     if (files.Any())
                     {
-                        Models.Sub.File file = files.First();
-
-                        if (await _repository.Remove<Models.Sub.File>(file.Id))
+                        var list =files.ToList();
+                        foreach (var file in list) 
                         {
-                            _fileManager.RemoveFile(file.FullFilePath);
+                            if (await _repository.Remove<Models.Sub.File>(file.Id))
+                            {
+                                _fileManager.RemoveFile(file.FullFilePath);
+                            }
                         }
                     }
 
@@ -625,19 +648,42 @@ namespace MediatorServices
                         Emails = current.Emails.Split(";").ToList(),
                     };
 
-                    string contractFilePath = _contractCreator.CreateContractDocument(dto, companyDto);
+                    string contractDocFilePath = _contractCreator.CreateContractDocument(dto, companyDto);
 
-                    string ext = Path.GetExtension(contractFilePath);
+                    string extDoc = Path.GetExtension(contractDocFilePath);
 
-                    Models.Sub.File contractFile = new Models.Sub.File()
+                    Models.Sub.File docFile = new Models.Sub.File()
                     {
-                        ViewNameWithExtencion = $"{contract.Number}{ext}",
+                        ViewNameWithExtencion = $"{contract.Number}{extDoc}",
                         EntityType = nameof(Contract),
                         EntityId = contract.Id,
-                        FullFilePath = contractFilePath,
+                        FullFilePath = contractDocFilePath,
                     };
 
-                    await _repository.Add(contractFile);
+                    await _repository.Add(docFile);
+
+
+                    string stampPath = string.Empty;
+                    var stampFile = await _repository.Get<Models.Sub.File>(f => f.EntityId == companyDto.Id);
+
+                    if (stampFile.Any())
+                    {
+                        stampPath = stampFile.First().FullFilePath;
+                    }
+
+                    string contractPdfFilePath = _contractCreator.CreateContractPdf(contractDocFilePath, stampPath);
+
+                    string extPdf = Path.GetExtension(contractPdfFilePath);
+
+                    Models.Sub.File pdfFile = new Models.Sub.File()
+                    {
+                        ViewNameWithExtencion = $"{contract.Number}{extPdf}",
+                        EntityType = nameof(Contract),
+                        EntityId = contract.Id,
+                        FullFilePath = contractPdfFilePath,
+                    };
+
+                    await _repository.Add(pdfFile);
 
                     return new MediatorServiceResult()
                     {
