@@ -252,7 +252,7 @@ namespace MediatRepos
         }
     }
 
-    public class AddVehicleService : IRequestHandler<Update<VehicleDto>, IServiceResult<object>>
+    public class AddVehicleService : IRequestHandler<Add<VehicleDto>, IServiceResult<object>>
     {
         private IRepository _repository;
 
@@ -261,7 +261,7 @@ namespace MediatRepos
             _repository = repository;
         }
 
-        public async Task<IServiceResult<object>> Handle(Update<VehicleDto> request, CancellationToken cancellationToken)
+        public async Task<IServiceResult<object>> Handle(Add<VehicleDto> request, CancellationToken cancellationToken)
         {
             VehicleDto dto = request.Value;
 

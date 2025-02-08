@@ -304,7 +304,7 @@ namespace MediatorServices
         }
     }
 
-    public class AddDriverService : IRequestHandler<Update<DriverDto>, IServiceResult<object>>
+    public class AddDriverService : IRequestHandler<Add<DriverDto>, IServiceResult<object>>
     {
         private IRepository _repository;
         public AddDriverService(IRepository repository)
@@ -312,7 +312,7 @@ namespace MediatorServices
             _repository = repository;
         }
 
-        public async Task<IServiceResult<object>> Handle(Update<DriverDto> request, CancellationToken cancellationToken)
+        public async Task<IServiceResult<object>> Handle(Add<DriverDto> request, CancellationToken cancellationToken)
         {
             DriverDto dto = request.Value;
 

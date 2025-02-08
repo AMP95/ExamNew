@@ -409,7 +409,7 @@ namespace MediatorServices
         }
     }
 
-    public class AddContractService : IRequestHandler<Update<ContractDto>, IServiceResult<object>>
+    public class AddContractService : IRequestHandler<Add<ContractDto>, IServiceResult<object>>
     {
         private IRepository _repository;
         private IContractCreator<ContractDto, CompanyBaseDto> _contractCreator;
@@ -421,7 +421,7 @@ namespace MediatorServices
             _contractCreator = contractCreator;
         }
 
-        public async Task<IServiceResult<object>> Handle(Update<ContractDto> request, CancellationToken cancellationToken)
+        public async Task<IServiceResult<object>> Handle(Add<ContractDto> request, CancellationToken cancellationToken)
         {
             ContractDto contractDto = request.Value;
 

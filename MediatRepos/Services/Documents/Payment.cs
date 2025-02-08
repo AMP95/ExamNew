@@ -158,7 +158,7 @@ namespace MediatorServices
         }
     }
 
-    public class AddPaymentService : IRequestHandler<Update<PaymentDto>, IServiceResult<object>>
+    public class AddPaymentService : IRequestHandler<Add<PaymentDto>, IServiceResult<object>>
     {
         private IRepository _repository;
 
@@ -167,7 +167,7 @@ namespace MediatorServices
             _repository = repository;
         }
 
-        public async Task<IServiceResult<object>> Handle(Update<PaymentDto> request, CancellationToken cancellationToken)
+        public async Task<IServiceResult<object>> Handle(Add<PaymentDto> request, CancellationToken cancellationToken)
         {
             PaymentDto dto = request.Value;
 

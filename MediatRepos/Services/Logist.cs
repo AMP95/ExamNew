@@ -157,7 +157,7 @@ namespace MediatorServices
     }
 
 
-    public class AddLogistService : IRequestHandler<Update<LogistDto>, IServiceResult<object>>
+    public class AddLogistService : IRequestHandler<Add<LogistDto>, IServiceResult<object>>
     {
         protected IRepository _repository;
         public AddLogistService(IRepository repository) 
@@ -165,7 +165,7 @@ namespace MediatorServices
             _repository = repository;
         }
 
-        public async Task<IServiceResult<object>> Handle(Update<LogistDto> request, CancellationToken cancellationToken)
+        public async Task<IServiceResult<object>> Handle(Add<LogistDto> request, CancellationToken cancellationToken)
         {
             LogistDto dto = request.Value;
 

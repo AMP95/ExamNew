@@ -242,7 +242,7 @@ namespace MediatorServices
         }
     }
 
-    public class AddDocumentService : IRequestHandler<Update<DocumentDto>, IServiceResult<object>>
+    public class AddDocumentService : IRequestHandler<Add<DocumentDto>, IServiceResult<object>>
     {
         private IRepository _repository;
 
@@ -251,7 +251,7 @@ namespace MediatorServices
             _repository = repository;
         }
 
-        public async Task<IServiceResult<object>> Handle(Update<DocumentDto> request, CancellationToken cancellationToken)
+        public async Task<IServiceResult<object>> Handle(Add<DocumentDto> request, CancellationToken cancellationToken)
         {
             Guid docId = await _repository.Add(DocumentConverter.Convert(request.Value));
 
