@@ -46,7 +46,7 @@ namespace Exam.Controllers
             {
                 if (jobj != null)
                 {
-                    return Ok(await _queue.Enqueue(new Update<DriverDto>(jobj.ToObject<DriverDto>())));
+                    return Ok(await _queue.Enqueue(new Add<DriverDto>(jobj.ToObject<DriverDto>())));
                 }
                 _logger.LogWarning($"Recieved null object");
                 return BadRequest("Передан пустой параметр");

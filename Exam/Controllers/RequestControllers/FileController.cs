@@ -50,7 +50,7 @@ namespace Exam.Controllers
                 {
                     if (await _fileManager.TempSave(data.FileDto.FileNameWithExtencion, data.File))
                     {
-                        return Ok(await _queue.Enqueue(new Update<FileDto>(data.FileDto)));
+                        return Ok(await _queue.Enqueue(new Add<FileDto>(data.FileDto)));
                     }
                 }
                 _logger.LogWarning($"Recieved null object");

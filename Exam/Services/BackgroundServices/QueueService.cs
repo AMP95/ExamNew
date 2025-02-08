@@ -10,6 +10,13 @@ namespace Exam.Services.BackgroundServices
         public bool IsSuccess { get; set; }
         public string ErrorMessage { get; set; }
         public Guid Result { get; set; }
+
+        public QueueServiceResult()
+        {
+            IsSuccess = false;
+            ErrorMessage = string.Empty;
+            Result = Guid.Empty;
+        }
     }
 
     public class QueueService : BackgroundService, IQueueService<IRequest<IServiceResult<object>>>

@@ -47,7 +47,7 @@ namespace Exam.Controllers
             {
                 if (jobj != null)
                 {
-                    return Ok(await _queue.Enqueue(new Update<VehicleDto>(jobj.ToObject<VehicleDto>())));
+                    return Ok(await _queue.Enqueue(new Add<VehicleDto>(jobj.ToObject<VehicleDto>())));
                 }
                 _logger.LogWarning($"Recieved null object");
                 return BadRequest("Передан пустой параметр");

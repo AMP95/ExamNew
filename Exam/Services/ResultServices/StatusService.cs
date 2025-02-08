@@ -8,6 +8,12 @@ namespace Exam.ResultServices
         public bool IsSuccess { get; set ; }
         public string ErrorMessage { get ; set ; }
         public Status Result { get ; set ; }
+        public StatusServiceResult()
+        {
+            IsSuccess = false;
+            ErrorMessage = string.Empty;
+            Result = Status.InProgress;
+        }
     }
 
     public class StatusService : IStatusService
