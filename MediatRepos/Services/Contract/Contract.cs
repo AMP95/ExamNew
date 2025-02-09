@@ -351,8 +351,22 @@ namespace MediatorServices
                             Number = contract.Number,
                             Type = PayType.Payment,
                             Balance = contract.CarrierPayment - paymentSumm,
-                            DaysToExpiration = (int)(income.OrderBy(d => d.RecievingDate).Last().RecievingDate - DateTime.Now).TotalDays
                         };
+
+                        int daysRange = (int)(DateTime.Now - income.OrderBy(d => d.RecievingDate).Last().RecievingDate).TotalDays;
+
+                        if (contract.CarrierPayPriority == (short)PaymentPriority.Normal)
+                        {   
+                            dto.DaysToExpiration = 7 - daysRange;
+                        }
+                        else if (contract.CarrierPayPriority == (short)PaymentPriority.Hight)
+                        {
+                            dto.DaysToExpiration = 5 - daysRange;
+                        }
+                        else 
+                        {
+                            dto.DaysToExpiration = 2 - daysRange;
+                        }
 
                         required.Add(dto);
                     }
