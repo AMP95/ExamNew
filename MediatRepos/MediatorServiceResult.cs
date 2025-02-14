@@ -12,7 +12,6 @@ namespace MediatorServices
         {
             IsSuccess = false;
             ErrorMessage = string.Empty;
-            Result = default;
         }
     }
 }

@@ -191,7 +191,8 @@ namespace MediatorServices
                 return new MediatorServiceResult()
                 {
                     IsSuccess = false,
-                    ErrorMessage = "Не удалось удалить компанию"
+                    ErrorMessage = "Не удалось удалить компанию",
+                    Result = false
                 };
             }
         }
@@ -215,7 +216,8 @@ namespace MediatorServices
                 return new MediatorServiceResult()
                 {
                     IsSuccess = false,
-                    ErrorMessage = "Не удалось добавить компанию"
+                    ErrorMessage = "Не удалось добавить компанию",
+                    Result = Guid.Empty
                 };
             }
             else 
@@ -249,7 +251,8 @@ namespace MediatorServices
                 return new MediatorServiceResult()
                 {
                     IsSuccess = false,
-                    ErrorMessage = "Не удалось найти компанию"
+                    ErrorMessage = "Не удалось найти компанию",
+                    Result  = false
                 };
             }
 
@@ -273,7 +276,8 @@ namespace MediatorServices
                 return new MediatorServiceResult()
                 {
                     IsSuccess = false,
-                    ErrorMessage = "Не удалось обновить компанию"
+                    ErrorMessage = "Не удалось обновить компанию",
+                    Result = false
                 };
             }
         }

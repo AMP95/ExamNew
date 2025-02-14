@@ -418,7 +418,8 @@ namespace MediatorServices
                 return new MediatorServiceResult()
                 {
                     IsSuccess = false,
-                    ErrorMessage = "Не удалось удалить заявку"
+                    ErrorMessage = "Не удалось удалить заявку",
+                    Result = false,
                 };
             }
         }
@@ -493,7 +494,8 @@ namespace MediatorServices
                 return new MediatorServiceResult()
                 {
                     IsSuccess = false,
-                    ErrorMessage = "Не удалось добавить заявку"
+                    ErrorMessage = "Не удалось добавить заявку",
+                    Result = Guid.Empty
                 };
             }
 
@@ -710,7 +712,8 @@ namespace MediatorServices
             return new MediatorServiceResult()
             {
                 IsSuccess = false,
-                ErrorMessage = "Не удалось обновить заявку"
+                ErrorMessage = "Не удалось обновить заявку",
+                Result = false
             };
         }
     }
@@ -733,7 +736,8 @@ namespace MediatorServices
                 return new MediatorServiceResult()
                 {
                     IsSuccess = false,
-                    ErrorMessage = "Заявка не найдена"
+                    ErrorMessage = "Заявка не найдена",
+                    Result= false
                 };
             }
 
@@ -762,7 +766,8 @@ namespace MediatorServices
             return new MediatorServiceResult()
             {
                 IsSuccess = false,
-                ErrorMessage = "Не удалось обновить заявку"
+                ErrorMessage = "Не удалось обновить заявку",
+                Result = false
             };
         }
     }

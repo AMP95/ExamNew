@@ -194,7 +194,8 @@ namespace MediatorServices
                 return new MediatorServiceResult()
                 {
                     IsSuccess = false,
-                    ErrorMessage = "Не удалось удалить перевозчика"
+                    ErrorMessage = "Не удалось удалить перевозчика",
+                    Result = false
                 };
             }
         }
@@ -219,7 +220,8 @@ namespace MediatorServices
                 return new MediatorServiceResult()
                 {
                     IsSuccess = false,
-                    ErrorMessage = "Не удалось добавить перевозчика"
+                    ErrorMessage = "Не удалось добавить перевозчика",
+                    Result  = Guid.Empty
                 };
             }
             else 
@@ -253,7 +255,8 @@ namespace MediatorServices
                 return new MediatorServiceResult()
                 {
                     IsSuccess = false,
-                    ErrorMessage = "Перевозчик не найден"
+                    ErrorMessage = "Перевозчик не найден",
+                    Result = false
                 };
             }
 
@@ -277,7 +280,8 @@ namespace MediatorServices
                 return new MediatorServiceResult()
                 {
                     IsSuccess = false,
-                    ErrorMessage = "Не удалось обновить перевозчика"
+                    ErrorMessage = "Не удалось обновить перевозчика",
+                    Result = false
                 };
             }
         }

@@ -4,6 +4,7 @@ using MediatRepos;
 using Microsoft.Extensions.Logging;
 using Models;
 using System.Linq.Expressions;
+using Utilities;
 using Utilities.Interfaces;
 
 namespace MediatorServices
@@ -218,7 +219,8 @@ namespace MediatorServices
                 return new MediatorServiceResult()
                 {
                     IsSuccess = false,
-                    ErrorMessage = "Документ не найден"
+                    ErrorMessage = "Документ не найден",
+                    Result = false
                 };
             }
 
@@ -236,7 +238,8 @@ namespace MediatorServices
             return new MediatorServiceResult()
             {
                 IsSuccess = false,
-                ErrorMessage = "Не удалось удалить документ"
+                ErrorMessage = "Не удалось удалить документ",
+                Result = false
             };
 
         }
@@ -253,6 +256,25 @@ namespace MediatorServices
 
         public async Task<IServiceResult<object>> Handle(Add<DocumentDto> request, CancellationToken cancellationToken)
         {
+            DocumentDto dto = request.Value;
+
+            if (dto.Type != DocumentType.Bill) 
+            {
+                IEnumerable<Contract> contracts = await _repository.Get<Contract>(c => c.Id == dto.ContractId, null, "LoadingPoint");
+
+                Contract contract = contracts.FirstOrDefault();
+
+                if (dto.CreationDate.Date < contract.LoadingPoint.DateAndTime.Date) 
+                {
+                    return new MediatorServiceResult()
+                    {
+                        IsSuccess = false,
+                        ErrorMessage = $"Дата {dto.Type.GetDescription()} не может быть раньше дать погрузки",
+                        Result = Guid.Empty
+                    };
+                }
+            }
+
             Guid docId = await _repository.Add(DocumentConverter.Convert(request.Value));
 
             if (docId == Guid.Empty)
@@ -260,7 +282,9 @@ namespace MediatorServices
                 return new MediatorServiceResult()
                 {
                     IsSuccess = false,
-                    ErrorMessage = "Не удалось сохранить документ"
+                    ErrorMessage = "Не удалось сохранить документ",
+                    Result = Guid.Empty
+                    
                 };
             }
             else 
@@ -290,12 +314,30 @@ namespace MediatorServices
 
             Document document = await _repository.GetById<Document>(dto.Id);
 
+            if (dto.Type != DocumentType.Bill)
+            {
+                IEnumerable<Contract> contracts = await _repository.Get<Contract>(c => c.Id == dto.ContractId, null, "LoadingPoint");
+
+                Contract contract = contracts.FirstOrDefault();
+
+                if (dto.CreationDate.Date < contract.LoadingPoint.DateAndTime.Date)
+                {
+                    return new MediatorServiceResult()
+                    {
+                        IsSuccess = false,
+                        ErrorMessage = $"Дата {dto.Type.GetDescription()} не может быть раньше дать погрузки",
+                        Result = false
+                    };
+                }
+            }
+
             if (document == null) 
             {
                 return new MediatorServiceResult()
                 {
                     IsSuccess = false,
-                    ErrorMessage = "Документ не найден"
+                    ErrorMessage = "Документ не найден",
+                    Result = false
                 };
             }
 
@@ -307,6 +349,8 @@ namespace MediatorServices
             document.RecievingDate = dto.RecievingDate;
             document.Summ = dto.Summ;
             document.DocumentType = (short)dto.Type;
+
+            
 
             if (await _repository.Update(document))
             {
@@ -323,7 +367,8 @@ namespace MediatorServices
                 return new MediatorServiceResult()
                 {
                     IsSuccess = false,
-                    ErrorMessage = "Не удалось обновить документ"
+                    ErrorMessage = "Не удалось обновить документ",
+                    Result= false
                 };
             }
         }

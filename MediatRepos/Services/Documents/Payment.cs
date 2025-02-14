@@ -133,7 +133,8 @@ namespace MediatorServices
                 return new MediatorServiceResult()
                 {
                     IsSuccess = false,
-                    ErrorMessage = "Оплата не найдена"
+                    ErrorMessage = "Оплата не найдена",
+                    Result = false
                 };
             }
 
@@ -152,7 +153,8 @@ namespace MediatorServices
                 return new MediatorServiceResult()
                 {
                     IsSuccess = false,
-                    ErrorMessage = "Не удалось удалить оплату"
+                    ErrorMessage = "Не удалось удалить оплату",
+                    Result = false
                 };
             } 
         }
@@ -187,7 +189,9 @@ namespace MediatorServices
                 return new MediatorServiceResult()
                 {
                     IsSuccess = false,
-                    Result = "Не удалось добавить оплату",
+                    ErrorMessage = "Не удалось добавить оплату",
+                    Result = Guid.Empty
+
                 };
             }
             else
@@ -223,7 +227,8 @@ namespace MediatorServices
                 return new MediatorServiceResult()
                 {
                     Result = false,
-                    ErrorMessage = "Облата не найдена"
+                    ErrorMessage = "Облата не найдена",
+                    IsSuccess = false
                 };
             }
 
@@ -248,7 +253,8 @@ namespace MediatorServices
                 return new MediatorServiceResult()
                 {
                     IsSuccess = false,
-                    ErrorMessage = "Не удалось обновить оплату"
+                    ErrorMessage = "Не удалось обновить оплату",
+                    Result = false
                 };
             }
         }

@@ -199,7 +199,8 @@ namespace MediatorServices
                 return new MediatorServiceResult()
                 {
                     IsSuccess = false,
-                    ErrorMessage = "Файл не найден"
+                    ErrorMessage = "Файл не найден",
+                    Result = false
                 };
             }
 
@@ -218,7 +219,8 @@ namespace MediatorServices
                 return new MediatorServiceResult()
                 {
                     IsSuccess = false,
-                    ErrorMessage = "Не удалось удалить файл"
+                    ErrorMessage = "Не удалось удалить файл",
+                    Result= false
                 };
             }
         }
@@ -291,7 +293,8 @@ namespace MediatorServices
             return new MediatorServiceResult()
             {
                 IsSuccess = false,
-                ErrorMessage = "Не удалось сохранить файл"
+                ErrorMessage = "Не удалось сохранить файл",
+                Result = Guid.Empty
             };
         }
     }

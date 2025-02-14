@@ -176,7 +176,8 @@ namespace MediatorServices
                 return new MediatorServiceResult()
                 {
                     IsSuccess = false,
-                    ErrorMessage = "Не удалось удалить шаблон"
+                    ErrorMessage = "Не удалось удалить шаблон",
+                    Result = false
                 };
             }
         }
@@ -210,7 +211,8 @@ namespace MediatorServices
                 return new MediatorServiceResult()
                 {
                     IsSuccess = false,
-                    ErrorMessage = "Не удалось добавить шаблон"
+                    ErrorMessage = "Не удалось добавить шаблон",
+                    Result= Guid.Empty
                 };
             }
             else 
@@ -256,7 +258,8 @@ namespace MediatorServices
                 return new MediatorServiceResult()
                 {
                     IsSuccess = false,
-                    ErrorMessage = "Не удалось обновить шаблон"
+                    ErrorMessage = "Не удалось обновить шаблон",
+                    Result = false
                 };
             }
         }

@@ -246,7 +246,8 @@ namespace MediatRepos
                 return new MediatorServiceResult()
                 {
                     IsSuccess = false,
-                    ErrorMessage = "ТС не найдено"
+                    ErrorMessage = "ТС не найдено",
+                    Result = false
                 };
             }
         }
@@ -285,7 +286,8 @@ namespace MediatRepos
                 return new MediatorServiceResult()
                 {
                     IsSuccess = false,
-                    ErrorMessage = "Де удалось добавить ТС"
+                    ErrorMessage = "Де удалось добавить ТС",
+                    Result = Guid.Empty
                 };
             }
             else 
@@ -320,7 +322,8 @@ namespace MediatRepos
                 return new MediatorServiceResult()
                 {
                     IsSuccess = false,
-                    ErrorMessage = "ТС не найдено"
+                    ErrorMessage = "ТС не найдено",
+                    Result = false
                 };
             }
 
@@ -361,7 +364,8 @@ namespace MediatRepos
                 return new MediatorServiceResult()
                 {
                     IsSuccess = false,
-                    ErrorMessage = "Не обновить ТС"
+                    ErrorMessage = "Не обновить ТС",
+                    Result= false
                 };
             }
         }

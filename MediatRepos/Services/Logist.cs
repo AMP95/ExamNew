@@ -186,7 +186,8 @@ namespace MediatorServices
                 return new MediatorServiceResult()
                 {
                     IsSuccess = false,
-                    ErrorMessage = "Не удалось сохранить пользователя"
+                    ErrorMessage = "Не удалось сохранить пользователя",
+                    Result = Guid.Empty
                 };
             }
             else 
@@ -233,7 +234,8 @@ namespace MediatorServices
                 return new MediatorServiceResult()
                 {
                     IsSuccess = false,
-                    ErrorMessage = "Не удалось обновить пользователя"
+                    ErrorMessage = "Не удалось обновить пользователя",
+                    Result = false
                 };
             }
         }
@@ -283,7 +285,8 @@ namespace MediatorServices
             return new MediatorServiceResult()
             {
                 IsSuccess = false,
-                ErrorMessage = "Не удалось обновить пользователя"
+                ErrorMessage = "Не удалось обновить пользователя",
+                Result = false
             };
         }
     }
@@ -332,7 +335,7 @@ namespace MediatorServices
                     return new MediatorServiceResult()
                     {
                         IsSuccess = false,
-                        ErrorMessage = "Доступ запрещен"
+                        ErrorMessage = "Доступ запрещен",
                     };
                 }
 

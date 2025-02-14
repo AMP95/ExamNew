@@ -298,7 +298,8 @@ namespace MediatorServices
                 return new MediatorServiceResult()
                 {
                     IsSuccess = false,
-                    ErrorMessage = "Не удалось удалить водителя"
+                    ErrorMessage = "Не удалось удалить водителя",
+                    Result = false
                 };
             }
         }
@@ -348,7 +349,8 @@ namespace MediatorServices
                 return new MediatorServiceResult()
                 {
                     IsSuccess = false,
-                    ErrorMessage = "Не удалось сохранить водителя"
+                    ErrorMessage = "Не удалось сохранить водителя",
+                    Result = Guid.Empty
                 };
             }
             else 
@@ -384,7 +386,8 @@ namespace MediatorServices
                 return new MediatorServiceResult()
                 {
                     IsSuccess = false,
-                    ErrorMessage = "Водитель не найден"
+                    ErrorMessage = "Водитель не найден",
+                    Result = false
                 };
             }
 
@@ -431,7 +434,8 @@ namespace MediatorServices
                 return new MediatorServiceResult()
                 {
                     IsSuccess = false,
-                    ErrorMessage = "Не удалось обновить водителя"
+                    ErrorMessage = "Не удалось обновить водителя",
+                    Result = false
                 };
             }
         }

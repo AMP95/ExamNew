@@ -92,6 +92,7 @@ namespace Exam.Services.BackgroundServices
                         catch (Exception ex)
                         {
                             _logger.LogError(ex, ex.Message);
+                            _requests.Enqueue(item);
                         }
                     }
                     else
