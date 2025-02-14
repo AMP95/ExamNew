@@ -197,7 +197,7 @@ namespace MediatorServices
                 return new MediatorServiceResult()
                 {
                     IsSuccess = true,
-                    Result = true,
+                    Result = payId,
                 };
             }
         }
