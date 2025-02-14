@@ -1,6 +1,7 @@
 ﻿using DTOs.Dtos;
 using MediatR;
 using MediatRepos;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
 using Utilities.Interfaces;
@@ -38,7 +39,7 @@ namespace Exam.Controllers
         {
             return Ok(await _queue.Enqueue(new GetRange<UserDto>(start, end)));
         }
-
+        [Authorize]
         [HttpPost()]
         public virtual async Task<ActionResult> PostLogist([FromBody] JObject jobj)
         {
@@ -75,7 +76,7 @@ namespace Exam.Controllers
                 return BadRequest("Неверный тип данных");
             }
         }
-
+        [Authorize]
         [HttpPut()]
         public virtual async Task<ActionResult> PutLogist([FromBody] JObject jobj)
         {
@@ -95,7 +96,7 @@ namespace Exam.Controllers
             }
 
         }
-
+        [Authorize]
         [HttpPatch("{id}")]
         public virtual async Task<ActionResult> PatchLogist(Guid id, [FromBody] JArray updates)
         {

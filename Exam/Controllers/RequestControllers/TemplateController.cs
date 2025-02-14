@@ -1,6 +1,7 @@
 ﻿using DTOs.Dtos;
 using MediatR;
 using MediatRepos;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
 using Utilities.Interfaces;
@@ -37,7 +38,7 @@ namespace Exam.Controllers
         {
             return Ok(await _queue.Enqueue(new GetRange<TemplateDto>(start, end)));
         }
-
+        [Authorize]
         [HttpPost()]
         public virtual async Task<ActionResult> PostTemplate([FromBody] JObject jobj)
         {
@@ -56,7 +57,7 @@ namespace Exam.Controllers
                 return BadRequest("Неверный тип данных");
             }
         }
-
+        [Authorize]
         [HttpPut()]
         public virtual async Task<ActionResult> PutTemplate([FromBody] JObject jobj)
         {
@@ -76,7 +77,7 @@ namespace Exam.Controllers
             }
 
         }
-
+        [Authorize]
         [HttpDelete("{id}")]
         public virtual async Task<ActionResult> DeleteTemplate(Guid id)
         {

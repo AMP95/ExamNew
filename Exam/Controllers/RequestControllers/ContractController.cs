@@ -1,6 +1,7 @@
 ﻿using DTOs;
 using MediatR;
 using MediatRepos;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
 using Utilities.Interfaces;
@@ -38,7 +39,7 @@ namespace Exam.Controllers
         {
             return Ok(await _queue.Enqueue(new GetRequiredToPay()));
         }
-
+        [Authorize]
         [HttpPost()]
         public virtual async Task<ActionResult> PostContract([FromBody] JObject jobj)
         {
@@ -57,7 +58,7 @@ namespace Exam.Controllers
                 return BadRequest("Неверный тип данных");
             }
         }
-
+        [Authorize]
         [HttpPut()]
         public virtual async Task<ActionResult> PutContract([FromBody] JObject jobj)
         {
@@ -77,7 +78,7 @@ namespace Exam.Controllers
             }
 
         }
-
+        [Authorize]
         [HttpPatch("{id}")]
         public virtual async Task<ActionResult> PatchContract(Guid id, [FromBody] JArray updates)
         {

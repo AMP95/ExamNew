@@ -1,6 +1,7 @@
 ﻿using DTOs;
 using MediatR;
 using MediatRepos;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
 using Utilities.Interfaces;
@@ -34,7 +35,7 @@ namespace Exam.Controllers
             return Ok(await _queue.Enqueue(new GetFilter<PaymentDto>(property, param)));
         }
 
-
+        [Authorize]
         [HttpPost()]
         public virtual async Task<ActionResult> PostPayment([FromBody] JObject jobj)
         {
@@ -54,7 +55,7 @@ namespace Exam.Controllers
             }
         }
 
-
+        [Authorize]
         [HttpPut()]
         public virtual async Task<ActionResult> PutPayment([FromBody] JObject jobj)
         {
@@ -75,7 +76,7 @@ namespace Exam.Controllers
 
         }
 
-
+        [Authorize]
         [HttpDelete("{id}")]
         public virtual async Task<ActionResult> DeletePayment(Guid id)
         {

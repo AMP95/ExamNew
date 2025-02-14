@@ -1,6 +1,7 @@
 ﻿using DTOs;
 using MediatR;
 using MediatRepos;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
 using Utilities.Interfaces;
@@ -21,6 +22,7 @@ namespace Exam.Controllers
             _logger = logger;
         }
 
+        
         [HttpGet("{id}")]
         public virtual async Task<ActionResult> GetCarrier(Guid id)
         {
@@ -39,6 +41,8 @@ namespace Exam.Controllers
             return Ok(await _queue.Enqueue(new GetRange<CarrierDto>(start, end)));
         }
 
+
+        [Authorize]
         [HttpPost()]
         public virtual async Task<ActionResult> PostCarrier([FromBody] JObject jobj)
         {
@@ -57,7 +61,7 @@ namespace Exam.Controllers
                 return BadRequest("Неверный тип данных");
             }
         }
-
+        [Authorize]
         [HttpPut()]
         public virtual async Task<ActionResult> PutCarrier([FromBody] JObject jobj)
         {
@@ -77,7 +81,7 @@ namespace Exam.Controllers
             }
 
         }
-
+        [Authorize]
         [HttpDelete("{id}")]
         public virtual async Task<ActionResult> DeleteCarrier(Guid id)
         {

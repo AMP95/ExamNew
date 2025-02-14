@@ -1,6 +1,7 @@
 ﻿using DTOs.Dtos;
 using MediatR;
 using MediatRepos;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Utilities.Interfaces;
 
@@ -28,7 +29,7 @@ namespace Exam.Controllers
         {
             return Ok(await _queue.Enqueue(new GetId<FileDto>(id)));
         }
-
+        [Authorize]
         [HttpGet("download/{id}")] //only File
         public virtual async Task<ActionResult> DownloadFile(Guid id)
         {
@@ -40,7 +41,7 @@ namespace Exam.Controllers
         {
             return Ok(await _queue.Enqueue(new GetFilter<FileDto>(property, param)));
         }
-
+        [Authorize]
         [HttpPost()]
         public virtual async Task<ActionResult> PostFile([FromForm] FileData data)
         {
@@ -62,7 +63,7 @@ namespace Exam.Controllers
                 return BadRequest("Неверный тип данных");
             }
         }
-
+        [Authorize]
         [HttpDelete("{id}")]
         public virtual async Task<ActionResult> DeleteFile(Guid id)
         {

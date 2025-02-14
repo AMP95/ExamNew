@@ -1,6 +1,7 @@
 ﻿using DTOs;
 using MediatR;
 using MediatRepos;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
@@ -39,7 +40,7 @@ namespace Exam.Controllers
         {
             return Ok(await _queue.Enqueue(new GetRange<CompanyDto>(start, end)));
         }
-
+        [Authorize]
         [HttpPost()]
         public virtual async Task<ActionResult> PostClient([FromBody] JObject jobj)
         {
@@ -58,7 +59,7 @@ namespace Exam.Controllers
                 return BadRequest("Неверный тип данных");
             }
         }
-
+        [Authorize]
         [HttpPut()]
         public virtual async Task<ActionResult> PutClient([FromBody] JObject jobj)
         {
@@ -79,7 +80,7 @@ namespace Exam.Controllers
 
 
         }
-
+        [Authorize]
         [HttpDelete("{id}")]
         public virtual async Task<ActionResult> DeleteClient(Guid id)
         {
