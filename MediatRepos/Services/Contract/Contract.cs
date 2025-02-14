@@ -472,6 +472,8 @@ namespace MediatorServices
                 LogistId = contractDto.Logist.Id,
             };
 
+            contractDto.UnloadPoints = contractDto.UnloadPoints.OrderBy(p => p.DateAndTime).ToList();
+
             foreach (RoutePointDto pointDto in contractDto.UnloadPoints)
             {
                 contract.UnloadingPoints.Add(new RoutePoint()
@@ -612,6 +614,8 @@ namespace MediatorServices
                         Side = (short)dto.LoadPoint.Side
                     };
                 }
+
+                dto.UnloadPoints = dto.UnloadPoints.OrderBy(p => p.DateAndTime).ToList();
 
                 foreach (RoutePointDto pointDto in dto.UnloadPoints)
                 {
