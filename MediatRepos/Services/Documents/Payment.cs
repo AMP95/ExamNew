@@ -3,6 +3,7 @@ using MediatR;
 using MediatRepos;
 using Microsoft.Extensions.Logging;
 using Models;
+using Models.Sub;
 using System.Linq.Expressions;
 using Utilities.Interfaces;
 
@@ -172,6 +173,42 @@ namespace MediatorServices
         public async Task<IServiceResult<object>> Handle(Add<PaymentDto> request, CancellationToken cancellationToken)
         {
             PaymentDto dto = request.Value;
+
+            IEnumerable<Contract> contracts = await _repository.Get<Contract>(c => c.Id == dto.ContractId, null, "LoadingPoint,UnloadingPoints");
+
+            Contract contract = contracts.FirstOrDefault();
+
+            RoutePoint lastRoute = contract.UnloadingPoints.OrderBy(p => p.DateAndTime).LastOrDefault();
+
+            if (dto.Summ != contract.CarrierPrepayment && dto.CreationDate.Date < lastRoute.DateAndTime.Date) 
+            {
+                return new MediatorServiceResult()
+                {
+                    IsSuccess = false,
+                    ErrorMessage = $"Дата платежного поручения не может быть раньше даты последней выгрузки",
+                    Result = Guid.Empty
+                };
+            }
+
+            if (dto.CreationDate.Date < contract.CreationDate.Date)
+            {
+                return new MediatorServiceResult()
+                {
+                    IsSuccess = false,
+                    ErrorMessage = $"Дата платежного поручения не может быть раньше даты заявки",
+                    Result = Guid.Empty
+                };
+            }
+
+            if (dto.CreationDate.Date < contract.LoadingPoint.DateAndTime.Date)
+            {
+                return new MediatorServiceResult()
+                {
+                    IsSuccess = false,
+                    ErrorMessage = $"Дата платежного поручения не может быть раньше даты погрузки",
+                    Result = Guid.Empty
+                };
+            }
 
             Payment payment = new Payment()
             {

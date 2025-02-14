@@ -258,18 +258,28 @@ namespace MediatorServices
         {
             DocumentDto dto = request.Value;
 
-            if (dto.Type != DocumentType.Bill) 
+            IEnumerable<Contract> contracts = await _repository.Get<Contract>(c => c.Id == dto.ContractId, null, "LoadingPoint");
+
+            Contract contract = contracts.FirstOrDefault();
+
+            if (dto.CreationDate.Date < contract.CreationDate.Date) 
             {
-                IEnumerable<Contract> contracts = await _repository.Get<Contract>(c => c.Id == dto.ContractId, null, "LoadingPoint");
+                return new MediatorServiceResult()
+                {
+                    IsSuccess = false,
+                    ErrorMessage = $"Дата {dto.Type.GetDescription()} не может быть раньше даты заявки",
+                    Result = Guid.Empty
+                };
+            }
 
-                Contract contract = contracts.FirstOrDefault();
-
+            if (dto.Type != DocumentType.Bill && dto.Type != DocumentType.TTN) 
+            {
                 if (dto.CreationDate.Date < contract.LoadingPoint.DateAndTime.Date) 
                 {
                     return new MediatorServiceResult()
                     {
                         IsSuccess = false,
-                        ErrorMessage = $"Дата {dto.Type.GetDescription()} не может быть раньше дать погрузки",
+                        ErrorMessage = $"Дата {dto.Type.GetDescription()} не может быть раньше даты погрузки",
                         Result = Guid.Empty
                     };
                 }
