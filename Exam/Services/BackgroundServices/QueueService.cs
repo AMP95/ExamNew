@@ -1,4 +1,5 @@
 ﻿using Exam.BackgroundServices;
+using MediatorServices;
 using MediatR;
 using System.Collections.Concurrent;
 using Utilities.Interfaces;
@@ -92,7 +93,7 @@ namespace Exam.Services.BackgroundServices
                         catch (Exception ex)
                         {
                             _logger.LogError(ex, ex.Message);
-                            _requests.Enqueue(item);
+                            _resultService.AddResult(item.Id, new MediatorServiceResult() { IsSuccess = false, Result = null, ErrorMessage = "Внутрення ошибка сервера"});
                         }
                     }
                     else

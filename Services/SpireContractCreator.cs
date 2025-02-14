@@ -42,8 +42,6 @@ namespace Exam.FileManager
 
             Table table = s.AddTable(true);
 
-            int rowCount = 18 + contract.Template.Additionals.Count + (contract.UnloadPoints.Count * 6);
-
             List<string[]> tableData = GetTableData(contract, company);
 
             table.ResetCells(tableData.Count, 2);
@@ -54,9 +52,9 @@ namespace Exam.FileManager
 
                 row.Cells[0].SetCellWidth(25, CellWidthType.Percentage);
                 Paragraph rowHeader = row.Cells[0].AddParagraph();
-                rowHeader.Format.LineSpacing = 13.5f;
                 TextRange rowHaderText = rowHeader.AppendText(tableData[i][0]);
-                rowHaderText.CharacterFormat.Bold = true;
+                rowHaderText.CharacterFormat.Bold = bool.Parse(tableData[i][2]);
+                rowHeader.Format.LineSpacing = 13.5f;
                 rowHaderText.CharacterFormat.FontSize = 12f;
 
                 if (tableData[i][1] == string.Empty)
@@ -72,6 +70,12 @@ namespace Exam.FileManager
                     cellParagraph.Format.AfterSpacingLines = 0.1f;
                     TextRange cellText = cellParagraph.AppendText(tableData[i][1]);
                     cellText.CharacterFormat.FontSize = 11f;
+
+                    if (tableData[i].Count() == 4)
+                    {
+                        cellParagraph.Format.LineSpacing = 8.15f;
+                        cellText.CharacterFormat.FontSize = 8f;
+                    }
                 }
             }
 
@@ -128,37 +132,41 @@ namespace Exam.FileManager
 
             List<string[]> tableData = new List<string[]>()
             {
-                new string[] { "Заказчик", company.Name },
-                new string[] { "Исполнитель", contract.Carrier.Name },
-                new string[] { "Маршрут", route },
-                new string[] { "Груз", "" },
-                new string[] { "Вес, т", contract.Weight.ToString() },
-                new string[] { "Объем", contract.Volume.ToString() },
-                new string[] { "Получение груза", "" },
-                new string[] { "Грузоотправитель", contract.LoadPoint.Company },
-                new string[] { "Адрес погрузки", $"{ contract.LoadPoint.Address }\n{string.Join(", ", contract.LoadPoint.Phones) }" },
-                new string[] { "Дата и время", contract.LoadPoint.DateAndTime.ToString("dd.MM.yyyy, HH:mm") },
-                new string[] { "Способ погрузки", contract.LoadPoint.Side.GetDescription() }
+                new string[] { "Заказчик", company.Name, true.ToString() },
+                new string[] { "Исполнитель", contract.Carrier.Name, true.ToString() },
+                new string[] { "Маршрут", route, true.ToString() },
+                new string[] { "Груз", "", true.ToString() },
+                new string[] { "Вес, т", contract.Weight.ToString(), false.ToString() },
+                new string[] { "Объем", contract.Volume.ToString(), false.ToString()  },
+                new string[] { "Получение груза", "", true.ToString(), false.ToString()  },
+                new string[] { "Грузоотправитель", contract.LoadPoint.Company, false.ToString()  },
+                new string[] { "Адрес погрузки", $"{ contract.LoadPoint.Address }\n{string.Join(", ", contract.LoadPoint.Phones) }", false.ToString()  },
+                new string[] { "Дата и время", contract.LoadPoint.DateAndTime.ToString("dd.MM.yyyy, HH:mm") , false.ToString() },
+                new string[] { "Способ погрузки", contract.LoadPoint.Side.GetDescription(), false.ToString() }
             };
 
 
             int count = 1;
             foreach (var point in contract.UnloadPoints)
             {
-                tableData.Add(new string[] { $"Сдача груза {count}", "" });
-                tableData.Add(new string[] { "Грузополучатель", point.Company });
-                tableData.Add(new string[] { "Адрес выгрузки", point.Address });
-                tableData.Add(new string[] { "Дата и время", point.DateAndTime.ToString("dd.MM.yyyy, HH:mm") });
-                tableData.Add(new string[] { "Контакт", string.Join(", ", point.Phones) });
-                tableData.Add(new string[] { "Способ выгрузки", point.Side.GetDescription() });
+                tableData.Add(new string[] { $"Сдача груза {count}", "", true.ToString() });
+                tableData.Add(new string[] { "Грузополучатель", point.Company, false.ToString() });
+                tableData.Add(new string[] { "Адрес выгрузки", point.Address, false.ToString() });
+                tableData.Add(new string[] { "Дата и время", point.DateAndTime.ToString("dd.MM.yyyy, HH:mm"), false.ToString() });
+                tableData.Add(new string[] { "Контакт", string.Join(", ", point.Phones), false.ToString() });
+                tableData.Add(new string[] { "Способ выгрузки", point.Side.GetDescription(), false.ToString() });
 
                 count++;
             }
 
-
-            foreach (AdditionalDto additional in contract.Template.Additionals)
+            if (contract.Template.Additionals.Any())
             {
-                tableData.Add(new string[] { additional.Name, additional.Description });
+                tableData.Add(new string[] { "Условия", "", true.ToString() });
+
+                foreach (AdditionalDto additional in contract.Template.Additionals)
+                {
+                    tableData.Add(new string[] { additional.Name, additional.Description, false.ToString(), "" });
+                }
             }
 
             string payment = $"{contract.Payment.ToString()} руб. {contract.Carrier.Vat.GetDescription()}";
@@ -168,13 +176,13 @@ namespace Exam.FileManager
                 payment += $"\nПредоплата {contract.Prepayment} руб.";
             }
 
-            tableData.Add(new string[] { $"Стоимость услуг", payment });
-            tableData.Add(new string[] { "Условия оплаты", contract.PaymentCondition.GetDescription() });
-            tableData.Add(new string[] { "Водитель", "" });
-            tableData.Add(new string[] { "ФИО", contract.Driver.Name });
-            tableData.Add(new string[] { "Паспортные данные", $"{contract.Driver.PassportSerial},выдан {contract.Driver.PassportIssuer}, {contract.Driver.PassportDateOfIssue.ToString("dd.MM.yyyy")}" });
-            tableData.Add(new string[] { "Тел.", string.Join(", ", contract.Driver.Phones) });
-            tableData.Add(new string[] { "ТС", $"{contract.Vehicle.TruckModel} {contract.Vehicle.TruckNumber}, {contract.Vehicle.TrailerNumber}" });
+            tableData.Add(new string[] { $"Стоимость услуг", payment, true.ToString() });
+            tableData.Add(new string[] { "Условия оплаты", $"{contract.PaymentCondition.GetDescription()} документов, {contract.PayPriority.GetDescription()}", true.ToString() });
+            tableData.Add(new string[] { "Водитель", "", true.ToString() });
+            tableData.Add(new string[] { "ФИО", contract.Driver.Name, false.ToString() });
+            tableData.Add(new string[] { "Паспортные данные", $"{contract.Driver.PassportSerial},выдан {contract.Driver.PassportIssuer}, {contract.Driver.PassportDateOfIssue.ToString("dd.MM.yyyy")}", false.ToString() });
+            tableData.Add(new string[] { "Тел.", string.Join(", ", contract.Driver.Phones) , false.ToString() });
+            tableData.Add(new string[] { "ТС", $"{contract.Vehicle.TruckModel} {contract.Vehicle.TruckNumber}, {contract.Vehicle.TrailerNumber}", true.ToString() });
 
             return tableData;
         }
