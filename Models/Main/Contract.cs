@@ -48,7 +48,7 @@ namespace Models
 
         [ForeignKey(nameof(Logist))]
         public Guid LogistId { get; set; }
-        public Logist Logist { get; set; }
+        public User Logist { get; set; }
 
         public float CarrierPayment { get; set; }
         public float CarrierPrepayment { get; set; }

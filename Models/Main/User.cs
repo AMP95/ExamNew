@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Models.Main
 {
-    public class Logist : BaseEntity
+    public class User : BaseEntity
     {
         public string Name { get; set; }
         public string Login { get; set; }

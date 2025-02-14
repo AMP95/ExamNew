@@ -6,9 +6,9 @@ namespace MediatRepos
 {
     public class Validate : IRequest<IServiceResult<object>> 
     { 
-        public LogistDto Logist { get; set; }
+        public UserDto Logist { get; set; }
 
-        public Validate(LogistDto logist)
+        public Validate(UserDto logist)
         {   
             Logist = logist;
         }

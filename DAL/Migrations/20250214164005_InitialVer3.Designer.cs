@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DAL.Migrations
 {
     [DbContext(typeof(Context))]
-    [Migration("20250126130250_Add_Logist")]
-    partial class Add_Logist
+    [Migration("20250214164005_InitialVer3")]
+    partial class InitialVer3
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -64,7 +64,7 @@ namespace DAL.Migrations
                     b.ToTable("Carrier");
                 });
 
-            modelBuilder.Entity("Models.Client", b =>
+            modelBuilder.Entity("Models.Company", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -85,9 +85,6 @@ namespace DAL.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<bool>("IsPriority")
-                        .HasColumnType("bit");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -98,9 +95,12 @@ namespace DAL.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
+                    b.Property<short>("Type")
+                        .HasColumnType("smallint");
+
                     b.HasKey("Id");
 
-                    b.ToTable("Client");
+                    b.ToTable("Company");
                 });
 
             modelBuilder.Entity("Models.Contract", b =>
@@ -277,7 +277,7 @@ namespace DAL.Migrations
                     b.ToTable("Drivers");
                 });
 
-            modelBuilder.Entity("Models.Main.ContractTemplate", b =>
+            modelBuilder.Entity("Models.Main.Template", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -295,7 +295,7 @@ namespace DAL.Migrations
                     b.ToTable("Templates");
                 });
 
-            modelBuilder.Entity("Models.Main.Logist", b =>
+            modelBuilder.Entity("Models.Main.User", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -325,7 +325,7 @@ namespace DAL.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Logists");
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("Models.Payment", b =>
@@ -357,13 +357,13 @@ namespace DAL.Migrations
                     b.ToTable("Payment");
                 });
 
-            modelBuilder.Entity("Models.Sub.BookMark", b =>
+            modelBuilder.Entity("Models.Sub.AdditionalCondition", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("InsertView")
+                    b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -371,9 +371,14 @@ namespace DAL.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<Guid?>("TemplateId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
 
-                    b.ToTable("BookMarks");
+                    b.HasIndex("TemplateId");
+
+                    b.ToTable("AdditionalCondition");
                 });
 
             modelBuilder.Entity("Models.Sub.File", b =>
@@ -494,7 +499,7 @@ namespace DAL.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Models.Client", "Client")
+                    b.HasOne("Models.Company", "Client")
                         .WithMany()
                         .HasForeignKey("ClientId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -512,13 +517,13 @@ namespace DAL.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Models.Main.Logist", "Logist")
+                    b.HasOne("Models.Main.User", "Logist")
                         .WithMany()
                         .HasForeignKey("LogistId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Models.Main.ContractTemplate", "Template")
+                    b.HasOne("Models.Main.Template", "Template")
                         .WithMany()
                         .HasForeignKey("TemplateId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -582,6 +587,13 @@ namespace DAL.Migrations
                     b.Navigation("Contract");
                 });
 
+            modelBuilder.Entity("Models.Sub.AdditionalCondition", b =>
+                {
+                    b.HasOne("Models.Main.Template", null)
+                        .WithMany("Additionals")
+                        .HasForeignKey("TemplateId");
+                });
+
             modelBuilder.Entity("Models.Sub.RoutePoint", b =>
                 {
                     b.HasOne("Models.Contract", null)
@@ -614,6 +626,11 @@ namespace DAL.Migrations
                     b.Navigation("Payments");
 
                     b.Navigation("UnloadingPoints");
+                });
+
+            modelBuilder.Entity("Models.Main.Template", b =>
+                {
+                    b.Navigation("Additionals");
                 });
 #pragma warning restore 612, 618
         }

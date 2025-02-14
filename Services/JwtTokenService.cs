@@ -16,7 +16,7 @@ namespace Exam.Authentication
         public int Lifetime { get; set; }
     }
 
-    public class JwtTokenService : ITokenService<LogistDto>
+    public class JwtTokenService : ITokenService<UserDto>
     {
         public static string ISSUER { get; set; }
         public static string AUDIENCE { get; set; }
@@ -31,7 +31,7 @@ namespace Exam.Authentication
             LIFETIME = settings.Lifetime;
         }
 
-        public string GetToken(LogistDto logist)
+        public string GetToken(UserDto logist)
         {
             var claims = new List<Claim>
                 {

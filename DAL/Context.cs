@@ -14,7 +14,7 @@ namespace DAL
         public DbSet<Contract> Contracts { get; set; }
         public DbSet<Template> Templates { get; set; }
         public DbSet<Models.Sub.File> Files { get; set; }
-        public DbSet<Logist> Logists { get; set; }
+        public DbSet<User> Users { get; set; }
 
         public Context(DbContextOptions options) : base(options)
         {

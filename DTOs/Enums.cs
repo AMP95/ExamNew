@@ -95,12 +95,12 @@ namespace DTOs
         Prepayment
     }
 
-    public enum LogistRole 
+    public enum UserRole 
     {
         [Description("Администратор")]
         Admin,
         [Description("Пользователь")]
-        User
+        Logist
     }
 
     public enum PasswordState

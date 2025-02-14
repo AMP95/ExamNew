@@ -9,13 +9,13 @@ namespace Exam.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class LogistController : ControllerBase
+    public class UserController : ControllerBase
     {
         private IQueueService<IRequest<IServiceResult<object>>> _queue;
-        private ILogger<LogistController> _logger;
+        private ILogger<UserController> _logger;
 
-        public LogistController(IQueueService<IRequest<IServiceResult<object>>> queue,
-                                ILogger<LogistController> logger)
+        public UserController(IQueueService<IRequest<IServiceResult<object>>> queue,
+                                ILogger<UserController> logger)
         {
             _queue = queue;
             _logger = logger;
@@ -24,19 +24,19 @@ namespace Exam.Controllers
         [HttpGet("{id}")]
         public virtual async Task<ActionResult> GetLogist(Guid id)
         {
-            return Ok(await _queue.Enqueue(new GetId<LogistDto>(id)));
+            return Ok(await _queue.Enqueue(new GetId<UserDto>(id)));
         }
 
         [HttpGet("filter/{property}")]
         public virtual async Task<ActionResult> GetLogistFilter(string property, [FromQuery] string[] param)
         {
-            return Ok(await _queue.Enqueue(new GetFilter<LogistDto>(property, param)));
+            return Ok(await _queue.Enqueue(new GetFilter<UserDto>(property, param)));
         }
 
         [HttpGet("range/{start}/{end}")]
         public virtual async Task<ActionResult> GetLogistRange(int start, int end)
         {
-            return Ok(await _queue.Enqueue(new GetRange<LogistDto>(start, end)));
+            return Ok(await _queue.Enqueue(new GetRange<UserDto>(start, end)));
         }
 
         [HttpPost()]
@@ -46,7 +46,7 @@ namespace Exam.Controllers
             {
                 if (jobj != null)
                 {
-                    return Ok(await _queue.Enqueue(new Add<LogistDto>(jobj.ToObject<LogistDto>())));
+                    return Ok(await _queue.Enqueue(new Add<UserDto>(jobj.ToObject<UserDto>())));
                 }
                 _logger.LogWarning($"Recieved null object");
                 return BadRequest("Передан пустой параметр");
@@ -65,7 +65,7 @@ namespace Exam.Controllers
             {
                 if (jobj != null)
                 {
-                    return Ok(await _queue.Enqueue(new Validate(jobj.ToObject<LogistDto>())));
+                    return Ok(await _queue.Enqueue(new Validate(jobj.ToObject<UserDto>())));
                 }
                 _logger.LogWarning($"Recieved null object");
                 return BadRequest("Передан пустой параметр");
@@ -83,7 +83,7 @@ namespace Exam.Controllers
             {
                 if (jobj != null)
                 {
-                    return Ok(await _queue.Enqueue(new Update<LogistDto>(jobj.ToObject<LogistDto>())));
+                    return Ok(await _queue.Enqueue(new Update<UserDto>(jobj.ToObject<UserDto>())));
                 }
                 _logger.LogWarning($"Recieved null object");
                 return BadRequest("Передан пустой параметр");
@@ -103,7 +103,7 @@ namespace Exam.Controllers
             {
                 if (updates != null)
                 {
-                    return Ok(await _queue.Enqueue(new Patch<LogistDto>(id, updates.ToObject<KeyValuePair<string, object>[]>())));
+                    return Ok(await _queue.Enqueue(new Patch<UserDto>(id, updates.ToObject<KeyValuePair<string, object>[]>())));
                 }
                 _logger.LogWarning($"Recieved null object");
                 return BadRequest("Передан пустой параметр");

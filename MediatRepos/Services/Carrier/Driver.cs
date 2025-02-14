@@ -29,7 +29,7 @@ namespace MediatorServices
                 DriverDto dto = new DriverDto()
                 {
                     Id = driver.Id,
-                    Name = $"{driver.FamilyName} {driver.Name} {driver.FamilyName}",
+                    Name = $"{driver.FamilyName} {driver.Name} {driver.FatherName}",
                     BirthDate = driver.DateOfBirth,
                     Phones = driver.Phones.Split(';').ToList(),
                     PassportDateOfIssue = driver.PassportDateOfIssue,

@@ -49,7 +49,7 @@ namespace Exam
             builder.Services.AddTransient<IRepository, ContextRepository>();
             builder.Services.AddTransient<IFileManager, FilesManager>();
             builder.Services.AddTransient<IContractCreator<ContractDto, CompanyBaseDto>, SpireContractCreator>();
-            builder.Services.AddTransient<ITokenService<LogistDto>, JwtTokenService>();
+            builder.Services.AddTransient<ITokenService<UserDto>, JwtTokenService>();
             builder.Services.AddTransient<IHashService, HashService>();
             builder.Services.AddTransient<IAppRootResolver, RootResolver>();
 

@@ -10,17 +10,17 @@ using Utilities.Interfaces;
 
 namespace MediatorServices
 {
-    public class GetIdLogistService : IRequestHandler<GetId<LogistDto>, IServiceResult<object>>
+    public class GetIdUserService : IRequestHandler<GetId<UserDto>, IServiceResult<object>>
     {
         private IRepository _repository;
-        public GetIdLogistService(IRepository repository)
+        public GetIdUserService(IRepository repository)
         {
             _repository = repository;
         }
 
-        public async Task<IServiceResult<object>> Handle(GetId<LogistDto> request, CancellationToken cancellationToken)
+        public async Task<IServiceResult<object>> Handle(GetId<UserDto> request, CancellationToken cancellationToken)
         {
-            Logist logist = await _repository.GetById<Logist>(request.Id);
+            User logist = await _repository.GetById<User>(request.Id);
 
             if (logist == null) 
             {
@@ -31,14 +31,14 @@ namespace MediatorServices
                 };
             }
 
-            LogistDto dto = new LogistDto()
+            UserDto dto = new UserDto()
             {
                 Id = logist.Id,
                 Name = logist.Name,
                 Login = logist.Login,
                 IsExpired = logist.IsExpired,
                 PasswordState = (PasswordState)logist.PasswordState,
-                Role = (LogistRole)Enum.Parse(typeof(LogistRole), logist.Role),
+                Role = (UserRole)Enum.Parse(typeof(UserRole), logist.Role),
             };
 
             return new MediatorServiceResult()
@@ -49,29 +49,29 @@ namespace MediatorServices
         }
     }
 
-    public class GetRangeLogistService : IRequestHandler<GetRange<LogistDto>, IServiceResult<object>>
+    public class GetRangeUserService : IRequestHandler<GetRange<UserDto>, IServiceResult<object>>
     {
         private IRepository _repository;
-        public GetRangeLogistService(IRepository repository)
+        public GetRangeUserService(IRepository repository)
         {
             _repository = repository;
         }
 
-        public async Task<IServiceResult<object>> Handle(GetRange<LogistDto> request, CancellationToken cancellationToken)
+        public async Task<IServiceResult<object>> Handle(GetRange<UserDto> request, CancellationToken cancellationToken)
         {
-            IEnumerable<Logist> logists = await _repository.GetRange<Logist>(request.Start, request.End, q => q.OrderBy(t => t.Name));
-            List<LogistDto> dtos = new List<LogistDto>();
+            IEnumerable<User> logists = await _repository.GetRange<User>(request.Start, request.End, q => q.OrderBy(t => t.Name));
+            List<UserDto> dtos = new List<UserDto>();
 
             foreach (var logist in logists)
             {
-                LogistDto dto = new LogistDto()
+                UserDto dto = new UserDto()
                 {
                     Id = logist.Id,
                     Name = logist.Name,
                     Login = logist.Login,
                     IsExpired = logist.IsExpired,
                     PasswordState = (PasswordState)logist.PasswordState,
-                    Role = (LogistRole)Enum.Parse(typeof(LogistRole), logist.Role),
+                    Role = (UserRole)Enum.Parse(typeof(UserRole), logist.Role),
                 };
 
 
@@ -86,34 +86,34 @@ namespace MediatorServices
         }
     }
 
-    public class GetFilterLogistService : IRequestHandler<GetFilter<LogistDto>, IServiceResult<object>>
+    public class GetFilterUserService : IRequestHandler<GetFilter<UserDto>, IServiceResult<object>>
     {
         protected IRepository _repository;
-        protected ILogger<GetFilterLogistService> _logger;
+        protected ILogger<GetFilterUserService> _logger;
 
-        public GetFilterLogistService(IRepository repository, ILogger<GetFilterLogistService> logger)
+        public GetFilterUserService(IRepository repository, ILogger<GetFilterUserService> logger)
         {
             _repository = repository;
             _logger = logger;
         }
 
-        public async Task<IServiceResult<object>> Handle(GetFilter<LogistDto> request, CancellationToken cancellationToken)
+        public async Task<IServiceResult<object>> Handle(GetFilter<UserDto> request, CancellationToken cancellationToken)
         {
-            Expression<Func<Logist, bool>> filter = GetFilter(request.PropertyName, request.Params);
+            Expression<Func<User, bool>> filter = GetFilter(request.PropertyName, request.Params);
 
-            IEnumerable<Logist> logists = await _repository.Get<Logist>(filter, q => q.OrderBy(t => t.Name));
-            List<LogistDto> dtos = new List<LogistDto>();
+            IEnumerable<User> logists = await _repository.Get<User>(filter, q => q.OrderBy(t => t.Name));
+            List<UserDto> dtos = new List<UserDto>();
 
             foreach (var logist in logists)
             {
-                LogistDto dto = new LogistDto()
+                UserDto dto = new UserDto()
                 {
                     Id = logist.Id,
                     Name = logist.Name,
                     Login = logist.Login,
                     IsExpired = logist.IsExpired,
                     PasswordState = (PasswordState)logist.PasswordState,
-                    Role = (LogistRole)Enum.Parse(typeof(LogistRole), logist.Role),
+                    Role = (UserRole)Enum.Parse(typeof(UserRole), logist.Role),
                 };
 
 
@@ -128,19 +128,19 @@ namespace MediatorServices
         }
 
 
-        protected Expression<Func<Logist, bool>> GetFilter(string property, params object[] parameters)
+        protected Expression<Func<User, bool>> GetFilter(string property, params object[] parameters)
         {
-            Expression<Func<Logist, bool>> filter = null;
+            Expression<Func<User, bool>> filter = null;
 
             try
             {
                 switch (property)
                 {
-                    case nameof(LogistDto.Name):
+                    case nameof(UserDto.Name):
                         string carname = parameters[0].ToString().ToLower();
                         filter = d => d.Name.ToLower().Contains(carname);
                         break;
-                    case nameof(LogistDto.Login):
+                    case nameof(UserDto.Login):
                         string login = parameters[0].ToString().ToLower();
                         filter = d => d.Login.ToLower().Contains(login);
                         break;
@@ -157,19 +157,19 @@ namespace MediatorServices
     }
 
 
-    public class AddLogistService : IRequestHandler<Add<LogistDto>, IServiceResult<object>>
+    public class AddUserService : IRequestHandler<Add<UserDto>, IServiceResult<object>>
     {
         protected IRepository _repository;
-        public AddLogistService(IRepository repository) 
+        public AddUserService(IRepository repository) 
         {
             _repository = repository;
         }
 
-        public async Task<IServiceResult<object>> Handle(Add<LogistDto> request, CancellationToken cancellationToken)
+        public async Task<IServiceResult<object>> Handle(Add<UserDto> request, CancellationToken cancellationToken)
         {
-            LogistDto dto = request.Value;
+            UserDto dto = request.Value;
 
-            Logist truck = new Logist()
+            User truck = new User()
             {
                 Name = dto.Name,
                 Login = dto.Login,
@@ -201,19 +201,19 @@ namespace MediatorServices
         }
     }
 
-    public class UpdateLogistService : IRequestHandler<Update<LogistDto>, IServiceResult<object>>
+    public class UpdateUserService : IRequestHandler<Update<UserDto>, IServiceResult<object>>
     {
         protected IRepository _repository;
-        public UpdateLogistService(IRepository repository)
+        public UpdateUserService(IRepository repository)
         {
             _repository = repository;
         }
 
-        public async Task<IServiceResult<object>> Handle(Update<LogistDto> request, CancellationToken cancellationToken)
+        public async Task<IServiceResult<object>> Handle(Update<UserDto> request, CancellationToken cancellationToken)
         {
-            LogistDto dto = request.Value;
+            UserDto dto = request.Value;
 
-            Logist logist = await _repository.GetById<Logist>(dto.Id);
+            User logist = await _repository.GetById<User>(dto.Id);
 
             logist.Name = dto.Name;
             logist.Password = dto.Password;
@@ -241,28 +241,28 @@ namespace MediatorServices
         }
     }
 
-    public class UpdateLogistPropertyService : IRequestHandler<Patch<LogistDto>, IServiceResult<object>>
+    public class UpdateUserPropertyService : IRequestHandler<Patch<UserDto>, IServiceResult<object>>
     {
         protected IRepository _repository;
-        protected ILogger<UpdateLogistPropertyService> _logger;
+        protected ILogger<UpdateUserPropertyService> _logger;
 
-        public UpdateLogistPropertyService(IRepository repository, ILogger<UpdateLogistPropertyService> logger)
+        public UpdateUserPropertyService(IRepository repository, ILogger<UpdateUserPropertyService> logger)
         {
             _repository = repository;
             _logger = logger;
         }
 
-        public async Task<IServiceResult<object>> Handle(Patch<LogistDto> request, CancellationToken cancellationToken)
+        public async Task<IServiceResult<object>> Handle(Patch<UserDto> request, CancellationToken cancellationToken)
         {
             try
             {
-                Logist logist = await _repository.GetById<Logist>(request.Id);
+                User logist = await _repository.GetById<User>(request.Id);
 
                 foreach (var pair in request.Updates)
                 {
                     switch (pair.Key)
                     {
-                        case nameof(LogistDto.IsExpired):
+                        case nameof(UserDto.IsExpired):
                             bool expiration = (bool)pair.Value;
                             logist.IsExpired = expiration;
                             break;
@@ -291,13 +291,13 @@ namespace MediatorServices
         }
     }
 
-    public class ValidateLogistService : IRequestHandler<Validate, IServiceResult<object>>
+    public class ValidateUserService : IRequestHandler<Validate, IServiceResult<object>>
     {
-        private ITokenService<LogistDto> _tokenService;
+        private ITokenService<UserDto> _tokenService;
         private IRepository _repository;
         private IHashService _hashService;
 
-        public ValidateLogistService(ITokenService<LogistDto> tokenService, 
+        public ValidateUserService(ITokenService<UserDto> tokenService, 
                                      IRepository repository,
                                      IHashService hashService)
         {
@@ -308,27 +308,27 @@ namespace MediatorServices
 
         public async Task<IServiceResult<object>> Handle(Validate request, CancellationToken cancellationToken)
         {
-            IEnumerable<Logist> admins = await _repository.Get<Logist>(l => l.Role == LogistRole.Admin.ToString());
+            IEnumerable<User> admins = await _repository.Get<User>(l => l.Role == UserRole.Admin.ToString());
 
             if (!admins.Any()) 
             {
-                Logist logist = new Logist()
+                User logist = new User()
                 {
                     Login = "admin",
                     Name = "Админ",
                     Password = _hashService.GetHash("admin"),
                     PasswordState= (short)PasswordState.OnReset,
-                    Role = LogistRole.Admin.ToString(),
+                    Role = UserRole.Admin.ToString(),
                 }; 
 
                 await _repository.Add(logist);
             }
 
-            IEnumerable<Logist> logists = await _repository.Get<Logist>(l => l.Login ==  request.Logist.Login && l.Password == request.Logist.Password);
+            IEnumerable<User> logists = await _repository.Get<User>(l => l.Login ==  request.Logist.Login && l.Password == request.Logist.Password);
 
             if (logists.Any())
             {
-                Logist logist = logists.FirstOrDefault();
+                User logist = logists.FirstOrDefault();
 
                 if (logist.IsExpired) 
                 {
@@ -339,14 +339,14 @@ namespace MediatorServices
                     };
                 }
 
-                LogistDto dto = new LogistDto()
+                UserDto dto = new UserDto()
                 {
                     Id = logist.Id,
                     Name = logist.Name,
                     Login = logist.Login,
                     IsExpired = logist.IsExpired,
                     PasswordState = (PasswordState)logist.PasswordState,
-                    Role = (LogistRole)Enum.Parse(typeof(LogistRole), logist.Role),
+                    Role = (UserRole)Enum.Parse(typeof(UserRole), logist.Role),
                 };
 
                 string token = _tokenService.GetToken(dto);

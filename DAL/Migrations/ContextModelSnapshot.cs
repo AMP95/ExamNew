@@ -274,7 +274,25 @@ namespace DAL.Migrations
                     b.ToTable("Drivers");
                 });
 
-            modelBuilder.Entity("Models.Main.Logist", b =>
+            modelBuilder.Entity("Models.Main.Template", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("Templates");
+                });
+
+            modelBuilder.Entity("Models.Main.User", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -304,25 +322,7 @@ namespace DAL.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Logists");
-                });
-
-            modelBuilder.Entity("Models.Main.Template", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Name")
-                        .IsUnique();
-
-                    b.ToTable("Templates");
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("Models.Payment", b =>
@@ -514,7 +514,7 @@ namespace DAL.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Models.Main.Logist", "Logist")
+                    b.HasOne("Models.Main.User", "Logist")
                         .WithMany()
                         .HasForeignKey("LogistId")
                         .OnDelete(DeleteBehavior.Cascade)

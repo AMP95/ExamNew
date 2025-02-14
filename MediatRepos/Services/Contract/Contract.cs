@@ -50,7 +50,7 @@ namespace MediatorServices
                     ClientPayment = constract.ClientPayment,
                     PayPriority = (PaymentPriority)constract.CarrierPayPriority,
                     PaymentCondition = (RecievingType)constract.CarrierPaymentCondition,
-                    Logist = new LogistDto()
+                    Logist = new UserDto()
                     {
                         Id = constract.Logist.Id,
                         Login = constract.Logist.Login,
@@ -166,7 +166,7 @@ namespace MediatorServices
                     Payment = contract.CarrierPayment,
                     Prepayment = contract.CarrierPrepayment,
                     ClientPayment = contract.ClientPayment,
-                    Logist = new LogistDto()
+                    Logist = new UserDto()
                     {
                         Id = contract.Logist.Id,
                         Login = contract.Logist.Login,
